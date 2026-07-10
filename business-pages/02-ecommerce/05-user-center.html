@@ -1,0 +1,768 @@
+<!--
+  ============================================================
+  用户中心页 - 电商平台
+
+  页面功能：XX电商平台用户中心页面，管理个人信息、收货地址和我的收藏
+  布局方式：顶部导航+左侧菜单+右侧内容区的用户中心布局
+  业务背景：
+    1. 电商平台用户个人管理中心
+    2. 个人信息、收货地址、收藏夹管理
+    3. 账户资产和订单数据概览
+
+  设计思路：
+    1. 用户信息和资产数据顶部展示
+    2. 左侧菜单分类导航
+    3. 常用功能快捷入口
+
+  技术要点：
+    - 使用float实现左侧菜单+右侧内容布局
+    - 数据卡片展示用户资产
+    - 标签页切换不同功能模块
+
+  适用迁移场景：
+    - 电商用户中心页面
+    - 会员中心/个人中心
+    - 用户信息管理页面
+
+  wjs created by 2016-05-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户中心 - XX电商</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    .top-bar {
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
+      height: 30px;
+      line-height: 30px;
+      font-size: 12px;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-bar-left {
+      float: left;
+      color: #666;
+    }
+    .top-bar-right {
+      float: right;
+    }
+    .top-bar-right a {
+      color: #666;
+      text-decoration: none;
+      margin-left: 15px;
+    }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+      border-bottom: 2px solid #ff6700;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 50px;
+    }
+    .search-box {
+      float: left;
+      margin-left: 100px;
+      margin-top: 8px;
+    }
+    .search-input {
+      width: 500px;
+      height: 40px;
+      border: 2px solid #ff6700;
+      padding: 0 15px;
+      font-size: 14px;
+      outline: none;
+      float: left;
+    }
+    .search-btn {
+      width: 80px;
+      height: 40px;
+      background: #ff6700;
+      color: #fff;
+      border: none;
+      float: left;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .cart-btn {
+      float: right;
+      margin-top: 8px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 20px;
+      background: #ff6700;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a {
+      color: #666;
+      text-decoration: none;
+    }
+    .user-header {
+      background: linear-gradient(135deg, #ff6700 0%, #ff8c00 100%);
+      border-radius: 8px;
+      padding: 25px 30px;
+      color: #fff;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .user-info {
+      float: left;
+      overflow: hidden;
+    }
+    .user-avatar {
+      float: left;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: #ff6700;
+      margin-right: 20px;
+      border: 3px solid rgba(255,255,255,0.5);
+    }
+    .user-detail {
+      overflow: hidden;
+      padding-top: 10px;
+    }
+    .user-name {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .user-level {
+      display: inline-block;
+      padding: 2px 12px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .user-stats {
+      float: right;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .stat-item {
+      float: left;
+      text-align: center;
+      padding: 0 30px;
+      border-right: 1px solid rgba(255,255,255,0.3);
+    }
+    .stat-item:last-child {
+      border-right: none;
+    }
+    .stat-num {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .container {
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .menu-title {
+      padding: 15px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .menu-list li {
+      list-style: none;
+      padding: 12px 20px 12px 40px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .menu-list li:hover {
+      color: #ff6700;
+      background: #fff8f0;
+    }
+    .menu-list li.active {
+      color: #ff6700;
+      background: #fff8f0;
+      border-left-color: #ff6700;
+      font-weight: bold;
+    }
+    .content {
+      margin-left: 220px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .panel-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .panel-action {
+      float: right;
+      color: #ff6700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .panel-body {
+      padding: 20px;
+    }
+    .order-stats {
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .order-stat {
+      float: left;
+      width: 20%;
+      text-align: center;
+      padding: 15px 0;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .order-stat:hover {
+      background: #fff8f0;
+    }
+    .order-stat-num {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ff6700;
+      margin-bottom: 5px;
+    }
+    .order-stat-label {
+      font-size: 13px;
+      color: #666;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .form-label {
+      float: left;
+      width: 100px;
+      line-height: 38px;
+      font-size: 14px;
+      color: #666;
+      text-align: right;
+      padding-right: 20px;
+    }
+    .form-label .required {
+      color: #ff6700;
+      margin-right: 5px;
+    }
+    .form-content {
+      margin-left: 100px;
+    }
+    .form-input {
+      width: 320px;
+      height: 38px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0 15px;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: #ff6700;
+    }
+    .form-text {
+      line-height: 38px;
+      font-size: 14px;
+      color: #333;
+    }
+    .form-text .edit {
+      color: #ff6700;
+      font-size: 13px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+    .avatar-upload {
+      width: 100px;
+      height: 100px;
+      border: 1px dashed #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn {
+      padding: 8px 25px;
+      border: 1px solid #ff6700;
+      border-radius: 4px;
+      background: #fff;
+      color: #ff6700;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    .btn-primary {
+      background: #ff6700;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #e65c00;
+    }
+    .address-list {
+      list-style: none;
+    }
+    .address-item {
+      padding: 18px 20px;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .address-item:hover {
+      border-color: #ff6700;
+    }
+    .address-item.default {
+      border-color: #ff6700;
+      background: #fff8f0;
+    }
+    .address-header {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .address-name {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .address-phone {
+      float: left;
+      margin-left: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    .address-tag {
+      float: left;
+      margin-left: 15px;
+      padding: 2px 8px;
+      background: #ff6700;
+      color: #fff;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+    .address-actions {
+      float: right;
+    }
+    .address-actions a {
+      color: #ff6700;
+      text-decoration: none;
+      font-size: 13px;
+      margin-left: 15px;
+      cursor: pointer;
+    }
+    .address-detail {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .favorite-grid {
+      overflow: hidden;
+      margin: 0 -10px;
+    }
+    .favorite-item {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+    .favorite-card {
+      background: #fff;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      overflow: hidden;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .favorite-card:hover {
+      box-shadow: 0 5px 15px rgba(255,103,0,0.15);
+      transform: translateY(-2px);
+    }
+    .favorite-img {
+      width: 100%;
+      height: 180px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 13px;
+    }
+    .favorite-info {
+      padding: 12px;
+    }
+    .favorite-name {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.4;
+      height: 36px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .favorite-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff6700;
+    }
+    .favorite-price small {
+      font-size: 12px;
+      font-weight: normal;
+    }
+    .tabs-bar {
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 20px;
+    }
+    .tab-item {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      color: #ff6700;
+      border-bottom-color: #ff6700;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-left">欢迎来到XX电商！</div>
+      <div class="top-bar-right">
+        <a href="#">张女士，你好</a>
+        <a href="#">我的订单</a>
+        <a href="#">会员中心</a>
+        <a href="#">客户服务</a>
+        <a href="#">退出</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX电商</div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索商品、店铺、品牌">
+        <button class="search-btn">搜索</button>
+      </div>
+      <div class="cart-btn">购物车 (3)</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> &gt; <a href="#">会员中心</a> &gt; <span style="color: #ff6700;">我的主页</span>
+    </div>
+
+    <div class="user-header">
+      <div class="user-info">
+        <div class="user-avatar">张</div>
+        <div class="user-detail">
+          <div class="user-name">张女士</div>
+          <span class="user-level">⭐ 黄金会员</span>
+        </div>
+      </div>
+      <div class="user-stats">
+        <div class="stat-item">
+          <div class="stat-num">3,280</div>
+          <div class="stat-label">积分</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">12</div>
+          <div class="stat-label">优惠券</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">68</div>
+          <div class="stat-label">收藏</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">3</div>
+          <div class="stat-label">足迹</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="sidebar">
+        <div class="menu-title">我的交易</div>
+        <ul class="menu-list">
+          <li>全部订单</li>
+          <li>待付款</li>
+          <li>待发货</li>
+          <li>待收货</li>
+          <li>待评价</li>
+          <li>退款/售后</li>
+        </ul>
+        <div class="menu-title">我的信息</div>
+        <ul class="menu-list">
+          <li class="active">个人信息</li>
+          <li>收货地址</li>
+          <li>我的收藏</li>
+          <li>我的足迹</li>
+          <li>消息通知</li>
+        </ul>
+        <div class="menu-title">我的资产</div>
+        <ul class="menu-list">
+          <li>我的积分</li>
+          <li>我的优惠券</li>
+          <li>余额充值</li>
+        </ul>
+      </div>
+
+      <div class="content">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">我的订单</div>
+            <div class="panel-action">查看全部订单 ›</div>
+          </div>
+          <div class="panel-body">
+            <div class="order-stats">
+              <div class="order-stat">
+                <div class="order-stat-num">5</div>
+                <div class="order-stat-label">待付款</div>
+              </div>
+              <div class="order-stat">
+                <div class="order-stat-num">3</div>
+                <div class="order-stat-label">待发货</div>
+              </div>
+              <div class="order-stat">
+                <div class="order-stat-num">2</div>
+                <div class="order-stat-label">待收货</div>
+              </div>
+              <div class="order-stat">
+                <div class="order-stat-num">8</div>
+                <div class="order-stat-label">待评价</div>
+              </div>
+              <div class="order-stat">
+                <div class="order-stat-num">2</div>
+                <div class="order-stat-label">退款/售后</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">个人信息</div>
+            <div class="panel-action">编辑信息</div>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="form-label">头像</label>
+              <div class="form-content">
+                <div class="avatar-upload">点击上传</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label"><span class="required">*</span>昵称</label>
+              <div class="form-content">
+                <div class="form-text">张女士 <span class="edit">修改</span></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">真实姓名</label>
+              <div class="form-content">
+                <div class="form-text">张** <span class="edit">修改</span></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">性别</label>
+              <div class="form-content">
+                <input type="radio" name="gender" checked style="margin-right:5px;"> 女
+                <input type="radio" name="gender" style="margin:0 5px 0 20px;"> 男
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">生日</label>
+              <div class="form-content">
+                <input type="text" class="form-input" value="1990-08-15">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">手机号</label>
+              <div class="form-content">
+                <div class="form-text">138****5678 <span class="edit">修改</span></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">邮箱</label>
+              <div class="form-content">
+                <div class="form-text">zhang***@163.com <span class="edit">修改</span></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label"></label>
+              <div class="form-content">
+                <button class="btn btn-primary">保存修改</button>
+                <button class="btn">取消</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">收货地址</div>
+            <div class="panel-action">+ 新增收货地址</div>
+          </div>
+          <div class="panel-body">
+            <ul class="address-list">
+              <li class="address-item default">
+                <div class="address-header">
+                  <span class="address-name">张女士</span>
+                  <span class="address-phone">138****5678</span>
+                  <span class="address-tag">默认</span>
+                  <div class="address-actions">
+                    <a>编辑</a>
+                    <a>删除</a>
+                    <a>设为默认</a>
+                  </div>
+                </div>
+                <div class="address-detail">北京市朝阳区XX路XX号XX小区B栋802室</div>
+              </li>
+              <li class="address-item">
+                <div class="address-header">
+                  <span class="address-name">张女士</span>
+                  <span class="address-phone">138****5678</span>
+                  <div class="address-actions">
+                    <a>编辑</a>
+                    <a>删除</a>
+                    <a>设为默认</a>
+                  </div>
+                </div>
+                <div class="address-detail">上海市浦东新区XX路XX号XX大厦15楼XX公司前台</div>
+              </li>
+              <li class="address-item">
+                <div class="address-header">
+                  <span class="address-name">张先生（家人）</span>
+                  <span class="address-phone">139****8888</span>
+                  <div class="address-actions">
+                    <a>编辑</a>
+                    <a>删除</a>
+                    <a>设为默认</a>
+                  </div>
+                </div>
+                <div class="address-detail">广东省深圳市南山区科技园XX小区A座2001室</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">我的收藏</div>
+            <div class="panel-action">查看全部 ›</div>
+          </div>
+          <div class="panel-body">
+            <div class="favorite-grid">
+              <div class="favorite-item">
+                <div class="favorite-card">
+                  <div class="favorite-img" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">商品图片</div>
+                  <div class="favorite-info">
+                    <div class="favorite-name">XX品牌智能手机 全网通4G 64G内存</div>
+                    <div class="favorite-price"><small>¥</small>2,999.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="favorite-item">
+                <div class="favorite-card">
+                  <div class="favorite-img" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">商品图片</div>
+                  <div class="favorite-info">
+                    <div class="favorite-name">XX品牌无线蓝牙耳机 主动降噪</div>
+                    <div class="favorite-price"><small>¥</small>299.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="favorite-item">
+                <div class="favorite-card">
+                  <div class="favorite-img" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">商品图片</div>
+                  <div class="favorite-info">
+                    <div class="favorite-name">XX旗舰手机 Pro 64G 全金属 4G全网通</div>
+                    <div class="favorite-price"><small>¥</small>4,599.00</div>
+                  </div>
+                </div>
+              </div>
+              <div class="favorite-item">
+                <div class="favorite-card">
+                  <div class="favorite-img" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">商品图片</div>
+                  <div class="favorite-info">
+                    <div class="favorite-name">XX入门手机 大屏大字 老人机</div>
+                    <div class="favorite-price"><small>¥</small>899.00</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

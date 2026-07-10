@@ -1,0 +1,557 @@
+<!--
+  ============================================================
+  商品详情页 - 电商平台
+
+  页面功能：XX电商平台商品详情页，展示商品详细信息和购买入口
+  布局方式：左侧商品图+右侧商品信息的经典详情页布局
+  业务背景：
+    1. 电商平台核心转化页面，用户决策购买的关键
+    2. 展示商品图片、价格、规格、详情等完整信息
+    3. 提供加入购物车、立即购买等操作入口
+
+  设计思路：
+    1. 商品图片大图展示，支持多图切换
+    2. 价格和促销信息醒目突出
+    3. 规格选择区域清晰易用
+
+  技术要点：
+    - 使用float实现左右两栏布局
+    - 商品详情内容区使用选项卡切换
+    - 数量选择器和规格选择组件
+
+  适用迁移场景：
+    - 电商商品详情页
+    - 产品展示详情页
+    - 服务介绍详情页
+
+  wjs created by 2016-04-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品详情 - XX电商</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
+      height: 30px;
+      line-height: 30px;
+      font-size: 12px;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-bar-left { float: left; color: #666; }
+    .top-bar-right { float: right; }
+    .top-bar-right a { color: #666; text-decoration: none; margin-left: 15px; }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+      border-bottom: 2px solid #ff6700;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 50px;
+    }
+    .search-box {
+      float: left;
+      margin-left: 100px;
+      margin-top: 8px;
+    }
+    .search-input {
+      width: 500px;
+      height: 40px;
+      border: 2px solid #ff6700;
+      padding: 0 15px;
+      font-size: 14px;
+      outline: none;
+      float: left;
+    }
+    .search-btn {
+      width: 80px;
+      height: 40px;
+      background: #ff6700;
+      color: #fff;
+      border: none;
+      float: left;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .cart-btn {
+      float: right;
+      margin-top: 8px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 20px;
+      background: #ff6700;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .breadcrumb {
+      width: 1200px;
+      margin: 15px auto;
+      font-size: 13px;
+      color: #666;
+    }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .main {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+    }
+    .product-gallery {
+      float: left;
+      width: 450px;
+    }
+    .main-img {
+      width: 450px;
+      height: 450px;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 4px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 16px;
+    }
+    .thumb-list {
+      overflow: hidden;
+    }
+    .thumb-item {
+      float: left;
+      width: 70px;
+      height: 70px;
+      margin-right: 10px;
+      border: 2px solid #eee;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #bbb;
+      font-size: 12px;
+    }
+    .thumb-item.active {
+      border-color: #ff6700;
+    }
+    .thumb-item:nth-child(1) { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+    .thumb-item:nth-child(2) { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+    .thumb-item:nth-child(3) { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
+    .thumb-item:nth-child(4) { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+    .thumb-item:nth-child(5) { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); }
+    .product-info {
+      margin-left: 480px;
+    }
+    .product-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .product-subtitle {
+      font-size: 14px;
+      color: #ff6700;
+      margin-bottom: 15px;
+    }
+    .price-box {
+      background: #fff3ed;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .price-label {
+      font-size: 13px;
+      color: #666;
+      margin-right: 20px;
+    }
+    .price-now {
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+    }
+    .price-now small { font-size: 16px; }
+    .price-origin {
+      font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+      margin-left: 15px;
+    }
+    .promo-tag {
+      display: inline-block;
+      background: #ff6700;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-left: 10px;
+    }
+    .promo-list {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed #fcc;
+    }
+    .promo-item {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .promo-item span {
+      background: #ff6700;
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-right: 8px;
+    }
+    .info-row {
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+      font-size: 14px;
+    }
+    .info-label {
+      float: left;
+      width: 80px;
+      color: #999;
+    }
+    .info-value {
+      margin-left: 90px;
+      color: #333;
+    }
+    .spec-group {
+      margin-bottom: 15px;
+    }
+    .spec-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .spec-options {
+      overflow: hidden;
+    }
+    .spec-item {
+      float: left;
+      padding: 8px 20px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-right: 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .spec-item:hover {
+      border-color: #ff6700;
+      color: #ff6700;
+    }
+    .spec-item.active {
+      border-color: #ff6700;
+      color: #ff6700;
+      background: #fff3ed;
+    }
+    .quantity-box {
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+    .quantity-label {
+      float: left;
+      width: 80px;
+      line-height: 38px;
+      font-size: 14px;
+      color: #666;
+    }
+    .quantity-control {
+      float: left;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .quantity-control button {
+      width: 38px;
+      height: 38px;
+      border: none;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 18px;
+      float: left;
+    }
+    .quantity-control input {
+      width: 60px;
+      height: 38px;
+      border: none;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      text-align: center;
+      font-size: 16px;
+      float: left;
+      outline: none;
+    }
+    .buy-buttons {
+      overflow: hidden;
+    }
+    .btn-cart, .btn-buy {
+      width: 180px;
+      height: 50px;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+      float: left;
+      margin-right: 15px;
+    }
+    .btn-cart {
+      background: #ffecd2;
+      color: #ff6700;
+      border: 1px solid #ff6700;
+    }
+    .btn-buy {
+      background: #ff6700;
+      color: #fff;
+    }
+    .detail-section {
+      width: 1200px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .detail-tabs {
+      border-bottom: 2px solid #ff6700;
+      overflow: hidden;
+    }
+    .tab-item {
+      float: left;
+      padding: 15px 30px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .tab-item.active {
+      background: #ff6700;
+      color: #fff;
+    }
+    .detail-content {
+      padding: 30px;
+    }
+    .detail-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .detail-params {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    .detail-params th,
+    .detail-params td {
+      padding: 12px 15px;
+      border: 1px solid #eee;
+      font-size: 14px;
+      text-align: left;
+    }
+    .detail-params th {
+      background: #f9f9f9;
+      width: 150px;
+      color: #666;
+      font-weight: normal;
+    }
+    .detail-desc {
+      line-height: 2;
+      font-size: 14px;
+      color: #666;
+    }
+    .detail-img-placeholder {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 4px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-left">欢迎来到XX电商！</div>
+      <div class="top-bar-right">
+        <a href="#">请登录</a>
+        <a href="#">免费注册</a>
+        <a href="#">我的订单</a>
+        <a href="#">会员中心</a>
+        <a href="#">客户服务</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX电商</div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索商品、店铺、品牌">
+        <button class="search-btn">搜索</button>
+      </div>
+      <div class="cart-btn">购物车 (3)</div>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a href="#">首页</a> &gt; <a href="#">手机数码</a> &gt; <a href="#">手机通讯</a> &gt; <a href="#">智能手机</a> &gt; 商品详情
+  </div>
+
+  <div class="main">
+    <div class="product-gallery">
+      <div class="main-img">商品主图</div>
+      <div class="thumb-list">
+        <div class="thumb-item active">图1</div>
+        <div class="thumb-item">图2</div>
+        <div class="thumb-item">图3</div>
+        <div class="thumb-item">图4</div>
+        <div class="thumb-item">图5</div>
+      </div>
+    </div>
+
+    <div class="product-info">
+      <h1 class="product-title">XX品牌智能手机 Pro 全网通4G 4+64G 全金属 旗舰手机</h1>
+      <div class="product-subtitle">【限时特惠】立减300元，赠原装耳机+保护壳</div>
+
+      <div class="price-box">
+        <div>
+          <span class="price-label">价　　格</span>
+          <span class="price-now"><small>¥</small>4,299.00</span>
+          <span class="price-origin">¥ 4,599.00</span>
+          <span class="promo-tag">限时直降</span>
+        </div>
+        <div class="promo-list">
+          <div class="promo-item"><span>促销</span>满3000减300，满5000减600</div>
+          <div class="promo-item"><span>赠品</span>购买即赠价值199元原装配件礼包</div>
+          <div class="promo-item"><span>服务</span>7天无理由退换 · 全国联保 · 顺丰包邮</div>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">累计销量</span>
+        <span class="info-value">15,680 件</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">用户评价</span>
+        <span class="info-value">98% 好评（共 3,256 条评价）</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">配送方式</span>
+        <span class="info-value">顺丰快递 · 预计明日送达</span>
+      </div>
+
+      <div class="info-row" style="border-bottom: none;">
+        <span class="info-label">选择颜色</span>
+        <div class="info-value">
+          <div class="spec-options">
+            <div class="spec-item active">星空黑</div>
+            <div class="spec-item">月光银</div>
+            <div class="spec-item">极光蓝</div>
+            <div class="spec-item">晨曦金</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-row" style="border-bottom: none;">
+        <span class="info-label">选择版本</span>
+        <div class="info-value">
+          <div class="spec-options">
+            <div class="spec-item">2+16G</div>
+            <div class="spec-item active">4+64G</div>
+            <div class="spec-item">4+128G</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quantity-box">
+        <div class="quantity-label">购买数量</div>
+        <div class="quantity-control">
+          <button>-</button>
+          <input type="text" value="1">
+          <button>+</button>
+        </div>
+      </div>
+
+      <div class="buy-buttons">
+        <button class="btn-cart">加入购物车</button>
+        <button class="btn-buy">立即购买</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-tabs">
+      <div class="tab-item active">商品详情</div>
+      <div class="tab-item">规格参数</div>
+      <div class="tab-item">商品评价 (3,256)</div>
+      <div class="tab-item">售后保障</div>
+    </div>
+    <div class="detail-content">
+      <h3 class="detail-title">产品亮点</h3>
+      <div class="detail-img-placeholder">产品展示图</div>
+      <p class="detail-desc">
+        本产品采用旗舰级处理器，性能强劲，运行流畅。配备高清大屏，视觉效果出色。
+        超大电池容量，支持快速充电，续航无忧。双摄像头系统，拍照效果卓越。
+        支持4G网络，下载速度更快。机身采用金属材质，手感舒适，外观时尚。
+      </p>
+      <div class="detail-img-placeholder">功能展示图</div>
+
+      <h3 class="detail-title" style="margin-top: 30px;">规格参数</h3>
+      
+        <div style="overflow-x:auto;">
+<table class="detail-params">
+        <tr><th>品牌</th><td>XX品牌</td></tr>
+        <tr><th>型号</th><td>XX-Pro 6</td></tr>
+        <tr><th>颜色</th><td>星空黑 / 月光银 / 极光蓝 / 晨曦金</td></tr>
+        <tr><th>屏幕尺寸</th><td>6.7英寸</td></tr>
+        <tr><th>屏幕分辨率</th><td>2772 x 1344</td></tr>
+        <tr><th>处理器</th><td>XX旗舰处理器</td></tr>
+        <tr><th>运行内存</th><td>2GB / 4GB</td></tr>
+        <tr><th>机身存储</th><td>16GB / 64GB / 128GB</td></tr>
+        <tr><th>后置摄像头</th><td>1600万主摄 + 800万超广角</td></tr>
+        <tr><th>前置摄像头</th><td>800万像素</td></tr>
+        <tr><th>电池容量</th><td>3000mAh</td></tr>
+        <tr><th>充电功率</th><td>18W快充</td></tr>
+        <tr><th>网络制式</th><td>4G全网通</td></tr>
+        <tr><th>操作系统</th><td>XX OS 5.0</td></tr>
+      </table>
+        </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!--
+  ============================================================
+  考勤管理页 - HR人力资源系统
+
+  页面功能：XX科技公司HR系统考勤管理页面
+  布局方式：顶部统计+考勤日历+异常列表的布局
+  业务背景：
+    1. 员工考勤管理和统计
+    2. 打卡记录查询
+    3. 异常考勤处理
+
+  设计思路：
+    1. 考勤数据一目了然
+    2. 日历视图直观展示
+    3. 异常考勤突出显示
+
+  技术要点：
+    - 日历视图布局
+    - 数据统计卡片
+    - 考勤状态颜色区分
+
+  适用迁移场景：
+    - 考勤管理页面
+    - 打卡记录查看
+    - 考勤统计报表
+
+  wjs created by 2020-04-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>考勤管理 - XX科技HR系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      height: 55px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1890ff;
+    }
+    .logo span {
+      color: #666;
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .header-right {
+      font-size: 14px;
+      color: #666;
+    }
+    .container {
+      display: flex;
+      height: calc(100vh - 55px);
+    }
+    .sidebar {
+      width: 200px;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      padding: 15px 0;
+    }
+    .menu-item {
+      padding: 12px 25px;
+      cursor: pointer;
+      color: #555;
+    }
+    .menu-item:hover { background: #f5f5f5; }
+    .menu-item.active {
+      background: #e6f7ff;
+      color: #1890ff;
+      font-weight: bold;
+      border-right: 3px solid #1890ff;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .stats-row {
+      display: flex;
+      margin: 0 -10px 20px;
+    }
+    .stat-card {
+      flex: 1;
+      margin: 0 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stat-num {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .stat-num.normal { color: #52c41a; }
+    .stat-num.late { color: #fa8c16; }
+    .stat-num.early { color: #13c2c2; }
+    .stat-num.absent { color: #f5222d; }
+    .stat-num.leave { color: #722ed1; }
+    .stat-label {
+      font-size: 13px;
+      color: #999;
+    }
+    .content-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .calendar-panel {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .month-select {
+      padding: 6px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+    .calendar-weekday {
+      text-align: center;
+      font-size: 13px;
+      font-weight: bold;
+      color: #666;
+      padding: 8px 0;
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 6px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .calendar-day:hover {
+      border-color: #1890ff;
+    }
+    .calendar-day.other-month {
+      opacity: 0.3;
+    }
+    .day-number {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .day-status {
+      font-size: 11px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .status-normal {
+      background: #f6ffed;
+      color: #52c41a;
+    }
+    .status-late {
+      background: #fff7e6;
+      color: #fa8c16;
+    }
+    .status-early {
+      background: #e6fffb;
+      color: #13c2c2;
+    }
+    .status-absent {
+      background: #fff1f0;
+      color: #f5222d;
+    }
+    .status-leave {
+      background: #f9f0ff;
+      color: #722ed1;
+    }
+    .status-weekend {
+      background: #f5f5f5;
+      color: #999;
+    }
+    .day-today {
+      border-color: #1890ff;
+      background: #e6f7ff;
+    }
+    .day-today .day-number {
+      color: #1890ff;
+      font-weight: bold;
+    }
+    .right-panel {
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .abnormal-panel {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      overflow: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .abnormal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .abnormal-title {
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .abnormal-title .badge {
+      background: #f5222d;
+      color: #fff;
+      font-size: 12px;
+      padding: 1px 8px;
+      border-radius: 10px;
+      margin-left: 8px;
+      font-weight: normal;
+    }
+    .abnormal-list {
+      padding: 10px 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .abnormal-item {
+      padding: 12px 0;
+      border-bottom: 1px dashed #f5f5f5;
+      cursor: pointer;
+    }
+    .abnormal-item:last-child { border-bottom: none; }
+    .abnormal-item:hover .abnormal-name { color: #1890ff; }
+    .abnormal-top {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .abnormal-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .abnormal-type {
+      font-size: 12px;
+      padding: 1px 8px;
+      border-radius: 3px;
+    }
+    .type-late { background: #fff7e6; color: #fa8c16; }
+    .type-early { background: #e6fffb; color: #13c2c2; }
+    .type-absent { background: #fff1f0; color: #f5222d; }
+    .abnormal-desc {
+      font-size: 12px;
+      color: #999;
+    }
+    .my-attendance {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .my-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .my-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #1890ff;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 15px;
+    }
+    .my-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .my-dept {
+      font-size: 13px;
+      color: #999;
+    }
+    .my-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .my-stat {
+      background: #fafafa;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    .my-stat-num {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1890ff;
+      margin-bottom: 4px;
+    }
+    .my-stat-label {
+      font-size: 12px;
+      color: #999;
+    }
+    .check-in-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .check-in-btn:hover { opacity: 0.9; }
+    .check-time {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+    }
+    .work-time {
+      color: #52c41a;
+      font-weight: bold;
+    }
+    .legend-panel {
+      background: #fff;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .legend-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .legend-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 6px;
+    }
+    .dot-normal { background: #f6ffed; border: 1px solid #b7eb8f; }
+    .dot-late { background: #fff7e6; border: 1px solid #ffd591; }
+    .dot-early { background: #e6fffb; border: 1px solid #87e8de; }
+    .dot-absent { background: #fff1f0; border: 1px solid #ffa39e; }
+    .dot-leave { background: #f9f0ff; border: 1px solid #d3adf7; }
+    .dot-weekend { background: #f5f5f5; border: 1px solid #d9d9d9; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX科技<span>人力资源管理系统</span></div>
+    <div class="header-right">
+      欢迎您，HR管理员 &nbsp;|&nbsp; 消息 &nbsp;|&nbsp; 退出
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="menu-item">首页</div>
+      <div class="menu-item">员工管理</div>
+      <div class="menu-item active">考勤管理</div>
+      <div class="menu-item">薪资管理</div>
+      <div class="menu-item">招聘管理</div>
+      <div class="menu-item">培训管理</div>
+      <div class="menu-item">绩效评估</div>
+      <div class="menu-item">系统设置</div>
+    </div>
+
+    <div class="main-content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num normal">238</div>
+          <div class="stat-label">本月正常考勤</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num late">12</div>
+          <div class="stat-label">迟到</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num early">5</div>
+          <div class="stat-label">早退</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num absent">3</div>
+          <div class="stat-label">旷工</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num leave">18</div>
+          <div class="stat-label">请假</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" style="color: #1890ff;">96.5%</div>
+          <div class="stat-label">出勤率</div>
+        </div>
+      </div>
+
+      <div class="content-row">
+        <div class="calendar-panel">
+          <div class="panel-header">
+            <div class="panel-title">2020年4月 考勤日历</div>
+            <div class="panel-actions">
+              <button class="btn" style="padding: 5px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer;">上个月</button>
+              <select class="month-select">
+                <option>2020年4月</option>
+                <option>2020年3月</option>
+                <option>2020年2月</option>
+                <option>2020年1月</option>
+              </select>
+              <button class="btn" style="padding: 5px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer;">下个月</button>
+            </div>
+          </div>
+
+          <div class="legend-panel" style="margin-bottom: 15px; box-shadow: none; border: 1px solid #f0f0f0;">
+            <div class="legend-list">
+              <div class="legend-item"><span class="legend-dot dot-normal"></span>正常</div>
+              <div class="legend-item"><span class="legend-dot dot-late"></span>迟到</div>
+              <div class="legend-item"><span class="legend-dot dot-early"></span>早退</div>
+              <div class="legend-item"><span class="legend-dot dot-absent"></span>旷工</div>
+              <div class="legend-item"><span class="legend-dot dot-leave"></span>请假</div>
+              <div class="legend-item"><span class="legend-dot dot-weekend"></span>周末</div>
+            </div>
+          </div>
+
+          <div class="calendar-grid">
+            <div class="calendar-weekday">日</div>
+            <div class="calendar-weekday">一</div>
+            <div class="calendar-weekday">二</div>
+            <div class="calendar-weekday">三</div>
+            <div class="calendar-weekday">四</div>
+            <div class="calendar-weekday">五</div>
+            <div class="calendar-weekday">六</div>
+
+            <div class="calendar-day other-month">
+              <div class="day-number">29</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day other-month">
+              <div class="day-number">30</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">1</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">2</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">3</div>
+              <span class="day-status status-late">迟到</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">4</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">5</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+
+            <div class="calendar-day">
+              <div class="day-number">6</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">7</div>
+              <span class="day-status status-leave">请假</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">8</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">9</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">10</div>
+              <span class="day-status status-early">早退</span>
+            </div>
+            <div class="calendar-day day-today">
+              <div class="day-number">15</div>
+              <span class="day-status status-late">迟到</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">11</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+
+            <div class="calendar-day">
+              <div class="day-number">12</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">13</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day day-today">
+              <div class="day-number">14</div>
+              <span class="day-status status-normal">正常</span>
+            </div>
+            <div class="calendar-day day-today">
+              <div class="day-number">15</div>
+              <span class="day-status status-normal">上班中</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">16</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">17</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">18</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+
+            <div class="calendar-day">
+              <div class="day-number">19</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">20</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">21</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">22</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">23</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">24</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">25</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+
+            <div class="calendar-day">
+              <div class="day-number">26</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">27</div>
+              <span class="day-status status-weekend">休息</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">28</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">29</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day">
+              <div class="day-number">30</div>
+              <span class="day-status" style="background: #f0f0f0; color: #bbb;">--</span>
+            </div>
+            <div class="calendar-day other-month">
+              <div class="day-number">1</div>
+            </div>
+            <div class="calendar-day other-month">
+              <div class="day-number">2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="my-attendance">
+            <div class="my-header">
+              <div class="my-avatar">我</div>
+              <div>
+                <div class="my-name">我的考勤</div>
+                <div class="my-dept">前端开发部 · 高级工程师</div>
+              </div>
+            </div>
+            <div class="my-stats">
+              <div class="my-stat">
+                <div class="my-stat-num">09:02</div>
+                <div class="my-stat-label">今日上班打卡</div>
+              </div>
+              <div class="my-stat">
+                <div class="my-stat-num" style="color: #999;">--:--</div>
+                <div class="my-stat-label">今日下班打卡</div>
+              </div>
+            </div>
+            <button class="check-in-btn">下班打卡</button>
+            <div class="check-time">
+              工作时间：<span class="work-time">09:00 - 18:00</span>
+            </div>
+          </div>
+
+          <div class="abnormal-panel">
+            <div class="abnormal-header">
+              <div class="abnormal-title">异常考勤 <span class="badge">20</span></div>
+              <span style="color: #1890ff; font-size: 13px; cursor: pointer;">处理</span>
+            </div>
+            <div class="abnormal-list">
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">赵磊</span>
+                  <span class="abnormal-type type-late">迟到</span>
+                </div>
+                <div class="abnormal-desc">前端开发部 · 4月15日 迟到12分钟</div>
+              </div>
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">王芳</span>
+                  <span class="abnormal-type type-early">早退</span>
+                </div>
+                <div class="abnormal-desc">前端开发部 · 4月10日 早退20分钟</div>
+              </div>
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">孙明</span>
+                  <span class="abnormal-type type-absent">旷工</span>
+                </div>
+                <div class="abnormal-desc">后端开发部 · 4月9日 全天未打卡</div>
+              </div>
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">周婷</span>
+                  <span class="abnormal-type type-late">迟到</span>
+                </div>
+                <div class="abnormal-desc">前端开发部 · 4月8日 迟到5分钟</div>
+              </div>
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">吴强</span>
+                  <span class="abnormal-type type-late">迟到</span>
+                </div>
+                <div class="abnormal-desc">前端开发部 · 4月7日 迟到8分钟</div>
+              </div>
+              <div class="abnormal-item">
+                <div class="abnormal-top">
+                  <span class="abnormal-name">郑华</span>
+                  <span class="abnormal-type type-absent">旷工</span>
+                </div>
+                <div class="abnormal-desc">测试部 · 4月3日 全天未打卡</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

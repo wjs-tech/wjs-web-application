@@ -1,0 +1,641 @@
+<!--
+  ============================================================
+  理财产品详情页 - 金融理财平台
+
+  页面功能：XX金融理财产品详情页面，展示产品详细信息
+  布局方式：左侧产品详情+右侧购买表单的两栏布局
+  业务背景：
+    1. 理财产品详情展示
+    2. 产品购买操作
+    3. 风险提示和产品说明
+
+  设计思路：
+    1. 收益率醒目展示
+    2. 购买操作便捷直观
+    3. 信息展示层次分明
+
+  技术要点：
+    - float左右两栏布局
+    - 表单样式美化
+    - 进度条可视化
+
+  适用迁移场景：
+    - 理财产品详情页
+    - 产品购买页面
+    - 投资项目详情页
+
+  wjs created by 2018-08-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>理财产品详情 - XX金融</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 24px;
+      font-weight: bold;
+      color: #c0392b;
+      line-height: 38px;
+    }
+    .logo span { color: #999; font-weight: normal; font-size: 14px; margin-left: 10px; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 38px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #c0392b; }
+    .nav-item.active { color: #c0392b; font-weight: bold; }
+    .user-info {
+      float: right;
+      line-height: 38px;
+      font-size: 14px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: visible;
+    }
+    .main::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a {
+      color: #999;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { color: #c0392b; }
+    .product-header {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .product-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .product-tags {
+      margin-bottom: 20px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      background: #fdecea;
+      color: #c0392b;
+      font-size: 12px;
+      border-radius: 3px;
+      margin-right: 8px;
+    }
+    .tag.hot { background: #fff3e0; color: #ff9800; }
+    .tag.safe { background: #e8f5e9; color: #4caf50; }
+    .product-highlights {
+      overflow: hidden;
+    }
+    .highlight-item {
+      float: left;
+      width: 25%;
+      text-align: center;
+      padding: 20px 0;
+      border-right: 1px solid #f0f0f0;
+    }
+    .highlight-item:last-child { border-right: none; }
+    .highlight-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #c0392b;
+      margin-bottom: 5px;
+    }
+    .highlight-value small {
+      font-size: 16px;
+      font-weight: normal;
+    }
+    .highlight-label {
+      font-size: 13px;
+      color: #999;
+    }
+    .left-section {
+      float: left;
+      width: 780px;
+    }
+    .detail-card {
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 25px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .card-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #c0392b;
+    }
+    .card-body {
+      padding: 25px;
+}
+    .info-table {
+      width: 100%;
+    }
+    .info-table td {
+      padding: 12px 0;
+      font-size: 14px;
+      border-bottom: 1px dashed #f5f5f5;
+    }
+    .info-table tr:last-child td { border-bottom: none; }
+    .info-table .label {
+      width: 30%;
+      color: #999;
+    }
+    .info-table .value {
+      color: #333;
+      font-weight: 500;
+    }
+    .risk-tip {
+      background: #fff3e0;
+      border: 1px solid #ffe0b2;
+      border-radius: 6px;
+      padding: 15px 20px;
+    }
+    .risk-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #e65100;
+      margin-bottom: 10px;
+    }
+    .risk-content {
+      font-size: 13px;
+      color: #e65100;
+      line-height: 1.8;
+    }
+    .timeline {
+      margin: 10px 0;
+    }
+    .timeline-item {
+      position: relative;
+      padding-left: 25px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #c0392b;
+    }
+    .timeline-item::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 22px;
+      width: 2px;
+      height: calc(100% + 10px);
+      background: #f0f0f0;
+    }
+    .timeline-item:last-child::after { display: none; }
+    .timeline-date {
+      color: #c0392b;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+    .timeline-desc {
+      color: #666;
+    }
+    .progress-section {
+      margin-bottom: 20px;
+    }
+    .progress-info {
+      overflow: hidden;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .progress-info .left { float: left; color: #666; }
+    .progress-info .right { float: right; color: #c0392b; font-weight: bold; }
+    .progress-bar {
+      height: 12px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      border-radius: 6px;
+      width: 68%;
+    }
+    .progress-detail {
+      margin-top: 12px;
+      overflow: hidden;
+      font-size: 13px;
+      color: #999;
+    }
+    .progress-detail span { margin-right: 20px; }
+    .right-section {
+      float: right;
+      width: 380px;
+    }
+    .buy-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 25px;
+      position: sticky;
+      top: 20px;
+    }
+    .buy-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .form-label .required { color: #c0392b; }
+    .input-group {
+      position: relative;
+    }
+    .input-group input {
+      width: 100%;
+      height: 44px;
+      padding: 0 50px 0 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 16px;
+      outline: none;
+    }
+    .input-group input:focus {
+      border-color: #c0392b;
+    }
+    .input-group .unit {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 14px;
+    }
+    .amount-quick {
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .amount-quick span {
+      float: left;
+      padding: 4px 10px;
+      margin-right: 8px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 12px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .amount-quick span:hover {
+      background: #fdecea;
+      color: #c0392b;
+    }
+    .income-preview {
+      background: #fdf6f5;
+      border: 1px solid #fdecea;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 18px;
+    }
+    .income-row {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .income-row:last-child { margin-bottom: 0; }
+    .income-row .label {
+      float: left;
+      color: #999;
+      font-size: 13px;
+    }
+    .income-row .value {
+      float: right;
+      font-size: 15px;
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .buy-btn {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .buy-btn:hover { opacity: 0.9; }
+    .buy-tips {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+    .buy-tips input {
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+    .buy-tips a { color: #c0392b; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX金融<span>专业财富管理平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item active">我要理财</div>
+        <div class="nav-item">基金</div>
+        <div class="nav-item">保险</div>
+        <div class="nav-item">我的账户</div>
+      </div>
+      <div class="user-info">
+        <span>可用余额：¥ 125,680.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>我要理财</a> / <a>稳健理财</a> / <span style="color: #333;">增利宝180天</span>
+    </div>
+
+    <div class="product-header">
+      <div class="product-title">增利宝180天 稳健型理财产品</div>
+      <div class="product-tags">
+        <span class="tag hot">热门</span>
+        <span class="tag safe">本息保障</span>
+        <span class="tag">稳健型</span>
+      </div>
+      <div class="product-highlights">
+        <div class="highlight-item">
+          <div class="highlight-value">9.80<small>%</small></div>
+          <div class="highlight-label">预期年化收益率</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-value">180<small>天</small></div>
+          <div class="highlight-label">投资期限</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-value">1,000<small>元起</small></div>
+          <div class="highlight-label">起投金额</div>
+        </div>
+        <div class="highlight-item">
+          <div class="highlight-value">68<small>%</small></div>
+          <div class="highlight-label">已售进度</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-section">
+      <div class="detail-card">
+        <div class="card-header">
+          <div class="card-title">产品信息</div>
+        </div>
+        <div class="card-body">
+          
+            <div style="overflow-x:auto;">
+<table class="info-table">
+            <tr>
+              <td class="label">产品名称</td>
+              <td class="value">增利宝180天 稳健型理财产品</td>
+            </tr>
+            <tr>
+              <td class="label">产品编号</td>
+              <td class="value">XJ20180815001</td>
+            </tr>
+            <tr>
+              <td class="label">预期年化收益率</td>
+              <td class="value" style="color: #c0392b; font-weight: bold;">9.80%</td>
+            </tr>
+            <tr>
+              <td class="label">投资期限</td>
+              <td class="value">180天</td>
+            </tr>
+            <tr>
+              <td class="label">起投金额</td>
+              <td class="value">1,000元，递增100元</td>
+            </tr>
+            <tr>
+              <td class="label">募集总额</td>
+              <td class="value">5,000万元</td>
+            </tr>
+            <tr>
+              <td class="label">计息方式</td>
+              <td class="value">到期一次性还本付息</td>
+            </tr>
+            <tr>
+              <td class="label">收益计算</td>
+              <td class="value">投资本金 × 年化收益率 × 投资天数 / 365</td>
+            </tr>
+            <tr>
+              <td class="label">风险等级</td>
+              <td class="value"><span style="color: #4caf50;">● 低风险</span></td>
+            </tr>
+            <tr>
+              <td class="label">募集开始时间</td>
+              <td class="value">2018-08-15 10:00</td>
+            </tr>
+            <tr>
+              <td class="label">募集结束时间</td>
+              <td class="value">2018-08-25 18:00</td>
+            </tr>
+            <tr>
+              <td class="label">起息日期</td>
+              <td class="value">2018-08-26</td>
+            </tr>
+            <tr>
+              <td class="label">到期日期</td>
+              <td class="value">2019-02-22</td>
+            </tr>
+          </table>
+            </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-header">
+          <div class="card-title">产品特点</div>
+        </div>
+        <div class="card-body">
+          
+            <div style="overflow-x:auto;">
+<table class="info-table">
+            <tr>
+              <td class="label">安全保障</td>
+              <td class="value">• 第三方担保公司全额本息担保<br>• 银行级风控审核体系<br>• 100%本息保障计划</td>
+            </tr>
+            <tr>
+              <td class="label">资金安全</td>
+              <td class="value">• 银行资金存管，专款专用<br>• 第三方支付全程托管<br>• 资金流向透明可查</td>
+            </tr>
+            <tr>
+              <td class="label">收益稳健</td>
+              <td class="value">• 固定年化收益9.8%<br>• 到期一次性还本付息<br>• 收益稳定，波动小</td>
+            </tr>
+          </table>
+            </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-header">
+          <div class="card-title">产品流程</div>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-date">8月15日 - 8月25日 募集期</div>
+              <div class="timeline-desc">产品募集期间，用户可进行预约购买，资金冻结期间按活期利率计息</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-date">8月26日 起息日</div>
+              <div class="timeline-desc">产品正式起息，开始计算收益</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-date">8月26日 - 次年2月22日 持有期</div>
+              <div class="timeline-desc">产品持有期间，不可提前赎回，收益每日计算</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-date">次年2月22日 到期日</div>
+              <div class="timeline-desc">产品到期，本金和收益自动返还到账户余额</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="card-header">
+          <div class="card-title">风险提示</div>
+        </div>
+        <div class="card-body">
+          <div class="risk-tip">
+            <div class="risk-title">⚠️ 风险提示</div>
+            <div class="risk-content">
+              1. 本理财产品由XX金融信息服务有限公司提供，理财非存款，产品有风险，投资须谨慎。<br>
+              2. 本产品为稳健型理财产品，风险等级为低风险，但不代表本金无损失风险。<br>
+              3. 预期收益率不代表实际收益率，实际收益可能因市场波动而有所不同。<br>
+              4. 本产品不可提前赎回，请根据自身资金情况合理安排投资。<br>
+              5. 投资前请仔细阅读《产品说明书》及《风险揭示书》，了解产品详情。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-section">
+      <div class="buy-card">
+        <div class="buy-title">立即购买</div>
+
+        <div class="progress-section">
+          <div class="progress-info">
+            <span class="left">募集进度</span>
+            <span class="right">68%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-detail">
+            <span>已售：3,400万</span>
+            <span>总额：5,000万</span>
+            <span>剩余：1,600万</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">购买金额<span class="required">*</span></div>
+          <div class="input-group">
+            <input type="text" value="10,000">
+            <span class="unit">元</span>
+          </div>
+          <div class="amount-quick">
+            <span>1千</span>
+            <span>5千</span>
+            <span>1万</span>
+            <span>5万</span>
+            <span>10万</span>
+          </div>
+        </div>
+
+        <div class="income-preview">
+          <div class="income-row">
+            <span class="label">预期收益</span>
+            <span class="value">¥ 483.29</span>
+          </div>
+          <div class="income-row">
+            <span class="label">到期总金额</span>
+            <span class="value">¥ 10,483.29</span>
+          </div>
+          <div class="income-row">
+            <span class="label">到期日期</span>
+            <span class="value" style="font-size: 13px; font-weight: normal; color: #666;">2019-02-22</span>
+          </div>
+        </div>
+
+        <button class="buy-btn">立即购买</button>
+        <div class="buy-tips">
+          <input type="checkbox" checked>
+          我已阅读并同意<a>《产品说明书》</a>和<a>《风险揭示书》</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

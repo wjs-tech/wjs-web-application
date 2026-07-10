@@ -1,0 +1,752 @@
+﻿<!--
+  ============================================================
+  护士工作站 - 医院管理系统
+
+  页面功能：XX医院护士工作站，管理床位、执行医嘱和护理记录
+  布局方式：顶部导航+左侧床位列表+右侧工作区的三栏布局
+  业务背景：
+    1. 医院病房护士日常工作平台
+    2. 床位管理和患者信息查看
+    3. 医嘱执行和护理记录录入
+
+  设计思路：
+    1. 床位可视化展示，状态清晰
+    2. 患者信息快捷查看
+    3. 护理工作分类管理
+
+  技术要点：
+    - float多栏布局
+    - 网格床位展示
+    - 标签页切换工作模块
+
+  适用迁移场景：
+    - 护士工作站系统
+    - 病房管理系统
+    - 护理工作平台
+
+  wjs created by 2018-03-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>护士工作站 - XX医院</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .header {
+      background: #007d65;
+      color: #fff;
+      padding: 12px 30px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 36px;
+    }
+    .logo span { color: #ffd700; }
+    .dept-info {
+      float: left;
+      margin-left: 40px;
+      line-height: 36px;
+      font-size: 16px;
+    }
+    .dept-info strong { color: #ffd700; }
+    .user-info {
+      float: right;
+      line-height: 36px;
+      font-size: 13px;
+    }
+    .user-info span { margin-left: 15px; cursor: pointer; }
+    .work-stats {
+      background: #fff;
+      padding: 15px 30px;
+      border-bottom: 1px solid #e8e8e8;
+      overflow: hidden;
+    }
+    .stat-item {
+      float: left;
+      padding: 0 30px;
+      border-right: 1px solid #f0f0f0;
+      text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007d65;
+    }
+    .stat-num.warning { color: #ff9800; }
+    .stat-num.danger { color: #f44336; }
+    .stat-num small {
+      font-size: 13px;
+      font-weight: normal;
+      color: #999;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #666;
+      margin-top: 3px;
+    }
+    .main {
+      padding: 15px 30px;
+      overflow: hidden;
+    }
+    .container {
+      overflow: hidden;
+    }
+    .ward-panel {
+      float: left;
+      width: 380px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 12px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .panel-title {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .panel-action {
+      float: right;
+      color: #007d65;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .ward-tabs {
+      padding: 10px 15px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .ward-tab {
+      display: inline-block;
+      padding: 8px 18px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -1px;
+      border-bottom: 2px solid transparent;
+    }
+    .ward-tab.active {
+      color: #007d65;
+      border-bottom-color: #007d65;
+      font-weight: bold;
+    }
+    .bed-grid {
+      padding: 15px;
+    }
+    .bed-row {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .bed-label {
+      float: left;
+      width: 50px;
+      line-height: 50px;
+      font-size: 13px;
+      color: #999;
+      text-align: center;
+    }
+    .bed-items {
+      margin-left: 50px;
+      overflow: hidden;
+    }
+    .bed-item {
+      float: left;
+      width: 20%;
+      padding: 3px;
+    }
+    .bed-card {
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 8px 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    .bed-card:hover {
+      border-color: #007d65;
+      transform: translateY(-1px);
+    }
+    .bed-card.selected {
+      border-color: #007d65;
+      background: #e8f5e9;
+    }
+    .bed-card.empty {
+      background: #fafafa;
+      border-style: dashed;
+    }
+    .bed-card.critical {
+      border-color: #f44336;
+      background: #ffebee;
+    }
+    .bed-no {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 3px;
+    }
+    .bed-patient {
+      font-size: 11px;
+      color: #666;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bed-card.empty .bed-patient {
+      color: #bbb;
+    }
+    .bed-tag {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 2px;
+      font-size: 10px;
+      margin-top: 2px;
+    }
+    .tag-level1 { background: #ffebee; color: #c62828; }
+    .tag-level2 { background: #fff3e0; color: #e65100; }
+    .tag-level3 { background: #e8f5e9; color: #2e7d32; }
+    .bed-legend {
+      padding: 10px 15px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-item {
+      display: inline-block;
+      margin-right: 15px;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .dot-occupied { background: #e8f5e9; border: 1px solid #007d65; }
+    .dot-empty { background: #fafafa; border: 1px dashed #ddd; }
+    .dot-critical { background: #ffebee; border: 1px solid #f44336; }
+    .work-panel {
+      margin-left: 400px;
+    }
+    .patient-info-bar {
+      background: #fff;
+      border-radius: 6px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .patient-avatar {
+      float: left;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00b894, #007d65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      margin-right: 15px;
+    }
+    .patient-basic {
+      float: left;
+      padding-top: 5px;
+    }
+    .patient-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .patient-detail {
+      font-size: 13px;
+      color: #666;
+    }
+    .patient-detail span {
+      margin-right: 20px;
+    }
+    .patient-actions {
+      float: right;
+      padding-top: 10px;
+    }
+    .action-btn {
+      display: inline-block;
+      padding: 6px 15px;
+      border: 1px solid #007d65;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+      color: #007d65;
+      background: #fff;
+    }
+    .action-btn.primary {
+      background: #007d65;
+      color: #fff;
+    }
+    .work-card {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .tabs-bar {
+      border-bottom: 2px solid #f0f0f0;
+      padding: 0 20px;
+      background: #fafafa;
+    }
+    .tab-item {
+      display: inline-block;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+      position: relative;
+    }
+    .tab-item.active {
+      color: #007d65;
+      border-bottom-color: #007d65;
+      font-weight: bold;
+      background: #fff;
+    }
+    .tab-item .badge {
+      position: absolute;
+      top: 8px;
+      right: 5px;
+      min-width: 16px;
+      height: 16px;
+      line-height: 16px;
+      padding: 0 5px;
+      background: #f44336;
+      color: #fff;
+      font-size: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: normal;
+    }
+    .tab-content {
+      padding: 20px;
+    }
+    .order-list {
+      list-style: none;
+    }
+    .order-item {
+      padding: 15px;
+      border: 1px solid #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .order-header {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .order-type {
+      float: left;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .order-time {
+      float: right;
+      font-size: 12px;
+      color: #999;
+    }
+    .order-content {
+      font-size: 13px;
+      color: #555;
+      line-height: 1.8;
+    }
+    .order-doctor {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    .order-status {
+      float: right;
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .status-done { background: #e8f5e9; color: #2e7d32; }
+    .nursing-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .nursing-table th {
+      background: #fafafa;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .nursing-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .nursing-table tr:hover { background: #fafafa; }
+    .vital-signs {
+      display: table;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .vital-row {
+      display: table-row;
+    }
+    .vital-cell {
+      display: table-cell;
+      width: 25%;
+      padding: 15px;
+      text-align: center;
+      border-right: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+    .vital-cell:last-child { border-right: none; }
+    .vital-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .vital-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #007d65;
+    }
+    .vital-value.warning { color: #ff9800; }
+    .vital-value.danger { color: #f44336; }
+    .vital-unit {
+      font-size: 12px;
+      font-weight: normal;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX<span>医院</span> 护士工作站</div>
+    <div class="dept-info">
+      心内科病房 <strong>3楼</strong>
+    </div>
+    <div class="user-info">
+      <span>当前护士：李护士</span>
+      <span>白班</span>
+      <span>交班</span>
+      <span>退出</span>
+    </div>
+  </div>
+
+  <div class="work-stats">
+    <div class="stat-item">
+      <div class="stat-num">42<small> 张</small></div>
+      <div class="stat-label">总床位</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">38<small> 人</small></div>
+      <div class="stat-label">在院患者</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num warning">4<small> 张</small></div>
+      <div class="stat-label">空床位</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num danger">3<small> 人</small></div>
+      <div class="stat-label">一级护理</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num warning">8<small> 条</small></div>
+      <div class="stat-label">待执行医嘱</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">5<small> 人</small></div>
+      <div class="stat-label">今日手术</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="container">
+      <div class="ward-panel">
+        <div class="panel-header">
+          <span class="panel-title">床位一览</span>
+          <span class="panel-action">切换病区 ›</span>
+        </div>
+        <div class="ward-tabs">
+          <span class="ward-tab active">3楼A区</span>
+          <span class="ward-tab">3楼B区</span>
+          <span class="ward-tab">3楼ICU</span>
+        </div>
+        <div class="bed-grid">
+          <div class="bed-row">
+            <div class="bed-label">301房</div>
+            <div class="bed-items">
+              <div class="bed-item">
+                <div class="bed-card critical selected">
+                  <div class="bed-no">301-1</div>
+                  <div class="bed-patient">张**</div>
+                  <div class="bed-tag tag-level1">一级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">301-2</div>
+                  <div class="bed-patient">李**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">301-3</div>
+                  <div class="bed-patient">王**</div>
+                  <div class="bed-tag tag-level3">三级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card empty">
+                  <div class="bed-no">301-4</div>
+                  <div class="bed-patient">空床</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bed-row">
+            <div class="bed-label">302房</div>
+            <div class="bed-items">
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">302-1</div>
+                  <div class="bed-patient">赵**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card critical">
+                  <div class="bed-no">302-2</div>
+                  <div class="bed-patient">刘**</div>
+                  <div class="bed-tag tag-level1">一级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">302-3</div>
+                  <div class="bed-patient">陈**</div>
+                  <div class="bed-tag tag-level3">三级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">302-4</div>
+                  <div class="bed-patient">杨**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bed-row">
+            <div class="bed-label">303房</div>
+            <div class="bed-items">
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">303-1</div>
+                  <div class="bed-patient">周**</div>
+                  <div class="bed-tag tag-level3">三级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">303-2</div>
+                  <div class="bed-patient">吴**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card empty">
+                  <div class="bed-no">303-3</div>
+                  <div class="bed-patient">空床</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card empty">
+                  <div class="bed-no">303-4</div>
+                  <div class="bed-patient">空床</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bed-row">
+            <div class="bed-label">304房</div>
+            <div class="bed-items">
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">304-1</div>
+                  <div class="bed-patient">徐**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">304-2</div>
+                  <div class="bed-patient">孙**</div>
+                  <div class="bed-tag tag-level3">三级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card critical">
+                  <div class="bed-no">304-3</div>
+                  <div class="bed-patient">马**</div>
+                  <div class="bed-tag tag-level1">一级</div>
+                </div>
+              </div>
+              <div class="bed-item">
+                <div class="bed-card">
+                  <div class="bed-no">304-4</div>
+                  <div class="bed-patient">朱**</div>
+                  <div class="bed-tag tag-level2">二级</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bed-legend">
+          <span class="legend-item"><span class="legend-dot dot-occupied"></span>已入住</span>
+          <span class="legend-item"><span class="legend-dot dot-empty"></span>空床</span>
+          <span class="legend-item"><span class="legend-dot dot-critical"></span>病危/病重</span>
+        </div>
+      </div>
+
+      <div class="work-panel">
+        <div class="patient-info-bar">
+          <div class="patient-avatar">张</div>
+          <div class="patient-basic">
+            <div class="patient-name">张** <span style="font-size:14px;color:#999;font-weight:normal;">（52岁 · 男）</span></div>
+            <div class="patient-detail">
+              <span>床号：301-1</span>
+              <span>住院号：ZY2018XXXX156</span>
+              <span>诊断：冠心病、高血压2级</span>
+              <span>主治医生：王主任</span>
+            </div>
+          </div>
+          <div class="patient-actions">
+            <span class="action-btn">打印腕带</span>
+            <span class="action-btn primary">录入护理</span>
+          </div>
+        </div>
+
+        <div class="work-card">
+          <div class="tabs-bar">
+            <span class="tab-item active">医嘱执行<span class="badge">8</span></span>
+            <span class="tab-item">生命体征</span>
+            <span class="tab-item">护理记录</span>
+            <span class="tab-item">用药记录</span>
+            <span class="tab-item">检查预约</span>
+            <span class="tab-item">费用清单</span>
+          </div>
+
+          <div class="tab-content">
+            <div class="vital-signs">
+              <div class="vital-cell">
+                <div class="vital-label">体温</div>
+                <div class="vital-value">36.8<span class="vital-unit">℃</span></div>
+              </div>
+              <div class="vital-cell">
+                <div class="vital-label">脉搏</div>
+                <div class="vital-value">78<span class="vital-unit">次/分</span></div>
+              </div>
+              <div class="vital-cell">
+                <div class="vital-label">呼吸</div>
+                <div class="vital-value">18<span class="vital-unit">次/分</span></div>
+              </div>
+              <div class="vital-cell">
+                <div class="vital-label">血压</div>
+                <div class="vital-value warning">165/105<span class="vital-unit">mmHg</span></div>
+              </div>
+            </div>
+
+            <ul class="order-list">
+              <li class="order-item">
+                <div class="order-header">
+                  <span class="order-type">💊 长期医嘱 - 药物治疗</span>
+                  <span class="order-status"><span class="status-tag status-pending">待执行</span></span>
+                </div>
+                <div class="order-content">
+                  硝苯地平控释片 30mg 口服 每日1次<br>
+                  阿司匹林肠溶片 100mg 口服 每日1次<br>
+                  阿托伐他汀钙片 20mg 口服 每晚1次
+                </div>
+                <div class="order-doctor">
+                  开嘱医生：王主任 &nbsp;|&nbsp; 开嘱时间：2018-03-20 08:30
+                </div>
+              </li>
+              <li class="order-item">
+                <div class="order-header">
+                  <span class="order-type">💉 临时医嘱 - 输液治疗</span>
+                  <span class="order-status"><span class="status-tag status-pending">待执行</span></span>
+                </div>
+                <div class="order-content">
+                  0.9%氯化钠注射液 250ml + 硝酸甘油注射液 10mg 静滴 qd<br>
+                  5%葡萄糖注射液 250ml + 维生素C 2g 静滴 qd
+                </div>
+                <div class="order-doctor">
+                  开嘱医生：王主任 &nbsp;|&nbsp; 开嘱时间：2018-03-20 09:00
+                </div>
+              </li>
+              <li class="order-item">
+                <div class="order-header">
+                  <span class="order-type">🩸 临时医嘱 - 检查检验</span>
+                  <span class="order-status"><span class="status-tag status-done">已执行</span></span>
+                </div>
+                <div class="order-content">
+                  血常规+CRP、生化全项、凝血功能、心肌酶谱、肌钙蛋白、BNP、心电图、心脏彩超
+                </div>
+                <div class="order-doctor">
+                  开嘱医生：王主任 &nbsp;|&nbsp; 开嘱时间：2018-03-20 07:30
+                </div>
+              </li>
+              <li class="order-item">
+                <div class="order-header">
+                  <span class="order-type">📋 长期医嘱 - 护理级别</span>
+                  <span class="order-status"><span class="status-tag status-done">已执行</span></span>
+                </div>
+                <div class="order-content">
+                  一级护理、低盐低脂饮食、测血压q8h、心电监护、记24小时出入量
+                </div>
+                <div class="order-doctor">
+                  开嘱医生：王主任 &nbsp;|&nbsp; 开嘱时间：2018-03-19 16:00
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

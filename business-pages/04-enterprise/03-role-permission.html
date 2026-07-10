@@ -1,0 +1,662 @@
+<!--
+  ============================================================
+  角色权限配置页 - 企业管理系统
+
+  页面功能：XX企业管理系统角色权限配置页面，管理角色和权限分配
+  布局方式：左侧角色列表+右侧权限配置的两栏布局
+  业务背景：
+    1. 系统权限管理的核心功能
+    2. 支持角色的增删改查
+    3. 支持按模块分配菜单和操作权限
+
+  设计思路：
+    1. 左右分栏，角色选择和权限配置清晰分离
+    2. 权限树状结构展示，层级分明
+    3. 批量选择和全选操作便捷
+
+  技术要点：
+    - 左右两栏float布局
+    - 树形结构展示权限菜单
+    - 复选框批量选择权限
+
+  适用迁移场景：
+    - 权限管理系统
+    - 角色配置页面
+    - 菜单权限分配
+
+  wjs created by 2017-04-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>角色权限 - XX企业管理系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #001529;
+      z-index: 1000;
+    }
+    .logo {
+      float: left;
+      width: 220px;
+      height: 100%;
+      line-height: 50px;
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      background: #002140;
+    }
+    .header-right {
+      float: right;
+      padding-right: 20px;
+      height: 50px;
+      line-height: 50px;
+      color: #fff;
+    }
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      background: #001529;
+      color: #fff;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .menu-title {
+      padding: 15px 20px 8px;
+      font-size: 12px;
+      color: #6b7a8f;
+    }
+    .menu-item-title {
+      padding: 12px 20px 12px 45px;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 14px;
+      position: relative;
+    }
+    .menu-item-title::before {
+      content: "▸";
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7a8f;
+    }
+    .menu-item.open .menu-item-title::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    .menu-item-title:hover {
+      color: #fff;
+      background: #1890ff20;
+    }
+    .sub-menu {
+      display: none;
+      background: #000c17;
+    }
+    .menu-item.open .sub-menu {
+      display: block;
+    }
+    .sub-menu li {
+      list-style: none;
+      padding: 10px 20px 10px 60px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .sub-menu li:hover { color: #fff; }
+    .sub-menu li.active {
+      color: #1890ff;
+      background: #1890ff10;
+    }
+    .main {
+      margin-left: 220px;
+      margin-top: 50px;
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .container {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .role-panel {
+      float: left;
+      width: 280px;
+      border-right: 1px solid #f0f0f0;
+      min-height: 600px;
+    }
+    .role-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .role-title {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .role-add {
+      float: right;
+      color: #1890ff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .role-search {
+      padding: 10px 15px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .role-search input {
+      width: 100%;
+      height: 32px;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .role-list {
+      padding: 10px 0;
+    }
+    .role-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .role-item:hover {
+      background: #f5f7fa;
+    }
+    .role-item.active {
+      background: #e6f7ff;
+      border-left-color: #1890ff;
+    }
+    .role-name {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .role-item.active .role-name {
+      color: #1890ff;
+      font-weight: bold;
+    }
+    .role-desc {
+      font-size: 12px;
+      color: #999;
+    }
+    .role-count {
+      float: right;
+      font-size: 12px;
+      color: #999;
+    }
+    .permission-panel {
+      margin-left: 280px;
+      padding: 20px;
+    }
+    .perm-header {
+      padding-bottom: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .perm-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .perm-title small {
+      font-size: 13px;
+      color: #999;
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .perm-actions {
+      float: right;
+    }
+    .btn {
+      display: inline-block;
+      padding: 6px 18px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #fff;
+      color: #333;
+    }
+    .btn-primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .btn + .btn { margin-left: 8px; }
+    .perm-tabs {
+      overflow: hidden;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .perm-tab {
+      float: left;
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .perm-tab.active {
+      color: #1890ff;
+      border-bottom-color: #1890ff;
+      font-weight: bold;
+    }
+    .perm-tree {
+      padding: 10px;
+      background: #fafafa;
+      border-radius: 4px;
+    }
+    .tree-node {
+      padding: 5px 0;
+    }
+    .tree-node-content {
+      padding: 6px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tree-node-content:hover {
+      background: #e8f4fd;
+    }
+    .tree-node-content input {
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .tree-node-content .arrow {
+      display: inline-block;
+      width: 16px;
+      color: #999;
+    }
+    .tree-children {
+      padding-left: 28px;
+      display: none;
+    }
+    .tree-node.open > .tree-children {
+      display: block;
+    }
+    .tree-node.open > .tree-node-content .arrow::before {
+      content: "▼";
+    }
+    .tree-node > .tree-node-content .arrow::before {
+      content: "▶";
+    }
+    .perm-leaf .tree-node-content .arrow::before {
+      content: "";
+    }
+    .perm-actions-bottom {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+      text-align: right;
+    }
+    .info-card {
+      background: #e6f7ff;
+      border: 1px solid #91d5ff;
+      border-radius: 4px;
+      padding: 12px 15px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      color: #0050b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX企业管理</div>
+    <div class="header-right">
+      <span style="margin-right: 20px;">管理员</span>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="menu-title">系统管理</div>
+    <div class="menu-item">
+      <div class="menu-item-title">用户管理</div>
+      <ul class="sub-menu">
+        <li>用户列表</li>
+      </ul>
+    </div>
+    <div class="menu-item open">
+      <div class="menu-item-title">角色权限</div>
+      <ul class="sub-menu">
+        <li class="active">角色管理</li>
+        <li>权限配置</li>
+      </ul>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-title">组织架构</div>
+      <ul class="sub-menu">
+        <li>部门管理</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> / <a href="#">系统管理</a> / <a href="#">角色权限</a> / <span>角色管理</span>
+    </div>
+
+    <div class="container" style="overflow: hidden;">
+      <div class="role-panel">
+        <div class="role-header">
+          <div class="role-title">角色列表</div>
+          <div class="role-add">+ 新增</div>
+        </div>
+        <div class="role-search">
+          <input type="text" placeholder="搜索角色名称">
+        </div>
+        <div class="role-list">
+          <div class="role-item active">
+            <div style="overflow: hidden;">
+              <span class="role-name">超级管理员</span>
+              <span class="role-count">2人</span>
+            </div>
+            <div class="role-desc">拥有系统所有权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">部门管理员</span>
+              <span class="role-count">8人</span>
+            </div>
+            <div class="role-desc">部门管理及下属用户权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">产品经理</span>
+              <span class="role-count">5人</span>
+            </div>
+            <div class="role-desc">产品相关功能权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">人事专员</span>
+              <span class="role-count">3人</span>
+            </div>
+            <div class="role-desc">人事管理相关权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">财务</span>
+              <span class="role-count">4人</span>
+            </div>
+            <div class="role-desc">财务相关功能权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">普通用户</span>
+              <span class="role-count">64人</span>
+            </div>
+            <div class="role-desc">基础功能查看权限</div>
+          </div>
+          <div class="role-item">
+            <div style="overflow: hidden;">
+              <span class="role-name">访客</span>
+              <span class="role-count">0人</span>
+            </div>
+            <div class="role-desc">仅可查看公开信息</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="permission-panel">
+        <div class="perm-header">
+          <div class="perm-title">
+            超级管理员 <small>（当前编辑角色）</small>
+          </div>
+          <div class="perm-actions">
+            <button class="btn">编辑角色</button>
+            <button class="btn btn-primary">保存权限</button>
+          </div>
+        </div>
+
+        <div class="info-card">
+          💡 提示：勾选菜单权限后，对应的操作权限可根据需要选择。子权限全部勾选时，父级权限自动勾选。
+        </div>
+
+        <div class="perm-tabs">
+          <div class="perm-tab active">菜单权限</div>
+          <div class="perm-tab">操作权限</div>
+          <div class="perm-tab">数据权限</div>
+        </div>
+
+        <div class="perm-tree">
+          <div class="tree-node open">
+            <div class="tree-node-content">
+              <span class="arrow"></span>
+              <input type="checkbox" checked> 工作台
+            </div>
+            <div class="tree-children">
+              <div class="tree-node perm-leaf">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 首页
+                </div>
+              </div>
+              <div class="tree-node perm-leaf">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 个人中心
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tree-node open">
+            <div class="tree-node-content">
+              <span class="arrow"></span>
+              <input type="checkbox" checked> 系统管理
+            </div>
+            <div class="tree-children">
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 用户管理
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 用户列表
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 新增用户
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 编辑用户
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 删除用户
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 角色权限
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 角色管理
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 权限配置
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 组织架构
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 部门管理
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 岗位管理
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 系统设置
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 参数配置
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 日志管理
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 数据字典
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tree-node open">
+            <div class="tree-node-content">
+              <span class="arrow"></span>
+              <input type="checkbox" checked> 业务管理
+            </div>
+            <div class="tree-children">
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 客户管理
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 客户列表
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 客户跟进
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tree-node open">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 订单管理
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 订单列表
+                    </div>
+                  </div>
+                  <div class="tree-node perm-leaf">
+                    <div class="tree-node-content">
+                      <span class="arrow"></span>
+                      <input type="checkbox" checked> 订单统计
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tree-node">
+            <div class="tree-node-content">
+              <span class="arrow"></span>
+              <input type="checkbox" checked> 报表中心
+            </div>
+            <div class="tree-children">
+              <div class="tree-node perm-leaf">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 销售报表
+                </div>
+              </div>
+              <div class="tree-node perm-leaf">
+                <div class="tree-node-content">
+                  <span class="arrow"></span>
+                  <input type="checkbox" checked> 财务报表
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="perm-actions-bottom">
+          <button class="btn">重置</button>
+          <button class="btn btn-primary">保存权限</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

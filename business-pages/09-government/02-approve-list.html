@@ -1,0 +1,626 @@
+<!--
+  ============================================================
+  审批事项列表页 - 政务服务系统
+
+  页面功能：XX市政务服务网审批事项列表，支持查询和办理
+  布局方式：顶部筛选+列表展示的经典政务列表布局
+  业务背景：
+    1. 政务服务事项列表展示
+    2. 按部门/类型/主题筛选
+    3. 在线申报和预约办理
+
+  设计思路：
+    1. 分类筛选清晰直观
+    2. 事项信息展示完整
+    3. 办理入口醒目
+
+  技术要点：
+    - 标签式分类筛选
+    - 列表项信息布局
+    - 政务风格样式
+
+  适用迁移场景：
+    - 政务服务事项列表
+    - 行政审批事项列表
+    - 办事事项查询页
+
+  wjs created by 2019-07-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审批事项列表 - XX市政务服务网</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #c8161d;
+      color: #fff;
+      padding: 15px 0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 40px;
+    }
+    .logo small {
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 10px;
+      opacity: 0.9;
+    }
+    .search-box {
+      float: right;
+      margin-top: 5px;
+    }
+    .search-input {
+      width: 400px;
+      height: 38px;
+      padding: 0 100px 0 15px;
+      border: none;
+      border-radius: 19px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 70px;
+      height: 34px;
+      background: #c8161d;
+      color: #fff;
+      border: none;
+      border-radius: 17px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .search-box { position: relative; }
+    .nav {
+      background: #a01015;
+    }
+    .nav-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .nav-item {
+      float: left;
+      padding: 12px 25px;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .nav-item:hover { background: #8a0d12; }
+    .nav-item.active { background: #8a0d12; font-weight: bold; }
+    .breadcrumb {
+      width: 1200px;
+      margin: 15px auto;
+      font-size: 13px;
+      color: #999;
+    }
+    .breadcrumb a {
+      color: #999;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { color: #c8161d; }
+    .main {
+      width: 1200px;
+      margin: 0 auto 30px;
+      overflow: hidden;
+    }
+    .left-col {
+      float: left;
+      width: 220px;
+    }
+    .menu-panel {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .menu-title {
+      padding: 15px 20px;
+      background: #c8161d;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .menu-list li {
+      list-style: none;
+    }
+    .menu-list > li > a {
+      display: block;
+      padding: 12px 20px;
+      color: #555;
+      text-decoration: none;
+      cursor: pointer;
+      border-bottom: 1px solid #f5f5f5;
+      transition: all 0.2s;
+    }
+    .menu-list > li > a:hover {
+      background: #fff5f5;
+      color: #c8161d;
+      padding-left: 25px;
+    }
+    .menu-list > li.active > a {
+      background: #fff5f5;
+      color: #c8161d;
+      font-weight: bold;
+      border-left: 3px solid #c8161d;
+    }
+    .sub-menu {
+      background: #fafafa;
+    }
+    .sub-menu li a {
+      display: block;
+      padding: 10px 20px 10px 40px;
+      color: #777;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .sub-menu li a:hover { color: #c8161d; }
+    .sub-menu li.active a { color: #c8161d; font-weight: bold; }
+    .right-col {
+      margin-left: 240px;
+    }
+    .filter-panel {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+    }
+    .filter-row {
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .filter-row:last-child { margin-bottom: 0; }
+    .filter-label {
+      float: left;
+      width: 70px;
+      color: #666;
+      line-height: 28px;
+    }
+    .filter-options {
+      margin-left: 70px;
+    }
+    .filter-option {
+      display: inline-block;
+      padding: 4px 15px;
+      margin-right: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #666;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .filter-option:hover {
+      color: #c8161d;
+      background: #fff5f5;
+    }
+    .filter-option.active {
+      background: #c8161d;
+      color: #fff;
+    }
+    .list-panel {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .list-header {
+      padding: 15px 25px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .list-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .list-sort {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .list-sort span {
+      cursor: pointer;
+      margin-left: 15px;
+    }
+    .list-sort span.active {
+      color: #c8161d;
+      font-weight: bold;
+    }
+    .result-count {
+      float: left;
+      font-size: 13px;
+      color: #999;
+      margin-left: 20px;
+      line-height: 22px;
+    }
+    .result-count strong {
+      color: #c8161d;
+      font-size: 16px;
+    }
+    .item-list {
+      padding: 0 25px;
+    }
+    .item {
+      padding: 20px 0;
+      border-bottom: 1px solid #f5f5f5;
+      overflow: hidden;
+    }
+    .item:last-child { border-bottom: none; }
+    .item-info {
+      float: left;
+      width: calc(100% - 120px);
+    }
+    .item-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .item-title:hover { color: #c8161d; }
+    .item-tags {
+      margin-bottom: 10px;
+    }
+    .item-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 3px;
+      margin-right: 8px;
+    }
+    .tag-dept { background: #e6f7ff; color: #1890ff; }
+    .tag-type { background: #f6ffed; color: #52c41a; }
+    .tag-level { background: #fff7e6; color: #fa8c16; }
+    .tag-online { background: #f9f0ff; color: #722ed1; }
+    .item-desc {
+      font-size: 13px;
+      color: #999;
+      line-height: 1.8;
+    }
+    .item-desc span {
+      margin-right: 25px;
+    }
+    .item-actions {
+      float: right;
+      width: 110px;
+      text-align: right;
+      padding-top: 15px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 7px 20px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: #c8161d;
+      color: #fff;
+      border-color: #c8161d;
+    }
+    .btn-primary:hover { background: #a01015; }
+    .btn-block {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    .pagination {
+      padding: 20px 25px;
+      text-align: right;
+      border-top: 1px solid #f0f0f0;
+    }
+    .pagination span {
+      display: inline-block;
+      min-width: 32px;
+      height: 32px;
+      line-height: 30px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      margin-left: 5px;
+      cursor: pointer;
+      padding: 0 10px;
+      font-size: 13px;
+      color: #666;
+      border-radius: 4px;
+    }
+    .pagination span.active {
+      background: #c8161d;
+      color: #fff;
+      border-color: #c8161d;
+    }
+    .pagination span:hover:not(.active) {
+      color: #c8161d;
+      border-color: #c8161d;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX市政务服务网<small>一网通办</small></div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索事项、部门、办事指南...">
+        <button class="search-btn">搜索</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-item">首页</div>
+      <div class="nav-item">个人办事</div>
+      <div class="nav-item active">法人办事</div>
+      <div class="nav-item">部门服务</div>
+      <div class="nav-item">办事指南</div>
+      <div class="nav-item">政务公开</div>
+      <div class="nav-item">互动交流</div>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a>首页</a> / <a>法人办事</a> / <a>设立变更</a> / <span style="color: #333;">企业开办</span>
+  </div>
+
+  <div class="main">
+    <div class="left-col">
+      <div class="menu-panel">
+        <div class="menu-title">事项分类</div>
+        <ul class="menu-list">
+          <li>
+            <a>设立变更</a>
+            <ul class="sub-menu">
+              <li class="active"><a>企业开办</a></li>
+              <li><a>变更登记</a></li>
+              <li><a>注销登记</a></li>
+              <li><a>备案登记</a></li>
+            </ul>
+          </li>
+          <li><a>税务办理</a></li>
+          <li><a>社会保障</a></li>
+          <li><a>住房公积金</a></li>
+          <li><a>建设项目</a></li>
+          <li><a>资质认证</a></li>
+          <li><a>年检年审</a></li>
+          <li><a>知识产权</a></li>
+          <li><a>进出口贸易</a></li>
+          <li><a>其他事项</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="filter-panel">
+        <div class="filter-row">
+          <div class="filter-label">部门：</div>
+          <div class="filter-options">
+            <span class="filter-option active">全部</span>
+            <span class="filter-option">市场监管局</span>
+            <span class="filter-option">税务局</span>
+            <span class="filter-option">人社局</span>
+            <span class="filter-option">住建局</span>
+            <span class="filter-option">公安局</span>
+            <span class="filter-option">环保局</span>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">主题：</div>
+          <div class="filter-options">
+            <span class="filter-option active">全部</span>
+            <span class="filter-option">企业开办</span>
+            <span class="filter-option">投资审批</span>
+            <span class="filter-option">工程建设</span>
+            <span class="filter-option">市场监管</span>
+            <span class="filter-option">公共服务</span>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">办理层级：</div>
+          <div class="filter-options">
+            <span class="filter-option active">全部</span>
+            <span class="filter-option">市级</span>
+            <span class="filter-option">区级</span>
+            <span class="filter-option">街道/镇级</span>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-label">服务对象：</div>
+          <div class="filter-options">
+            <span class="filter-option active">全部</span>
+            <span class="filter-option">企业法人</span>
+            <span class="filter-option">事业法人</span>
+            <span class="filter-option">社会组织</span>
+            <span class="filter-option">个体工商户</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="list-panel">
+        <div class="list-header">
+          <div class="list-title">审批事项列表</div>
+          <div class="result-count">共 <strong>58</strong> 个事项</div>
+          <div class="list-sort">
+            排序：
+            <span class="active">综合排序</span>
+            <span>办理量</span>
+            <span>好评率</span>
+          </div>
+        </div>
+
+        <div class="item-list">
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">内资有限责任公司设立登记</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">市场监管局</span>
+                <span class="item-tag tag-type">行政许可</span>
+                <span class="item-tag tag-level">市级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：3个工作日</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：99.2%</span>
+                <span>👥 办理量：5,682件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">企业名称预先核准</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">市场监管局</span>
+                <span class="item-tag tag-type">行政许可</span>
+                <span class="item-tag tag-level">市级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：1个工作日</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：99.5%</span>
+                <span>👥 办理量：8,956件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">营业执照变更登记</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">市场监管局</span>
+                <span class="item-tag tag-type">行政许可</span>
+                <span class="item-tag tag-level">区级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：3个工作日</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：98.8%</span>
+                <span>👥 办理量：4,325件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">税务登记证办理</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">税务局</span>
+                <span class="item-tag tag-type">公共服务</span>
+                <span class="item-tag tag-level">市级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：即办</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：99.0%</span>
+                <span>👥 办理量：6,872件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">社会保险单位登记</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">人社局</span>
+                <span class="item-tag tag-type">公共服务</span>
+                <span class="item-tag tag-level">市级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：2个工作日</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：98.5%</span>
+                <span>👥 办理量：3,541件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="item-info">
+              <div class="item-title">住房公积金单位缴存登记</div>
+              <div class="item-tags">
+                <span class="item-tag tag-dept">公积金中心</span>
+                <span class="item-tag tag-type">公共服务</span>
+                <span class="item-tag tag-level">市级</span>
+                <span class="item-tag tag-online">全程网办</span>
+              </div>
+              <div class="item-desc">
+                <span>⏱ 承诺时限：1个工作日</span>
+                <span>📝 办理形式：网上办理</span>
+                <span>⭐ 好评率：99.3%</span>
+                <span>👥 办理量：2,856件</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-primary btn-block">在线办理</button>
+              <button class="btn btn-block">办事指南</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <span>首页</span>
+          <span>上一页</span>
+          <span class="active">1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+          <span>5</span>
+          <span>...</span>
+          <span>下一页</span>
+          <span>末页</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

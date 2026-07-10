@@ -1,0 +1,187 @@
+﻿<!--
+  ============================================================
+  Flex 弹性布局 - flex 实现各种布局，现代主流方案
+
+  布局方式：CSS3 Flexbox 弹性盒子
+  布局思想：
+    1. 父容器设为 display: flex，子元素自动成为弹性项目
+    2. 通过 justify-content 控制主轴对齐，align-items 控制交叉轴对齐
+    3. 子元素通过 flex 属性灵活分配空间，实现自适应布局
+
+  适用场景：
+    - 导航菜单水平/垂直排列
+    - 居中布局（水平垂直居中轻而易举）
+    - 两栏/三栏自适应布局
+    - 卡片列表等分布局
+    - 响应式布局的基础
+
+  技术要点：
+    - display: flex / inline-flex 声明弹性容器
+    - flex-direction 控制主轴方向（row/column）
+    - justify-content 主轴对齐方式
+    - align-items 交叉轴对齐方式
+    - flex-grow / flex-shrink / flex-basis 控制弹性
+    - flex-wrap 控制是否换行
+
+  可迁移性：
+    - 现代前端开发的主流布局方案
+    - 可迁移到任何现代网页和应用
+    - 移动端优先推荐使用
+
+  wjs created by 2017-03-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flex 弹性布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; padding: 20px; }
+    h2 { margin: 20px 0 10px; color: #2c3e50; }
+
+    .demo-box {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 10px;
+    }
+    .flex-row .item {
+      flex: 1;
+      height: 80px;
+      background: #3498db;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flex-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 120px;
+      background: #ecf0f1;
+    }
+    .flex-center .box {
+      width: 100px;
+      height: 60px;
+      background: #e74c3c;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flex-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 200px;
+    }
+    .flex-column .item {
+      height: 50px;
+      background: #2ecc71;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flex-holy {
+      display: flex;
+      gap: 10px;
+    }
+    .flex-holy .left {
+      width: 150px;
+      height: 200px;
+      background: #9b59b6;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flex-holy .main {
+      flex: 1;
+      height: 200px;
+      background: #f39c12;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .flex-holy .right {
+      width: 120px;
+      height: 200px;
+      background: #1abc9c;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flex-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      padding: 0 20px;
+      background: #2c3e50;
+      color: #fff;
+    }
+    .flex-nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Flex 弹性布局 Demo</h1>
+
+  <h2>1. 水平等分布局</h2>
+  <div class="demo-box flex-row">
+    <div class="item">flex: 1</div>
+    <div class="item">flex: 1</div>
+    <div class="item">flex: 1</div>
+    <div class="item">flex: 1</div>
+  </div>
+
+  <h2>2. 水平垂直居中</h2>
+  <div class="demo-box flex-center">
+    <div class="box">完美居中</div>
+  </div>
+
+  <h2>3. 垂直排列布局</h2>
+  <div class="demo-box flex-column">
+    <div class="item">item 1</div>
+    <div class="item">item 2</div>
+    <div class="item">item 3</div>
+  </div>
+
+  <h2>4. 三栏自适应布局</h2>
+  <div class="demo-box flex-holy">
+    <div class="left">左定宽</div>
+    <div class="main">中间自适应</div>
+    <div class="right">右定宽</div>
+  </div>
+
+  <h2>5. 导航栏布局</h2>
+  <div class="demo-box flex-nav">
+    <div class="logo">Logo</div>
+    <ul>
+      <li>首页</li>
+      <li>产品</li>
+      <li>服务</li>
+      <li>关于</li>
+    </ul>
+  </div>
+</body>
+</html>

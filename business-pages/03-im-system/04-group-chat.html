@@ -1,0 +1,656 @@
+<!--
+  ============================================================
+  群聊页面 - IM即时通讯系统
+
+  页面功能：XX企业IM群聊界面，支持多人聊天和群成员管理
+  布局方式：左侧导航+中间聊天区+右侧群信息面板
+  业务背景：
+    1. 企业内部团队协作的主要沟通方式
+    2. 支持多人实时消息交流
+    3. 群文件、群公告等辅助功能
+
+  设计思路：
+    1. 聊天区域空间最大化，消息展示清晰
+    2. 群成员面板展示在线状态
+    3. 群信息和设置入口便捷
+
+  技术要点：
+    - 三栏布局，中间聊天区自适应
+    - 消息气泡区分不同发送者
+    - 右侧成员列表和群信息
+
+  适用迁移场景：
+    - 群聊/多人聊天界面
+    - 团队协作讨论区
+    - 在线客服多人会话
+
+  wjs created by 2016-10-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>群聊 - XX企业IM</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .im-container {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .nav-left {
+      float: left;
+      width: 60px;
+      height: 100%;
+      background: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding-top: 20px;
+      position: relative;
+    }
+    .nav-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 30px;
+    }
+    .nav-item {
+      padding: 15px 0;
+      cursor: pointer;
+      color: #95a5a6;
+      font-size: 20px;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active { color: #fff; }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 15px;
+      bottom: 15px;
+      width: 3px;
+      background: #3498db;
+      border-radius: 0 2px 2px 0;
+    }
+    .nav-badge {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      min-width: 18px;
+      height: 18px;
+      background: #e74c3c;
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 18px;
+      padding: 0 5px;
+    }
+    .nav-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+    }
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2ecc71;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+    }
+    .session-panel {
+      float: left;
+      width: 260px;
+      height: 100%;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+    }
+    .session-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #e8e8e8;
+      border-radius: 17px;
+      padding: 0 15px 0 35px;
+      font-size: 13px;
+      outline: none;
+      background: #f5f5f5;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bdc3c7;
+      font-size: 14px;
+    }
+    .session-list {
+      height: calc(100vh - 65px);
+      overflow-y: auto;
+    }
+    .session-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #fafafa;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .session-item:hover { background: #f5f7fa; }
+    .session-item.active { background: #e8f4fd; }
+    .session-avatar {
+      float: left;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      margin-right: 12px;
+    }
+    .session-content { margin-left: 52px; }
+    .session-top {
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .session-name {
+      float: left;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    .session-time {
+      float: right;
+      font-size: 11px;
+      color: #bbb;
+    }
+    .session-msg {
+      font-size: 12px;
+      color: #999;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .unread-badge {
+      float: right;
+      min-width: 18px;
+      height: 18px;
+      background: #e74c3c;
+      color: #fff;
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      padding: 0 5px;
+    }
+    .chat-main {
+      margin-left: 320px;
+      margin-right: 260px;
+      height: 100%;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chat-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    .chat-title small {
+      font-size: 12px;
+      color: #999;
+      margin-left: 10px;
+      font-weight: normal;
+    }
+    .chat-actions {
+      color: #666;
+      font-size: 16px;
+    }
+    .chat-actions span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .message-time {
+      text-align: center;
+      font-size: 12px;
+      color: #bbb;
+      margin: 10px 0 20px;
+    }
+    .message-item {
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+    }
+    .message-item.other .message-avatar {
+      float: left;
+    }
+    .message-item.mine .message-avatar {
+      float: right;
+      background: #2ecc71;
+    }
+    .message-content { max-width: 65%; }
+    .message-item.other .message-content {
+      float: left;
+      margin-left: 12px;
+    }
+    .message-item.mine .message-content {
+      float: right;
+      margin-right: 12px;
+      text-align: right;
+    }
+    .message-name {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .message-bubble {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 100%;
+      word-break: break-word;
+      text-align: left;
+    }
+    .message-item.other .message-bubble {
+      background: #fff;
+      color: #333;
+      border-top-left-radius: 2px;
+    }
+    .message-item.mine .message-bubble {
+      background: #3498db;
+      color: #fff;
+      border-top-right-radius: 2px;
+    }
+    .system-msg {
+      text-align: center;
+      margin: 15px 0;
+    }
+    .system-msg span {
+      display: inline-block;
+      padding: 5px 15px;
+      background: #e8f4fd;
+      color: #3498db;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .chat-input-area {
+      background: #fff;
+      border-top: 1px solid #e8e8e8;
+      padding: 15px 20px;
+    }
+    .input-toolbar {
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 16px;
+    }
+    .input-toolbar span {
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    .input-box {
+      min-height: 60px;
+      padding: 10px;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+    }
+    .input-footer {
+      text-align: right;
+      margin-top: 10px;
+    }
+    .send-btn {
+      padding: 8px 25px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .member-panel {
+      float: right;
+      width: 260px;
+      height: 100%;
+      background: #fff;
+      border-left: 1px solid #e8e8e8;
+    }
+    .member-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .group-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .group-desc {
+      font-size: 12px;
+      color: #999;
+    }
+    .member-count {
+      padding: 12px 15px;
+      font-size: 13px;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .member-list {
+      height: calc(100vh - 150px);
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+    .member-item {
+      padding: 8px 15px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .member-item:hover { background: #f5f7fa; }
+    .member-avatar {
+      float: left;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 12px;
+      margin-right: 10px;
+      position: relative;
+    }
+    .online-dot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 10px;
+      height: 10px;
+      background: #2ecc71;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .member-name {
+      line-height: 32px;
+      font-size: 13px;
+      color: #333;
+    }
+    .member-role {
+      float: right;
+      line-height: 32px;
+      font-size: 11px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="im-container">
+    <div class="nav-left">
+      <div class="nav-logo">XX</div>
+      <div class="nav-item active">💬<span class="nav-badge">12</span></div>
+      <div class="nav-item">👥</div>
+      <div class="nav-item">📁</div>
+      <div class="nav-item">📅</div>
+      <div class="nav-bottom">
+        <div class="nav-item">⚙️</div>
+        <div class="nav-avatar">我</div>
+      </div>
+    </div>
+
+    <div class="session-panel">
+      <div class="session-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="搜索">
+        </div>
+      </div>
+      <div class="session-list">
+        <div class="session-item active">
+          <div class="session-avatar">技研群</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">技术研发群</span>
+              <span class="unread-badge">25</span>
+            </div>
+            <div class="session-msg">陈工：接口文档已经更新了</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: linear-gradient(135deg, #f093fb, #f5576c);">产品组</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">产品设计讨论组</span>
+              <span class="unread-badge">8</span>
+            </div>
+            <div class="session-msg">王经理：这个方案再讨论下</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">项目A</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">项目A专项组</span>
+              <span class="session-time">10:30</span>
+            </div>
+            <div class="session-msg">张总：大家加油，月底上线</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="member-panel">
+      <div class="member-header">
+        <div class="group-name">技术研发群</div>
+        <div class="group-desc">技术部研发团队交流群</div>
+      </div>
+      <div class="member-count">群成员 (35人，在线28人)</div>
+      <div class="member-list">
+        <div class="member-item">
+          <div class="member-avatar" style="background: #e74c3c;">张<span class="online-dot"></span></div>
+          <div class="member-name">张总</div>
+          <div class="member-role">群主</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #3498db;">李<span class="online-dot"></span></div>
+          <div class="member-name">李明</div>
+          <div class="member-role">管理员</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #e74c3c;">陈<span class="online-dot"></span></div>
+          <div class="member-name">陈工</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #9b59b6;">王<span class="online-dot"></span></div>
+          <div class="member-name">王开发</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #1abc9c;">刘</div>
+          <div class="member-name">刘测试</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #f39c12;">赵<span class="online-dot"></span></div>
+          <div class="member-name">赵架构</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #e67e22;">黄<span class="online-dot"></span></div>
+          <div class="member-name">黄运维</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #34495e;">周</div>
+          <div class="member-name">周前端</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #27ae60;">吴<span class="online-dot"></span></div>
+          <div class="member-name">吴后端</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #d35400;">郑<span class="online-dot"></span></div>
+          <div class="member-name">郑产品</div>
+        </div>
+        <div class="member-item">
+          <div class="member-avatar" style="background: #8e44ad;">孙</div>
+          <div class="member-name">孙设计</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-main">
+      <div class="chat-header">
+        <div class="chat-title">
+          技术研发群 <small>35人</small>
+        </div>
+        <div class="chat-actions">
+          <span>📞</span>
+          <span>📹</span>
+          <span>📁</span>
+          <span>🔔</span>
+          <span>⋯</span>
+        </div>
+      </div>
+
+      <div class="chat-messages">
+        <div class="message-time">今天 09:00</div>
+
+        <div class="system-msg">
+          <span>张总 邀请 吴后端 加入了群聊</span>
+        </div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #e74c3c;">张</div>
+          <div class="message-content">
+            <div class="message-name">张总</div>
+            <div class="message-bubble">大家早上好，今天下午3点开项目周会，请各位提前准备一下进度汇报。</div>
+          </div>
+        </div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #3498db;">李</div>
+          <div class="message-content">
+            <div class="message-name">李明</div>
+            <div class="message-bubble">收到</div>
+          </div>
+        </div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #e74c3c;">陈</div>
+          <div class="message-content">
+            <div class="message-name">陈工</div>
+            <div class="message-bubble">好的张总，我这边接口开发进度大概80%了，预计明天能完成</div>
+          </div>
+        </div>
+
+        <div class="message-time">10:30</div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #f39c12;">赵</div>
+          <div class="message-content">
+            <div class="message-name">赵架构</div>
+            <div class="message-bubble">我把新版的架构设计文档发群里了，大家有空看一下，有问题随时提。</div>
+          </div>
+        </div>
+
+        <div class="message-item mine">
+          <div class="message-avatar">我</div>
+          <div class="message-content">
+            <div class="message-bubble">好的，我看完了，整体没问题，有几个小细节我整理一下发你</div>
+          </div>
+        </div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #f39c12;">赵</div>
+          <div class="message-content">
+            <div class="message-name">赵架构</div>
+            <div class="message-bubble">👍 好的，辛苦</div>
+          </div>
+        </div>
+
+        <div class="message-time">14:20</div>
+
+        <div class="message-item other">
+          <div class="message-avatar" style="background: #e74c3c;">陈</div>
+          <div class="message-content">
+            <div class="message-name">陈工</div>
+            <div class="message-bubble">各位，接口文档已经更新到wiki了，链接在这里：<br>http://wiki.xx.com/api<br>大家对接的时候注意一下，有问题找我。</div>
+          </div>
+        </div>
+
+        <div class="system-msg">
+          <span>你上传了 文件：前端开发规范v2.0.doc</span>
+        </div>
+
+        <div class="message-item mine">
+          <div class="message-avatar">我</div>
+          <div class="message-content">
+            <div class="message-bubble">这是最新的前端开发规范，大家可以参考一下</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-toolbar">
+          <span>😊</span>
+          <span>🖼️</span>
+          <span>📎</span>
+          <span>📁</span>
+          <span>📹</span>
+          <span>📝</span>
+          <span>@</span>
+        </div>
+        <div class="input-box" contenteditable="true" placeholder="输入消息，按Enter发送..."></div>
+        <div class="input-footer">
+          <button class="send-btn">发送 (Enter)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!--
+  ============================================================
+  审批详情页 - 政务服务系统
+
+  页面功能：XX市政务服务网审批事项详情页，展示办事指南
+  布局方式：左侧基本信息+右侧详情内容的两栏布局
+  业务背景：
+    1. 政务服务事项详细信息
+    2. 办理材料和流程说明
+    3. 在线申报入口
+
+  设计思路：
+    1. 基本信息清晰展示
+    2. 办事指南条理分明
+    3. 申报入口醒目
+
+  技术要点：
+    - 标签页切换内容
+    - 两栏布局展示
+    - 列表样式展示材料流程
+
+  适用迁移场景：
+    - 政务服务事项详情
+    - 办事指南详情页
+    - 行政审批详情页
+
+  wjs created by 2019-08-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审批详情 - XX市政务服务网</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #c8161d;
+      color: #fff;
+      padding: 15px 0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 40px;
+    }
+    .logo small {
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 10px;
+      opacity: 0.9;
+    }
+    .search-box {
+      float: right;
+      margin-top: 5px;
+      position: relative;
+    }
+    .search-input {
+      width: 350px;
+      height: 38px;
+      padding: 0 90px 0 15px;
+      border: none;
+      border-radius: 19px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 65px;
+      height: 34px;
+      background: #c8161d;
+      color: #fff;
+      border: none;
+      border-radius: 17px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .breadcrumb {
+      width: 1200px;
+      margin: 15px auto;
+      font-size: 13px;
+      color: #999;
+    }
+    .breadcrumb a {
+      color: #999;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { color: #c8161d; }
+    .main {
+      width: 1200px;
+      margin: 0 auto 30px;
+      overflow: hidden;
+    }
+    .page-title {
+      background: #fff;
+      padding: 20px 25px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .title-text {
+      float: left;
+    }
+    .title-text h1 {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .title-tags {
+      font-size: 13px;
+    }
+    .title-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-right: 8px;
+    }
+    .tag-dept { background: #e6f7ff; color: #1890ff; }
+    .tag-type { background: #f6ffed; color: #52c41a; }
+    .tag-online { background: #f9f0ff; color: #722ed1; }
+    .title-actions {
+      float: right;
+      padding-top: 10px;
+    }
+    .btn {
+      padding: 10px 28px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    .btn-primary {
+      background: #c8161d;
+      color: #fff;
+      border-color: #c8161d;
+    }
+    .btn-primary:hover { background: #a01015; }
+    .left-col {
+      float: left;
+      width: 300px;
+    }
+    .info-card {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .card-header {
+      padding: 15px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 15px;
+      font-weight: bold;
+      padding-left: 15px;
+      border-left: 4px solid #c8161d;
+    }
+    .card-body {
+      padding: 20px;
+}
+    .info-list {
+      list-style: none;
+    }
+    .info-list li {
+      padding: 10px 0;
+      border-bottom: 1px dashed #f0f0f0;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .info-list li:last-child { border-bottom: none; }
+    .info-label {
+      float: left;
+      width: 90px;
+      color: #999;
+    }
+    .info-value {
+      margin-left: 90px;
+      color: #333;
+    }
+    .info-value.highlight {
+      color: #c8161d;
+      font-weight: bold;
+    }
+    .right-col {
+      margin-left: 320px;
+    }
+    .detail-panel {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .tabs-bar {
+      border-bottom: 2px solid #f0f0f0;
+      padding: 0 25px;
+    }
+    .tab-item {
+      display: inline-block;
+      padding: 15px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      color: #c8161d;
+      border-bottom-color: #c8161d;
+      font-weight: bold;
+    }
+    .tab-content {
+      padding: 30px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      margin-top: 25px;
+      padding-left: 10px;
+      border-left: 3px solid #c8161d;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .section-desc {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+    .material-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    .material-table th {
+      background: #fafafa;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .material-table td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .material-table tr:hover { background: #fafafa; }
+    .step-list {
+      list-style: none;
+      padding-left: 10px;
+    }
+    .step-item {
+      position: relative;
+      padding-left: 40px;
+      padding-bottom: 25px;
+    }
+    .step-item:last-child { padding-bottom: 0; }
+    .step-num {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 26px;
+      height: 26px;
+      background: #c8161d;
+      color: #fff;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 26px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .step-item::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 30px;
+      bottom: 0;
+      width: 2px;
+      background: #f0f0f0;
+    }
+    .step-item:last-child::after { display: none; }
+    .step-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .step-time {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+    .condition-list {
+      list-style: none;
+    }
+    .condition-list li {
+      padding: 8px 0 8px 25px;
+      position: relative;
+      font-size: 14px;
+      color: #555;
+    }
+    .condition-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #52c41a;
+      font-weight: bold;
+    }
+    .fee-box {
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 20px;
+    }
+    .fee-item {
+      padding: 10px 0;
+      border-bottom: 1px dashed #e8e8e8;
+      overflow: hidden;
+    }
+    .fee-item:last-child { border-bottom: none; }
+    .fee-name {
+      float: left;
+      color: #555;
+    }
+    .fee-standard {
+      float: right;
+      color: #c8161d;
+      font-weight: bold;
+    }
+    .qa-list {
+      list-style: none;
+    }
+    .qa-item {
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed #f0f0f0;
+    }
+    .qa-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .qa-question {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .qa-question::before {
+      content: "Q：";
+      color: #c8161d;
+    }
+    .qa-answer {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .qa-answer::before {
+      content: "A：";
+      color: #52c41a;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX市政务服务网<small>一网通办</small></div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索事项、部门、办事指南...">
+        <button class="search-btn">搜索</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a>首页</a> / <a>法人办事</a> / <a>设立变更</a> / <a>企业开办</a> / <span style="color: #333;">内资有限责任公司设立登记</span>
+  </div>
+
+  <div class="main">
+    <div class="page-title">
+      <div class="title-text">
+        <h1>内资有限责任公司设立登记</h1>
+        <div class="title-tags">
+          <span class="title-tag tag-dept">办理部门：市市场监督管理局</span>
+          <span class="title-tag tag-type">事项类型：行政许可</span>
+          <span class="title-tag tag-online">✅ 全程网办</span>
+        </div>
+      </div>
+      <div class="title-actions">
+        <button class="btn">收藏</button>
+        <button class="btn">咨询</button>
+        <button class="btn btn-primary">在线办理</button>
+      </div>
+    </div>
+
+    <div class="left-col">
+      <div class="info-card">
+        <div class="card-header">基本信息</div>
+        <div class="card-body">
+          <ul class="info-list">
+            <li>
+              <span class="info-label">事项编码</span>
+              <span class="info-value">11010000000000000020001</span>
+            </li>
+            <li>
+              <span class="info-label">事项类型</span>
+              <span class="info-value">行政许可</span>
+            </li>
+            <li>
+              <span class="info-label">办理部门</span>
+              <span class="info-value">市市场监督管理局</span>
+            </li>
+            <li>
+              <span class="info-label">服务对象</span>
+              <span class="info-value">企业法人</span>
+            </li>
+            <li>
+              <span class="info-label">办理形式</span>
+              <span class="info-value">网上办理</span>
+            </li>
+            <li>
+              <span class="info-label">承诺时限</span>
+              <span class="info-value highlight">3个工作日</span>
+            </li>
+            <li>
+              <span class="info-label">法定时限</span>
+              <span class="info-value">15个工作日</span>
+            </li>
+            <li>
+              <span class="info-label">办理地点</span>
+              <span class="info-value">市政务服务中心</span>
+            </li>
+            <li>
+              <span class="info-label">办理时间</span>
+              <span class="info-value">工作日 9:00-17:00</span>
+            </li>
+            <li>
+              <span class="info-label">咨询电话</span>
+              <span class="info-value highlight">12345</span>
+            </li>
+            <li>
+              <span class="info-label">是否收费</span>
+              <span class="info-value">不收费</span>
+            </li>
+            <li>
+              <span class="info-label">好评率</span>
+              <span class="info-value highlight">99.2%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="card-header">办事进度</div>
+        <div class="card-body">
+          <div style="text-align: center; padding: 15px 0;">
+            <div style="font-size: 14px; color: #999; margin-bottom: 10px;">输入办件编号查询</div>
+            <input type="text" placeholder="请输入办件编号" style="width: 100%; height: 36px; padding: 0 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; margin-bottom: 10px;">
+            <button class="btn btn-primary" style="width: 100%;">查询进度</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="detail-panel">
+        <div class="tabs-bar">
+          <span class="tab-item active">办事指南</span>
+          <span class="tab-item">办理材料</span>
+          <span class="tab-item">办理流程</span>
+          <span class="tab-item">收费标准</span>
+          <span class="tab-item">常见问题</span>
+        </div>
+
+        <div class="tab-content">
+          <div class="section-title">事项介绍</div>
+          <div class="section-desc">
+            内资有限责任公司设立登记是指在XX市行政区域内，由自然人、法人或其他组织投资设立的有限责任公司，
+            向市场监督管理部门申请办理营业执照的登记注册行为。本事项适用于名称预先核准后，申请有限责任公司设立登记的办理。
+          </div>
+
+          <div class="section-title">办理条件</div>
+          <ul class="condition-list">
+            <li>股东符合法定人数（50人以下）</li>
+            <li>有符合公司章程规定的全体股东认缴的出资额</li>
+            <li>股东共同制定公司章程</li>
+            <li>有公司名称，建立符合有限责任公司要求的组织机构</li>
+            <li>有公司住所</li>
+            <li>法律、行政法规规定的其他条件</li>
+          </ul>
+
+          <div class="section-title">申请材料</div>
+          
+            <div style="overflow-x:auto;">
+<table class="material-table">
+            <thead>
+              <tr>
+                <th width="5%">序号</th>
+                <th width="30%">材料名称</th>
+                <th width="10%">材料形式</th>
+                <th width="10%">份数</th>
+                <th width="10%">必要性</th>
+                <th width="35%">备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>公司登记（备案）申请书</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>法定代表人签字，加盖公章</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>指定代表或者共同委托代理人授权委托书</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>全体股东签字，附代理人身份证复印件</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>公司章程</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>全体股东签字或盖章</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>股东的主体资格证明</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>自然人提供身份证，企业提供营业执照</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>董事、监事和经理的任职文件</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>股东会决议或股东决定</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>法定代表人任职文件</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>股东会决议或董事会决议</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>住所使用证明</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>房产证复印件或租赁合同</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>企业名称预先核准通知书</td>
+                <td>纸质/电子</td>
+                <td>1份</td>
+                <td>必要</td>
+                <td>名称预先核准通过后取得</td>
+              </tr>
+            </tbody>
+          </table>
+            </div>
+
+          <div class="section-title">办理流程</div>
+          <ol class="step-list">
+            <li class="step-item">
+              <div class="step-num">1</div>
+              <div class="step-title">提交申请</div>
+              <div class="step-desc">申请人通过政务服务网在线填报申请信息，上传电子材料，或到政务服务中心窗口提交纸质材料。</div>
+              <div class="step-time">办理时限：1个工作日内受理</div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">2</div>
+              <div class="step-title">受理审核</div>
+              <div class="step-desc">市场监管部门对申请材料进行形式审查，材料齐全、符合法定形式的予以受理；材料不齐全的，一次性告知需要补正的全部内容。</div>
+              <div class="step-time">办理时限：1个工作日</div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">3</div>
+              <div class="step-title">审查决定</div>
+              <div class="step-desc">对申请材料的实质性内容进行审查，符合条件的作出准予登记的决定；不符合条件的作出不予登记的决定并说明理由。</div>
+              <div class="step-time">办理时限：1个工作日</div>
+            </li>
+            <li class="step-item">
+              <div class="step-num">4</div>
+              <div class="step-title">领取证照</div>
+              <div class="step-desc">准予登记的，制作并颁发营业执照。申请人可选择现场领取或邮寄送达。</div>
+              <div class="step-time">办理时限：1个工作日</div>
+            </li>
+          </ol>
+
+          <div class="section-title">收费标准</div>
+          <div class="fee-box">
+            <div class="fee-item">
+              <span class="fee-name">内资有限责任公司设立登记费</span>
+              <span class="fee-standard">不收费</span>
+            </div>
+            <div class="fee-item">
+              <span class="fee-name">营业执照工本费</span>
+              <span class="fee-standard">不收费</span>
+            </div>
+          </div>
+
+          <div class="section-title">常见问题</div>
+          <div class="qa-list">
+            <div class="qa-item">
+              <div class="qa-question">有限责任公司注册资本最低限额是多少？</div>
+              <div class="qa-answer">
+                根据现行《公司法》规定，有限责任公司的注册资本为在公司登记机关登记的全体股东认缴的出资额。
+                法律、行政法规以及国务院决定对有限责任公司注册资本实缴、注册资本最低限额另有规定的，从其规定。
+                除特殊行业外，一般有限责任公司没有最低注册资本限制。
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-question">公司注册地址可以是住宅吗？</div>
+              <div class="qa-answer">
+                根据XX市相关规定，允许符合条件的住宅作为企业住所（经营场所）登记，但需遵守法律法规和管理规约，
+                并提交住所（经营场所）登记表。具体要求可咨询辖区市场监管部门。
+              </div>
+            </div>
+            <div class="qa-item">
+              <div class="qa-question">法定代表人必须是股东吗？</div>
+              <div class="qa-answer">
+                不一定。根据《公司法》规定，公司法定代表人依照公司章程的规定，由董事长、执行董事或者经理担任，
+                并依法登记。法定代表人可以是股东，也可以不是股东。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

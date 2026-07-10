@@ -1,0 +1,743 @@
+﻿<!--
+  ============================================================
+  基金列表页 - 金融理财平台
+
+  页面功能：XX金融理财平台基金列表页，展示基金排行和筛选条件
+  布局方式：顶部导航+左侧筛选+右侧基金列表的两栏布局
+  业务背景：
+    1. 基金产品列表展示和筛选
+    2. 基金排行和业绩展示
+    3. 基金详情入口
+
+  设计思路：
+    1. 左侧多维度筛选条件
+    2. 基金排行表格展示
+    3. 重点基金突出推荐
+
+  技术要点：
+    - float两栏布局
+    - 表格展示基金数据
+    - 标签页切换基金类型
+
+  适用迁移场景：
+    - 基金产品列表
+    - 基金排行榜
+    - 理财产品筛选
+
+  wjs created by 2018-06-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基金列表 - XX金融</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      background: #f5f5f5;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .top-bar {
+      background: #f5f5f5;
+      border-bottom: 1px solid #e8e8e8;
+      font-size: 12px;
+      color: #999;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 8px 0;
+      overflow: hidden;
+    }
+    .top-left { float: left; }
+    .top-right { float: right; }
+    .top-right span { margin-left: 20px; cursor: pointer; }
+    .top-right span:hover { color: #c0392b; }
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 26px;
+      font-weight: bold;
+      color: #c0392b;
+      line-height: 42px;
+    }
+    .logo span { color: #333; font-weight: normal; font-size: 15px; margin-left: 8px; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 22px;
+      line-height: 42px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #c0392b; }
+    .nav-item.active {
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .header-right {
+      float: right;
+      line-height: 42px;
+    }
+    .search-box {
+      float: left;
+      margin-right: 15px;
+    }
+    .search-input {
+      height: 34px;
+      width: 220px;
+      border: 1px solid #ddd;
+      border-radius: 17px;
+      padding: 0 15px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #c0392b;
+    }
+    .btn {
+      padding: 7px 20px;
+      border: 1px solid #c0392b;
+      border-radius: 4px;
+      background: #fff;
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #c0392b;
+      color: #fff;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #999; text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { color: #c0392b; }
+    .container {
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 220px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .filter-section {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .filter-title {
+      padding: 12px 15px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      background: #fafafa;
+    }
+    .filter-list {
+      padding: 10px 15px;
+    }
+    .filter-item {
+      padding: 6px 10px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-bottom: 3px;
+    }
+    .filter-item:hover { background: #f9f0ef; color: #c0392b; }
+    .filter-item.active {
+      background: #c0392b;
+      color: #fff;
+    }
+    .content {
+      margin-left: 240px;
+    }
+    .fund-tabs {
+      background: #fff;
+      border-radius: 4px 4px 0 0;
+      padding: 0 20px;
+      border-bottom: 2px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .fund-tab {
+      float: left;
+      padding: 15px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .fund-tab.active {
+      color: #c0392b;
+      border-bottom-color: #c0392b;
+      font-weight: bold;
+    }
+    .fund-tab .count {
+      font-size: 12px;
+      color: #999;
+      margin-left: 5px;
+      font-weight: normal;
+    }
+    .fund-toolbar {
+      background: #fff;
+      padding: 12px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .sort-options {
+      float: left;
+      font-size: 13px;
+      color: #666;
+    }
+    .sort-options span {
+      margin-right: 15px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 3px;
+    }
+    .sort-options span:hover { color: #c0392b; }
+    .sort-options span.active {
+      background: #c0392b;
+      color: #fff;
+    }
+    .view-options {
+      float: right;
+    }
+    .view-btn {
+      display: inline-block;
+      padding: 4px 10px;
+      border: 1px solid #ddd;
+      margin-left: -1px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666;
+    }
+    .view-btn.active {
+      background: #c0392b;
+      color: #fff;
+      border-color: #c0392b;
+    }
+    .fund-table-wrap {
+      background: #fff;
+      border-radius: 0 0 4px 4px;
+      overflow-x: auto;
+    }
+    .fund-table {
+      width: 100%;
+      min-width: 800px;
+      border-collapse: collapse;
+    }
+    .fund-table th {
+      background: #fafafa;
+      padding: 12px 15px;
+      text-align: right;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .fund-table th:first-child { text-align: left; }
+    .fund-table th:nth-child(2) { text-align: left; }
+    .fund-table td {
+      padding: 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      text-align: right;
+    }
+    .fund-table td:first-child { text-align: left; width: 60px; }
+    .fund-table td:nth-child(2) { text-align: left; }
+    .fund-table tr:hover { background: #fafafa; }
+    .rank-num {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      background: #e0e0e0;
+      color: #666;
+    }
+    .rank-num.top1 { background: #ff6b35; color: #fff; }
+    .rank-num.top2 { background: #ff9800; color: #fff; }
+    .rank-num.top3 { background: #ffc107; color: #fff; }
+    .fund-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+    }
+    .fund-name:hover { color: #c0392b; }
+    .fund-code {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .fund-type-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #f0f0f0;
+      color: #666;
+      font-size: 11px;
+      border-radius: 2px;
+      margin-left: 5px;
+    }
+    .fund-type-tag.stock { background: #ffebee; color: #c62828; }
+    .fund-type-tag.bond { background: #e3f2fd; color: #1565c0; }
+    .fund-type-tag.mixed { background: #fff3e0; color: #e65100; }
+    .fund-type-tag.index { background: #e8f5e9; color: #2e7d32; }
+    .rate-up { color: #c0392b; font-weight: bold; }
+    .rate-down { color: #2e7d32; font-weight: bold; }
+    .rate-flat { color: #999; font-weight: bold; }
+    .fund-risk {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-size: 11px;
+    }
+    .risk-low { background: #e8f5e9; color: #2e7d32; }
+    .risk-medium { background: #fff3e0; color: #e65100; }
+    .risk-high { background: #ffebee; color: #c62828; }
+    .action-btn {
+      display: inline-block;
+      padding: 5px 15px;
+      background: #c0392b;
+      color: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .action-btn.outline {
+      background: #fff;
+      color: #c0392b;
+      border: 1px solid #c0392b;
+      margin-right: 5px;
+    }
+    .pagination {
+      padding: 20px;
+      text-align: center;
+    }
+    .page-item {
+      display: inline-block;
+      padding: 6px 12px;
+      margin: 0 3px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #666;
+    }
+    .page-item.active {
+      background: #c0392b;
+      color: #fff;
+      border-color: #c0392b;
+    }
+    .page-item:hover {
+      border-color: #c0392b;
+      color: #c0392b;
+    }
+    .hot-fund-banner {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: #fff;
+      padding: 18px 25px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .banner-left {
+      float: left;
+    }
+    .banner-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .banner-desc {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    .banner-right {
+      float: right;
+      text-align: right;
+      padding-top: 5px;
+    }
+    .banner-rate {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .banner-rate small { font-size: 14px; font-weight: normal; }
+    .banner-btn {
+      display: inline-block;
+      padding: 8px 25px;
+      background: #fff;
+      color: #c0392b;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-left">欢迎来到XX金融理财平台</div>
+      <div class="top-right">
+        <span>客服热线：400-XXX-XXXX</span>
+        <span>手机版</span>
+        <span>帮助中心</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX金融<span>专业理财平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item active">基金理财</div>
+        <div class="nav-item">定期理财</div>
+        <div class="nav-item">活期理财</div>
+        <div class="nav-item">保险</div>
+        <div class="nav-item">我的资产</div>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="搜索基金代码/名称">
+        </div>
+        <button class="btn">登录</button>
+        <button class="btn btn-primary">注册</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>基金理财</a> / <span style="color:#333;">全部基金</span>
+    </div>
+
+    <div class="hot-fund-banner">
+      <div class="banner-left">
+        <div class="banner-title">🔥 热门推荐 · XX成长精选混合</div>
+        <div class="banner-desc">近一年收益率 52.38% · 基金经理精选 · 专注成长赛道</div>
+      </div>
+      <div class="banner-right">
+        <div class="banner-rate">+52.38<small>%</small></div>
+        <div class="banner-btn">立即购买</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="sidebar">
+        <div class="filter-section">
+          <div class="filter-title">基金类型</div>
+          <div class="filter-list">
+            <div class="filter-item active">全部类型</div>
+            <div class="filter-item">股票型 <span style="float:right;color:#999;">168</span></div>
+            <div class="filter-item">混合型 <span style="float:right;color:#999;">245</span></div>
+            <div class="filter-item">债券型 <span style="float:right;color:#999;">132</span></div>
+            <div class="filter-item">指数型 <span style="float:right;color:#999;">86</span></div>
+            <div class="filter-item">QDII <span style="float:right;color:#999;">45</span></div>
+            <div class="filter-item">货币型 <span style="float:right;color:#999;">38</span></div>
+            <div class="filter-item">FOF <span style="float:right;color:#999;">24</span></div>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">风险等级</div>
+          <div class="filter-list">
+            <div class="filter-item active">全部风险</div>
+            <div class="filter-item">低风险（R1）</div>
+            <div class="filter-item">中低风险（R2）</div>
+            <div class="filter-item">中风险（R3）</div>
+            <div class="filter-item">中高风险（R4）</div>
+            <div class="filter-item">高风险（R5）</div>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">业绩排名</div>
+          <div class="filter-list">
+            <div class="filter-item">近一周排名</div>
+            <div class="filter-item active">近一月排名</div>
+            <div class="filter-item">近三月排名</div>
+            <div class="filter-item">近半年排名</div>
+            <div class="filter-item">近一年排名</div>
+            <div class="filter-item">近三年排名</div>
+            <div class="filter-item">今年以来</div>
+            <div class="filter-item">成立以来</div>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-title">基金公司</div>
+          <div class="filter-list">
+            <div class="filter-item active">全部公司</div>
+            <div class="filter-item">易XX基金</div>
+            <div class="filter-item">华XX基金</div>
+            <div class="filter-item">广XX基金</div>
+            <div class="filter-item">南XX基金</div>
+            <div class="filter-item">嘉XX基金</div>
+            <div class="filter-item">博XX基金</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="fund-tabs">
+          <span class="fund-tab active">全部基金 <span class="count">(738)</span></span>
+          <span class="fund-tab">热销基金 <span class="count">(56)</span></span>
+          <span class="fund-tab">新发基金 <span class="count">(12)</span></span>
+          <span class="fund-tab">定开基金 <span class="count">(38)</span></span>
+          <span class="fund-tab">定投专区 <span class="count">(125)</span></span>
+          <span class="fund-tab">金牛基金 <span class="count">(28)</span></span>
+        </div>
+        <div class="fund-toolbar">
+          <div class="sort-options">
+            排序：
+            <span class="active">近一月收益</span>
+            <span>近一年收益</span>
+            <span>今年以来</span>
+            <span>净值</span>
+            <span>规模</span>
+            <span>成立时间</span>
+          </div>
+          <div class="view-options">
+            <span class="view-btn active">列表</span>
+            <span class="view-btn">网格</span>
+          </div>
+        </div>
+        <div class="fund-table-wrap">
+          <table class="fund-table">
+            <thead>
+              <tr>
+                <th>序号</th>
+                <th>基金名称</th>
+                <th>单位净值</th>
+                <th>日涨幅</th>
+                <th>近1月</th>
+                <th>近1年</th>
+                <th>今年以来</th>
+                <th>风险等级</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rank-num top1">1</span></td>
+                <td>
+                  <div class="fund-name">XX新能源产业股票<span class="fund-type-tag stock">股票型</span></div>
+                  <div class="fund-code">代码：00XXXX1</div>
+                </td>
+                <td>2.8560</td>
+                <td class="rate-up">+2.35%</td>
+                <td class="rate-up">+18.65%</td>
+                <td class="rate-up">+68.42%</td>
+                <td class="rate-up">+45.28%</td>
+                <td><span class="fund-risk risk-high">R5高风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num top2">2</span></td>
+                <td>
+                  <div class="fund-name">XX科技创新混合<span class="fund-type-tag mixed">混合型</span></div>
+                  <div class="fund-code">代码：00XXXX2</div>
+                </td>
+                <td>3.4210</td>
+                <td class="rate-up">+1.88%</td>
+                <td class="rate-up">+15.42%</td>
+                <td class="rate-up">+52.38%</td>
+                <td class="rate-up">+38.56%</td>
+                <td><span class="fund-risk risk-high">R4中高风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num top3">3</span></td>
+                <td>
+                  <div class="fund-name">XX医药健康混合<span class="fund-type-tag mixed">混合型</span></div>
+                  <div class="fund-code">代码：00XXXX3</div>
+                </td>
+                <td>2.1580</td>
+                <td class="rate-up">+3.12%</td>
+                <td class="rate-up">+12.86%</td>
+                <td class="rate-up">+42.15%</td>
+                <td class="rate-up">+32.85%</td>
+                <td><span class="fund-risk risk-high">R4中高风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">4</span></td>
+                <td>
+                  <div class="fund-name">XX沪深300指数<span class="fund-type-tag index">指数型</span></div>
+                  <div class="fund-code">代码：00XXXX4</div>
+                </td>
+                <td>1.5230</td>
+                <td class="rate-up">+1.25%</td>
+                <td class="rate-up">+10.58%</td>
+                <td class="rate-up">+28.96%</td>
+                <td class="rate-up">+22.45%</td>
+                <td><span class="fund-risk risk-medium">R3中风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">5</span></td>
+                <td>
+                  <div class="fund-name">XX消费精选股票<span class="fund-type-tag stock">股票型</span></div>
+                  <div class="fund-code">代码：00XXXX5</div>
+                </td>
+                <td>4.2860</td>
+                <td class="rate-down">-0.65%</td>
+                <td class="rate-up">+8.92%</td>
+                <td class="rate-up">+35.28%</td>
+                <td class="rate-up">+25.68%</td>
+                <td><span class="fund-risk risk-high">R5高风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">6</span></td>
+                <td>
+                  <div class="fund-name">XX纯债债券A<span class="fund-type-tag bond">债券型</span></div>
+                  <div class="fund-code">代码：00XXXX6</div>
+                </td>
+                <td>1.2850</td>
+                <td class="rate-up">+0.08%</td>
+                <td class="rate-up">+1.25%</td>
+                <td class="rate-up">+6.85%</td>
+                <td class="rate-up">+4.52%</td>
+                <td><span class="fund-risk risk-low">R2中低风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">7</span></td>
+                <td>
+                  <div class="fund-name">XX红利优选混合<span class="fund-type-tag mixed">混合型</span></div>
+                  <div class="fund-code">代码：00XXXX7</div>
+                </td>
+                <td>1.8960</td>
+                <td class="rate-up">+0.95%</td>
+                <td class="rate-up">+7.86%</td>
+                <td class="rate-up">+22.56%</td>
+                <td class="rate-up">+18.25%</td>
+                <td><span class="fund-risk risk-medium">R3中风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">8</span></td>
+                <td>
+                  <div class="fund-name">XX创业板指数<span class="fund-type-tag index">指数型</span></div>
+                  <div class="fund-code">代码：00XXXX8</div>
+                </td>
+                <td>2.0560</td>
+                <td class="rate-up">+2.15%</td>
+                <td class="rate-up">+6.45%</td>
+                <td class="rate-up">+18.92%</td>
+                <td class="rate-up">+15.68%</td>
+                <td><span class="fund-risk risk-high">R5高风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">9</span></td>
+                <td>
+                  <div class="fund-name">XX货币基金A<span class="fund-type-tag bond">货币型</span></div>
+                  <div class="fund-code">代码：00XXXX9</div>
+                </td>
+                <td>1.0000</td>
+                <td class="rate-flat">0.00%</td>
+                <td class="rate-up">+0.35%</td>
+                <td class="rate-up">+3.25%</td>
+                <td class="rate-up">+2.18%</td>
+                <td><span class="fund-risk risk-low">R1低风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="rank-num">10</span></td>
+                <td>
+                  <div class="fund-name">XX价值成长混合<span class="fund-type-tag mixed">混合型</span></div>
+                  <div class="fund-code">代码：00XXX10</div>
+                </td>
+                <td>3.1580</td>
+                <td class="rate-down">-0.42%</td>
+                <td class="rate-up">+5.28%</td>
+                <td class="rate-up">+25.68%</td>
+                <td class="rate-up">+20.15%</td>
+                <td><span class="fund-risk risk-medium">R3中风险</span></td>
+                <td>
+                  <span class="action-btn outline">详情</span>
+                  <span class="action-btn">购买</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="page-item">« 上一页</span>
+            <span class="page-item active">1</span>
+            <span class="page-item">2</span>
+            <span class="page-item">3</span>
+            <span class="page-item">4</span>
+            <span class="page-item">5</span>
+            <span class="page-item">74</span>
+            <span class="page-item">下一页 »</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

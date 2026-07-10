@@ -1,0 +1,680 @@
+<!--
+  ============================================================
+  充值提现页 - 金融理财平台
+
+  页面功能：XX金融平台充值和提现操作页面
+  布局方式：左右两栏布局，左侧充值右侧提现
+  业务背景：
+    1. 账户资金充值操作
+    2. 账户余额提现操作
+    3. 银行卡管理
+
+  设计思路：
+    1. 充值提现分开展示
+    2. 表单操作简洁直观
+    3. 资金信息清晰展示
+
+  技术要点：
+    - float两栏布局
+    - 表单样式美化
+    - 银行卡卡片展示
+
+  适用迁移场景：
+    - 账户充值提现页
+    - 资金管理页面
+    - 支付操作页面
+
+  wjs created by 2018-10-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>充值提现 - XX金融</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 24px;
+      font-weight: bold;
+      color: #c0392b;
+      line-height: 38px;
+    }
+    .logo span { color: #999; font-weight: normal; font-size: 14px; margin-left: 10px; }
+    .nav-menu { float: left; margin-left: 50px; }
+    .nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 38px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #c0392b; }
+    .nav-item.active { color: #c0392b; font-weight: bold; }
+    .user-info {
+      float: right;
+      line-height: 38px;
+      font-size: 14px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .left-menu {
+      float: left;
+      width: 200px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 15px 0;
+      margin-right: 20px;
+    }
+    .menu-title {
+      font-size: 14px;
+      color: #999;
+      padding: 10px 20px;
+    }
+    .menu-item {
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .menu-item:hover {
+      background: #fafafa;
+      color: #c0392b;
+    }
+    .menu-item.active {
+      background: #fdecea;
+      color: #c0392b;
+      border-left-color: #c0392b;
+      font-weight: bold;
+    }
+    .right-content {
+      margin-left: 220px;
+    }
+    .balance-bar {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      border-radius: 8px;
+      padding: 25px 30px;
+      color: #fff;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .balance-item {
+      float: left;
+      margin-right: 60px;
+    }
+    .balance-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+    .balance-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .balance-value small {
+      font-size: 14px;
+      font-weight: normal;
+    }
+    .balance-actions {
+      float: right;
+      margin-top: 10px;
+    }
+    .balance-btn {
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+      font-size: 13px;
+    }
+    .balance-btn:hover { background: rgba(255,255,255,0.3); }
+    .content-row {
+      display: flex;
+      margin: 0 -10px;
+    }
+    .panel {
+      width: 50%;
+      padding: 0 10px;
+    }
+    .panel-inner {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 25px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .panel-title {
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #c0392b;
+    }
+    .panel-body {
+      padding: 30px 25px;
+}
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .form-label .required { color: #c0392b; }
+    .bank-card {
+      background: linear-gradient(135deg, #1a237e, #283593);
+      border-radius: 8px;
+      padding: 18px 20px;
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .bank-card::before {
+      content: "";
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .bank-logo {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .bank-number {
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      font-family: Arial;
+    }
+    .bank-name {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    .bank-card.small {
+      padding: 12px 15px;
+    }
+    .bank-card.small .bank-logo { font-size: 14px; margin-bottom: 8px; }
+    .bank-card.small .bank-number { font-size: 16px; }
+    .amount-input-group {
+      position: relative;
+    }
+    .amount-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 50px 0 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 20px;
+      outline: none;
+      font-family: Arial;
+    }
+    .amount-input:focus {
+      border-color: #c0392b;
+    }
+    .amount-unit {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+    .quick-amount {
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .quick-amount span {
+      float: left;
+      padding: 6px 15px;
+      margin-right: 10px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .quick-amount span:hover {
+      background: #fdecea;
+      color: #c0392b;
+    }
+    .form-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    .form-tip strong {
+      color: #c0392b;
+      font-weight: normal;
+    }
+    .fee-info {
+      background: #fafafa;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+    .fee-row {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .fee-row:last-child { margin-bottom: 0; }
+    .fee-row .label {
+      float: left;
+      color: #999;
+    }
+    .fee-row .value {
+      float: right;
+      color: #333;
+    }
+    .submit-btn {
+      width: 100%;
+      height: 48px;
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .submit-btn:hover { opacity: 0.9; }
+    .submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .withdraw-tip {
+      background: #fff3e0;
+      border: 1px solid #ffe0b2;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .withdraw-tip-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #e65100;
+      margin-bottom: 8px;
+    }
+    .withdraw-tip-content {
+      font-size: 13px;
+      color: #e65100;
+      line-height: 1.6;
+    }
+    .record-section {
+      background: #fff;
+      border-radius: 8px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+    .record-header {
+      padding: 18px 25px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .record-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #c0392b;
+    }
+    .record-tabs {
+      float: right;
+    }
+    .record-tab {
+      display: inline-block;
+      padding: 4px 15px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-left: 5px;
+    }
+    .record-tab.active {
+      background: #c0392b;
+      color: #fff;
+    }
+    .record-body {
+      padding: 20px 25px;
+}
+    .record-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .record-table th {
+      background: #fafafa;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .record-table td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .record-table tr:hover { background: #fafafa; }
+    .amount-plus { color: #4caf50; font-weight: bold; }
+    .amount-minus { color: #f44336; font-weight: bold; }
+    .status-success { color: #4caf50; }
+    .status-pending { color: #ff9800; }
+    .status-fail { color: #f44336; }
+    .sms-input-group {
+      overflow: hidden;
+    }
+    .sms-input {
+      float: left;
+      width: 60%;
+      height: 44px;
+      padding: 0 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px 0 0 6px;
+      font-size: 14px;
+      outline: none;
+    }
+    .sms-btn {
+      float: left;
+      width: 40%;
+      height: 44px;
+      background: #f5f5f5;
+      color: #666;
+      border: 1px solid #d9d9d9;
+      border-left: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .sms-btn:hover { background: #eee; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX金融<span>专业财富管理平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item">我要理财</div>
+        <div class="nav-item">基金</div>
+        <div class="nav-item active">我的账户</div>
+      </div>
+      <div class="user-info">
+        <span>欢迎您，用户***</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="left-menu">
+      <div class="menu-title">我的账户</div>
+      <div class="menu-item">资产总览</div>
+      <div class="menu-item active">充值提现</div>
+      <div class="menu-item">资金流水</div>
+      <div class="menu-title">我的理财</div>
+      <div class="menu-item">持有产品</div>
+      <div class="menu-item">已结束产品</div>
+      <div class="menu-item">我的预约</div>
+      <div class="menu-title">其他</div>
+      <div class="menu-item">消息中心</div>
+      <div class="menu-item">安全中心</div>
+      <div class="menu-item">个人资料</div>
+    </div>
+
+    <div class="right-content">
+      <div class="balance-bar">
+        <div class="balance-item">
+          <div class="balance-label">可用余额</div>
+          <div class="balance-value">26,580.25<small> 元</small></div>
+        </div>
+        <div class="balance-item">
+          <div class="balance-label">冻结金额</div>
+          <div class="balance-value">0.00<small> 元</small></div>
+        </div>
+        <div class="balance-item">
+          <div class="balance-label">待收收益</div>
+          <div class="balance-value">4,326.50<small> 元</small></div>
+        </div>
+        <div class="balance-actions">
+          <button class="balance-btn">查看流水</button>
+          <button class="balance-btn">银行卡管理</button>
+        </div>
+      </div>
+
+      <div class="content-row">
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="panel-header">
+              <div class="panel-title">账户充值</div>
+            </div>
+            <div class="panel-body">
+              <div class="form-group">
+                <div class="form-label">充值银行卡</div>
+                <div class="bank-card small">
+                  <div class="bank-logo">XX工商银行</div>
+                  <div class="bank-number">**** **** **** 8888</div>
+                  <div class="bank-name">储蓄卡</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">充值金额<span class="required">*</span></div>
+                <div class="amount-input-group">
+                  <input type="text" class="amount-input" value="5,000.00">
+                  <span class="amount-unit">元</span>
+                </div>
+                <div class="quick-amount">
+                  <span>1000元</span>
+                  <span>5000元</span>
+                  <span>10000元</span>
+                  <span>50000元</span>
+                </div>
+                <div class="form-tip">单笔限额5万元，单日限额20万元</div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">短信验证码<span class="required">*</span></div>
+                <div class="sms-input-group">
+                  <input type="text" class="sms-input" placeholder="请输入验证码">
+                  <button class="sms-btn">获取验证码</button>
+                </div>
+              </div>
+
+              <div class="fee-info">
+                <div class="fee-row">
+                  <span class="label">充值金额</span>
+                  <span class="value">¥ 5,000.00</span>
+                </div>
+                <div class="fee-row">
+                  <span class="label">手续费</span>
+                  <span class="value">¥ 0.00</span>
+                </div>
+                <div class="fee-row">
+                  <span class="label">预计到账</span>
+                  <span class="value">实时到账</span>
+                </div>
+              </div>
+
+              <button class="submit-btn">确认充值</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-inner">
+            <div class="panel-header">
+              <div class="panel-title">账户提现</div>
+            </div>
+            <div class="panel-body">
+              <div class="withdraw-tip">
+                <div class="withdraw-tip-title">💡 温馨提示</div>
+                <div class="withdraw-tip-content">
+                  1. 提现金额将在T+1个工作日内到账<br>
+                  2. 每日提现限额：单笔5万，单日20万<br>
+                  3. 提现需使用本人实名银行卡
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">提现到银行卡</div>
+                <div class="bank-card small" style="background: linear-gradient(135deg, #b71c1c, #c62828);">
+                  <div class="bank-logo">XX建设银行</div>
+                  <div class="bank-number">**** **** **** 6666</div>
+                  <div class="bank-name">储蓄卡</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">提现金额<span class="required">*</span></div>
+                <div class="amount-input-group">
+                  <input type="text" class="amount-input" value="">
+                  <span class="amount-unit">元</span>
+                </div>
+                <div class="quick-amount">
+                  <span>1000元</span>
+                  <span>5000元</span>
+                  <span>全部提现</span>
+                </div>
+                <div class="form-tip">可用余额：<strong>26,580.25元</strong> &nbsp; 提现手续费：2元/笔</div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">交易密码<span class="required">*</span></div>
+                <div class="amount-input-group">
+                  <input type="password" class="amount-input" placeholder="请输入交易密码" style="font-size: 14px;">
+                </div>
+              </div>
+
+              <div class="fee-info">
+                <div class="fee-row">
+                  <span class="label">提现金额</span>
+                  <span class="value">¥ 0.00</span>
+                </div>
+                <div class="fee-row">
+                  <span class="label">手续费</span>
+                  <span class="value">¥ 2.00</span>
+                </div>
+                <div class="fee-row">
+                  <span class="label">实到金额</span>
+                  <span class="value">¥ 0.00</span>
+                </div>
+                <div class="fee-row">
+                  <span class="label">预计到账</span>
+                  <span class="value">2018-10-11 24:00前</span>
+                </div>
+              </div>
+
+              <button class="submit-btn">确认提现</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="record-section">
+        <div class="record-header">
+          <div class="record-title">近期交易记录</div>
+          <div class="record-tabs">
+            <span class="record-tab active">全部</span>
+            <span class="record-tab">充值</span>
+            <span class="record-tab">提现</span>
+            <span class="record-tab">投资</span>
+            <span class="record-tab">回款</span>
+          </div>
+        </div>
+        <div class="record-body">
+          
+            <div style="overflow-x:auto;">
+<table class="record-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>类型</th>
+                <th>金额</th>
+                <th>状态</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2018-10-10 10:25:36</td>
+                <td>充值</td>
+                <td class="amount-plus">+10,000.00</td>
+                <td class="status-success">成功</td>
+                <td>XX工商银行尾号8888</td>
+              </tr>
+              <tr>
+                <td>2018-10-09 15:30:12</td>
+                <td>投资</td>
+                <td class="amount-minus">-10,000.00</td>
+                <td class="status-success">成功</td>
+                <td>增利宝180天</td>
+              </tr>
+              <tr>
+                <td>2018-10-08 09:15:48</td>
+                <td>提现</td>
+                <td class="amount-minus">-5,000.00</td>
+                <td class="status-success">成功</td>
+                <td>XX建设银行尾号6666</td>
+              </tr>
+              <tr>
+                <td>2018-10-05 14:22:06</td>
+                <td>回款</td>
+                <td class="amount-plus">+10,254.79</td>
+                <td class="status-success">成功</td>
+                <td>月息通理财到期</td>
+              </tr>
+              <tr>
+                <td>2018-10-03 11:08:23</td>
+                <td>充值</td>
+                <td class="amount-plus">+20,000.00</td>
+                <td class="status-success">成功</td>
+                <td>XX工商银行尾号8888</td>
+              </tr>
+            </tbody>
+          </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

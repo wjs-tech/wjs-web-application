@@ -1,0 +1,176 @@
+﻿<!--
+  ============================================================
+  卡片瀑布流布局 - 多列瀑布流，column-count 实现
+
+  布局方式：CSS Multi-column Layout（多列布局）
+  布局思想：
+    1. 使用 column-count 将容器内容分割成多列
+    2. 卡片元素使用 break-inside: avoid 防止被分割
+    3. 内容自动从左到右、从上到下流动填充各列
+
+  适用场景：
+    - 图片瀑布流展示（花瓣网、Pinterest风格）
+    - 商品列表卡片展示
+    - 博客文章列表
+    - 不规则内容的多列展示
+
+  技术要点：
+    - column-count 设置列数
+    - column-gap 设置列间距
+    - break-inside: avoid 防止元素内部断行
+    - column-rule 设置列之间的分隔线（可选）
+    - 纯CSS实现，无需JavaScript
+    - 缺点：内容按列填充，不是按行排列
+
+  可迁移性：
+    - 可迁移到图片/卡片瀑布流页面
+    - 适用于不规则高度内容的多列展示
+    - 如需按行排列需用JS或Grid masonry方案
+
+  wjs created by 2018-10-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡片瀑布流布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; background: #f5f5f5; }
+    .header {
+      background: #fff;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .waterfall {
+      column-count: 4;
+      column-gap: 15px;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .card {
+      break-inside: avoid;
+      margin-bottom: 15px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card .img {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .card .info {
+      padding: 12px 15px;
+    }
+    .card .title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .card .desc {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1200px) {
+      .waterfall { column-count: 3; }
+    }
+    @media (max-width: 768px) {
+      .waterfall { column-count: 2; }
+    }
+    @media (max-width: 480px) {
+      .waterfall { column-count: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>瀑布流布局 Demo</h1>
+    <p style="color: #666; margin-top: 8px;">column-count + break-inside 实现</p>
+  </div>
+  <div class="waterfall">
+    <div class="card">
+      <div class="img" style="height: 150px;">1</div>
+      <div class="info">
+        <div class="title">卡片标题 1</div>
+        <div class="desc">这是一段描述文字，展示瀑布流效果。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 220px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">2</div>
+      <div class="info">
+        <div class="title">卡片标题 2</div>
+        <div class="desc">不同高度的卡片形成错落有致的瀑布流效果。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 180px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">3</div>
+      <div class="info">
+        <div class="title">卡片标题 3</div>
+        <div class="desc">纯CSS实现，简单高效。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 250px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">4</div>
+      <div class="info">
+        <div class="title">卡片标题 4</div>
+        <div class="desc">响应式设计，屏幕宽度变化时自动调整列数。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 160px; background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">5</div>
+      <div class="info">
+        <div class="title">卡片标题 5</div>
+        <div class="desc">break-inside: avoid 防止卡片被分割。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 200px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">6</div>
+      <div class="info">
+        <div class="title">卡片标题 6</div>
+        <div class="desc">适用于图片、商品、文章等内容展示。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 140px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">7</div>
+      <div class="info">
+        <div class="title">卡片标题 7</div>
+        <div class="desc">简洁美观。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 230px; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">8</div>
+      <div class="info">
+        <div class="title">卡片标题 8</div>
+        <div class="desc">column-count 多列布局的经典应用场景。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 170px; background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">9</div>
+      <div class="info">
+        <div class="title">卡片标题 9</div>
+        <div class="desc">瀑布流布局让页面更有节奏感。</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="img" style="height: 210px; background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">10</div>
+      <div class="info">
+        <div class="title">卡片标题 10</div>
+        <div class="desc">Pinterest 风格的经典布局方式。</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

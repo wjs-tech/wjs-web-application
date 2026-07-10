@@ -1,0 +1,110 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  04-border.css - 边框工具类
+
+  功能说明：
+    1. 边框：全边框、无边框、单边边框（上/右/下/左）
+    2. 圆角：小圆角、默认圆角、中圆角、大圆角、全圆角、圆形、无圆角
+    3. 边框样式：实线、虚线、点线
+
+  适用场景：
+    - 卡片、按钮、输入框等组件边框样式
+    - 图片、头像等元素圆角处理
+    - 分割线、装饰线等边框效果
+
+  技术要点：
+    - 使用border-width控制边框粗细
+    - 使用border-radius实现圆角效果
+    - 支持不同边框样式（solid/dashed/dotted）
+
+  wjs created by 2016-06-10
+  ============================================================
+*/
+
+/* ========== 边框 ========== */
+
+/* 全边框 1px实线 */
+.border {
+  border: 1px solid #ddd;
+}
+
+/* 无边框 */
+.border-0 {
+  border: 0;
+}
+
+/* 上边框 */
+.border-top {
+  border-top: 1px solid #ddd;
+}
+
+/* 右边框 */
+.border-right {
+  border-right: 1px solid #ddd;
+}
+
+/* 下边框 */
+.border-bottom {
+  border-bottom: 1px solid #ddd;
+}
+
+/* 左边框 */
+.border-left {
+  border-left: 1px solid #ddd;
+}
+
+/* ========== 圆角 ========== */
+
+/* 小圆角 2px */
+.rounded-sm {
+  border-radius: 2px;
+}
+
+/* 默认圆角 4px */
+.rounded {
+  border-radius: 4px;
+}
+
+/* 中圆角 6px */
+.rounded-md {
+  border-radius: 6px;
+}
+
+/* 大圆角 8px */
+.rounded-lg {
+  border-radius: 8px;
+}
+
+/* 全圆角 9999px（胶囊形） */
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* 圆形 50% */
+.rounded-circle {
+  border-radius: 50%;
+}
+
+/* 无圆角 */
+.rounded-0 {
+  border-radius: 0;
+}
+
+/* ========== 边框样式 ========== */
+
+/* 实线边框 */
+.border-solid {
+  border-style: solid;
+}
+
+/* 虚线边框 */
+.border-dashed {
+  border-style: dashed;
+}
+
+/* 点线边框 */
+.border-dotted {
+  border-style: dotted;
+}

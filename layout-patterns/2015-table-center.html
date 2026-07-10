@@ -1,0 +1,139 @@
+﻿<!--
+  ============================================================
+  Table 居中布局 - 经典登录页布局
+
+  布局方式：Table 布局 + 垂直水平居中
+  布局思想：
+    1. 使用 table 实现元素垂直水平居中，兼容性极佳（IE6+ 都支持）
+    2. 外层 table 宽度 100% 高度 100%，内层 td 设置 vertical-align: middle
+    3. 内容区域固定宽度，左右 auto 实现水平居中
+    4. 不依赖任何 CSS3 属性，纯原生实现
+
+  适用场景：
+    - 登录页、注册页、找回密码等单表单页
+    - 需要兼容低版本浏览器（IE6/7/8）的项目
+    - 银行、政府、国企等对兼容性要求高的系统
+
+  技术要点：
+    - table-layout: fixed 固定表格布局，渲染更快
+    - border-collapse: collapse 合并边框
+    - vertical-align: middle 垂直居中
+    - text-align: center 水平居中
+
+  可迁移性：
+    - 可直接迁移到任何需要居中弹窗的页面
+    - 可改造为 Modal 弹窗、Tooltip 提示等组件
+
+  wjs created by 2015-05-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Table 居中布局 - 登录页</title>
+<style>
+  * { margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; }
+  body { font-family: "Microsoft YaHei", Arial, sans-serif; background: #f0f2f5; }
+
+  .login-table {
+    width: 100%;
+    height: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+  .login-table td {
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  .login-box {
+    width: 400px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+    padding: 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    text-align: left;
+  }
+  .login-title {
+    font-size: 20px;
+    color: #303133;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .form-item {
+    margin-bottom: 20px;
+  }
+  .form-item label {
+    display: block;
+    font-size: 14px;
+    color: #606266;
+    margin-bottom: 8px;
+  }
+  .form-item input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+  }
+  .form-item input:focus {
+    border-color: #409eff;
+  }
+  .btn-login {
+    width: 100%;
+    height: 40px;
+    background: #409eff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .btn-login:hover {
+    background: #66b1ff;
+  }
+  .login-footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #909399;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<table class="login-table">
+  <tr>
+    <td>
+      <div class="login-box">
+        <h2 class="login-title">XX 银行网银系统</h2>
+        <div class="form-item">
+          <label>账号</label>
+          <input type="text" placeholder="请输入账号">
+        </div>
+        <div class="form-item">
+          <label>密码</label>
+          <input type="password" placeholder="请输入密码">
+        </div>
+        <div class="form-item">
+          <label>验证码</label>
+          <input type="text" placeholder="请输入验证码">
+        </div>
+        <button class="btn-login">登 录</button>
+        <div class="login-footer">
+          © 2015 XX银行 版权所有
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

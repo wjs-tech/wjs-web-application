@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>招聘管理 - XX科技HR系统</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Microsoft YaHei", Arial, sans-serif; font-size: 14px; color: #333; background: #f0f2f5;       min-height: 100vh;
+}
+
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar { width: 220px; background: #001529; color: #fff; flex-shrink: 0; }
+  .sidebar .logo { height: 60px; line-height: 60px; text-align: center; font-size: 18px; font-weight: bold; border-bottom: 1px solid #1f3a5f; }
+  .sidebar-menu { list-style: none; padding: 12px 0; }
+  .sidebar-menu li { padding: 12px 24px; cursor: pointer; transition: all 0.3s; }
+  .sidebar-menu li:hover { background: #1890ff; }
+  .sidebar-menu li.active { background: #1890ff; }
+  .sidebar-menu li i { margin-right: 10px; }
+
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .header { height: 60px; background: #fff; border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+  .header .breadcrumb { color: #666; }
+  .header .breadcrumb span { color: #1890ff; }
+  .header .user-info { display: flex; align-items: center; gap: 12px; }
+  .header .user-info .avatar { width: 36px; height: 36px; border-radius: 50%; background: #1890ff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+  .content { flex: 1; padding: 20px; overflow-y: auto; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-card .stat-label { color: #666; font-size: 13px; margin-bottom: 8px; }
+  .stat-card .stat-value { font-size: 28px; font-weight: bold; color: #333; }
+  .stat-card .stat-value.color-blue { color: #1890ff; }
+  .stat-card .stat-value.color-green { color: #52c41a; }
+  .stat-card .stat-value.color-orange { color: #fa8c16; }
+  .stat-card .stat-value.color-red { color: #f5222d; }
+
+  .panel { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .panel-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+  .panel-header h3 { font-size: 16px; font-weight: 600; }
+  .panel-header .actions { display: flex; gap: 10px; }
+  .panel-body { padding: 20px; }
+
+  .filter-form { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .form-item { display: flex; align-items: center; gap: 8px; }
+  .form-item label { color: #666; white-space: nowrap; }
+  .form-item input, .form-item select { padding: 6px 10px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; width: 140px; }
+  .form-item input:focus, .form-item select:focus { outline: none; border-color: #1890ff; }
+
+  .btn { padding: 6px 16px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; background: #fff; transition: all 0.3s; }
+  .btn:hover { border-color: #1890ff; color: #1890ff; }
+  .btn-primary { background: #1890ff; border-color: #1890ff; color: #fff; }
+  .btn-primary:hover { background: #40a9ff; border-color: #40a9ff; color: #fff; }
+  .btn-sm { padding: 4px 12px; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+  th { background: #fafafa; font-weight: 600; color: #333; font-size: 13px; }
+  td { font-size: 13px; color: #555; }
+  tr:hover { background: #f5f5f5; }
+
+  .status-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .status-publish { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+  .status-interview { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+  .status-offer { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+  .status-closed { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+  .progress-bar { width: 120px; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+  .progress-bar .fill { height: 100%; background: linear-gradient(90deg, #1890ff, #52c41a); border-radius: 4px; }
+
+  .action-links { display: flex; gap: 8px; }
+  .action-links a { color: #1890ff; text-decoration: none; font-size: 12px; cursor: pointer; }
+  .action-links a:hover { text-decoration: underline; }
+
+  .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 16px 20px; }
+  .pagination .page-btn { width: 32px; height: 32px; border: 1px solid #d9d9d9; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px; }
+  .pagination .page-btn.active { background: #1890ff; border-color: #1890ff; color: #fff; }
+  .pagination .page-btn:hover:not(.active) { border-color: #1890ff; color: #1890ff; }
+  .pagination .total { color: #666; font-size: 13px; margin-right: 12px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .channel-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  .channel-item:last-child { border-bottom: none; }
+  .channel-info { display: flex; align-items: center; gap: 12px; }
+  .channel-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+  .channel-icon.bg-blue { background: #1890ff; }
+  .channel-icon.bg-green { background: #52c41a; }
+  .channel-icon.bg-orange { background: #fa8c16; }
+  .channel-icon.bg-purple { background: #722ed1; }
+  .channel-name { font-weight: 500; }
+  .channel-count { font-size: 12px; color: #999; margin-top: 2px; }
+  .channel-num { font-size: 18px; font-weight: bold; color: #333; }
+
+  .candidate-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+  .candidate-item:last-child { border-bottom: none; }
+  .candidate-avatar { width: 44px; height: 44px; border-radius: 50%; background: #e6f7ff; color: #1890ff; display: flex; align-items: center; justify-content: center; font-weight: 500; flex-shrink: 0; }
+  .candidate-info { flex: 1; }
+  .candidate-name { font-weight: 500; }
+  .candidate-desc { font-size: 12px; color: #999; margin-top: 2px; }
+  .candidate-status { font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="sidebar">
+    <div class="logo">XX科技HR系统</div>
+    <ul class="sidebar-menu">
+      <li><i>📊</i>仪表盘</li>
+      <li><i>👥</i>员工管理</li>
+      <li><i>📅</i>考勤管理</li>
+      <li><i>💰</i>薪资管理</li>
+      <li class="active"><i>🎯</i>招聘管理</li>
+      <li><i>📚</i>培训管理</li>
+      <li><i>🏆</i>绩效管理</li>
+      <li><i>⚙️</i>系统设置</li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="breadcrumb">首页 / <span>招聘管理</span></div>
+      <div class="user-info">
+        <span>张HR</span>
+        <div class="avatar">张</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">招聘职位数</div>
+          <div class="stat-value color-blue">28</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">在招职位</div>
+          <div class="stat-value color-green">15</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">简历总数</div>
+          <div class="stat-value color-orange">1,286</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">本月入职</div>
+          <div class="stat-value color-red">12</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h3>职位管理</h3>
+          <div class="actions">
+            <button class="btn btn-primary">+ 发布新职位</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="filter-form">
+            <div class="form-item">
+              <label>职位名称</label>
+              <input type="text" placeholder="请输入职位名称">
+            </div>
+            <div class="form-item">
+              <label>招聘部门</label>
+              <select>
+                <option>全部部门</option>
+                <option>技术部</option>
+                <option>产品部</option>
+                <option>市场部</option>
+                <option>运营部</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <label>招聘状态</label>
+              <select>
+                <option>全部状态</option>
+                <option>招聘中</option>
+                <option>面试中</option>
+                <option>已发offer</option>
+                <option>已关闭</option>
+              </select>
+            </div>
+            <div class="form-item">
+              <button class="btn btn-primary">搜索</button>
+              <button class="btn">重置</button>
+            </div>
+          </div>
+        </div>
+        
+          <div style="overflow-x:auto;">
+<table>
+          <thead>
+            <tr>
+              <th>职位名称</th>
+              <th>招聘部门</th>
+              <th>招聘人数</th>
+              <th>薪资范围</th>
+              <th>工作地点</th>
+              <th>简历数</th>
+              <th>招聘进度</th>
+              <th>状态</th>
+              <th>发布时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>高级前端工程师</td>
+              <td>技术部</td>
+              <td>3人</td>
+              <td>15K-25K</td>
+              <td>大连</td>
+              <td>128</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 60%"></div></div></td>
+              <td><span class="status-tag status-interview">面试中</span></td>
+              <td>2020-05-10</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>产品经理</td>
+              <td>产品部</td>
+              <td>2人</td>
+              <td>12K-20K</td>
+              <td>大连</td>
+              <td>86</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 45%"></div></div></td>
+              <td><span class="status-tag status-publish">招聘中</span></td>
+              <td>2020-05-15</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Java开发工程师</td>
+              <td>技术部</td>
+              <td>5人</td>
+              <td>10K-18K</td>
+              <td>大连</td>
+              <td>256</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 80%"></div></div></td>
+              <td><span class="status-tag status-offer">已发offer</span></td>
+              <td>2020-04-20</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>UI设计师</td>
+              <td>设计部</td>
+              <td>1人</td>
+              <td>8K-12K</td>
+              <td>大连</td>
+              <td>42</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 30%"></div></div></td>
+              <td><span class="status-tag status-publish">招聘中</span></td>
+              <td>2020-05-20</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>运营专员</td>
+              <td>运营部</td>
+              <td>2人</td>
+              <td>6K-10K</td>
+              <td>大连</td>
+              <td>98</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 100%"></div></div></td>
+              <td><span class="status-tag status-closed">已关闭</span></td>
+              <td>2020-03-10</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>复制</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>测试工程师</td>
+              <td>技术部</td>
+              <td>2人</td>
+              <td>8K-15K</td>
+              <td>大连</td>
+              <td>64</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 50%"></div></div></td>
+              <td><span class="status-tag status-interview">面试中</span></td>
+              <td>2020-05-05</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>市场推广</td>
+              <td>市场部</td>
+              <td>3人</td>
+              <td>7K-12K</td>
+              <td>大连</td>
+              <td>76</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 25%"></div></div></td>
+              <td><span class="status-tag status-publish">招聘中</span></td>
+              <td>2020-06-01</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>行政助理</td>
+              <td>行政部</td>
+              <td>1人</td>
+              <td>4K-6K</td>
+              <td>大连</td>
+              <td>112</td>
+              <td><div class="progress-bar"><div class="fill" style="width: 90%"></div></div></td>
+              <td><span class="status-tag status-offer">已发offer</span></td>
+              <td>2020-04-25</td>
+              <td>
+                <div class="action-links">
+                  <a>查看</a>
+                  <a>编辑</a>
+                  <a>简历</a>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+          </div>
+        <div class="pagination">
+          <span class="total">共 28 条记录</span>
+          <div class="page-btn">«</div>
+          <div class="page-btn active">1</div>
+          <div class="page-btn">2</div>
+          <div class="page-btn">3</div>
+          <div class="page-btn">4</div>
+          <div class="page-btn">»</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>招聘渠道统计</h3>
+          </div>
+          <div class="panel-body">
+            <div class="channel-item">
+              <div class="channel-info">
+                <div class="channel-icon bg-blue">🔗</div>
+                <div>
+                  <div class="channel-name">XX招聘网</div>
+                  <div class="channel-count">本月新增 156 份简历</div>
+                </div>
+              </div>
+              <div class="channel-num">486</div>
+            </div>
+            <div class="channel-item">
+              <div class="channel-info">
+                <div class="channel-icon bg-green">💼</div>
+                <div>
+                  <div class="channel-name">XX直聘</div>
+                  <div class="channel-count">本月新增 128 份简历</div>
+                </div>
+              </div>
+              <div class="channel-num">358</div>
+            </div>
+            <div class="channel-item">
+              <div class="channel-info">
+                <div class="channel-icon bg-orange">👥</div>
+                <div>
+                  <div class="channel-name">员工推荐</div>
+                  <div class="channel-count">本月新增 32 份简历</div>
+                </div>
+              </div>
+              <div class="channel-num">124</div>
+            </div>
+            <div class="channel-item">
+              <div class="channel-info">
+                <div class="channel-icon bg-purple">🎓</div>
+                <div>
+                  <div class="channel-name">校园招聘</div>
+                  <div class="channel-count">本月新增 86 份简历</div>
+                </div>
+              </div>
+              <div class="channel-num">218</div>
+            </div>
+            <div class="channel-item">
+              <div class="channel-info">
+                <div class="channel-icon bg-blue">📱</div>
+                <div>
+                  <div class="channel-name">微信公众号</div>
+                  <div class="channel-count">本月新增 24 份简历</div>
+                </div>
+              </div>
+              <div class="channel-num">100</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>待面试候选人</h3>
+            <div class="actions">
+              <a href="#" style="color: #1890ff; font-size: 13px; text-decoration: none;">查看全部</a>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="candidate-item">
+              <div class="candidate-avatar">李</div>
+              <div class="candidate-info">
+                <div class="candidate-name">李明 - 高级前端工程师</div>
+                <div class="candidate-desc">5年经验 · 本科 · 期望18K</div>
+              </div>
+              <div class="candidate-status status-tag status-interview">今天 14:00</div>
+            </div>
+            <div class="candidate-item">
+              <div class="candidate-avatar">王</div>
+              <div class="candidate-info">
+                <div class="candidate-name">王芳 - 产品经理</div>
+                <div class="candidate-desc">3年经验 · 本科 · 期望15K</div>
+              </div>
+              <div class="candidate-status status-tag status-interview">今天 16:00</div>
+            </div>
+            <div class="candidate-item">
+              <div class="candidate-avatar">张</div>
+              <div class="candidate-info">
+                <div class="candidate-name">张伟 - Java开发工程师</div>
+                <div class="candidate-desc">4年经验 · 本科 · 期望16K</div>
+              </div>
+              <div class="candidate-status status-tag status-publish">明天 10:00</div>
+            </div>
+            <div class="candidate-item">
+              <div class="candidate-avatar">刘</div>
+              <div class="candidate-info">
+                <div class="candidate-name">刘洋 - 测试工程师</div>
+                <div class="candidate-desc">2年经验 · 大专 · 期望10K</div>
+              </div>
+              <div class="candidate-status status-tag status-publish">明天 14:30</div>
+            </div>
+            <div class="candidate-item">
+              <div class="candidate-avatar">陈</div>
+              <div class="candidate-info">
+                <div class="candidate-name">陈静 - UI设计师</div>
+                <div class="candidate-desc">3年经验 · 本科 · 期望11K</div>
+              </div>
+              <div class="candidate-status status-tag status-publish">后天 09:30</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+  ============================================================
+  招聘管理页 - HR人力资源系统
+
+  页面功能：管理公司招聘全流程，包括职位发布、简历管理、面试安排和渠道统计
+  布局方式：左侧菜单 + 顶部导航 + 主内容区（统计卡片 + 职位列表表格 + 双栏统计面板）
+  业务背景：
+    1. XX科技公司快速发展，需要统一管理各部门招聘需求
+    2. 多渠道招聘来源分散，需要整合统计各渠道效果
+    3. HR团队需要高效管理面试流程和候选人进度
+
+  设计思路：
+    1. 顶部统计卡片展示核心招聘数据，一目了然掌握整体情况
+    2. 职位列表采用表格形式，支持多条件筛选，清晰展示招聘进度
+    3. 下方双栏布局展示招聘渠道统计和待面试候选人，辅助HR日常工作
+    4. 使用状态标签和进度条直观呈现招聘状态和进展
+
+  技术要点：
+    - 经典后台管理系统三栏布局结构
+    - CSS Grid实现双栏统计面板
+    - 自定义进度条组件展示招聘进度
+    - 表格支持筛选、分页等管理功能
+    - 状态标签系统（招聘中/面试中/已发offer/已关闭）
+
+  适用迁移场景：
+    - 企业HR系统招聘模块
+    - 猎头公司招聘管理系统
+    - 企业官网人才招聘后台
+    - 校园招聘管理系统
+
+  wjs created by 2020-06-10
+  ============================================================
+-->
+</body>
+</html>

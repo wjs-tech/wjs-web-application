@@ -1,0 +1,620 @@
+<!--
+  ============================================================
+  政务服务首页 - 政务服务系统
+
+  页面功能：XX市政务服务网首页，提供各类政务服务入口
+  布局方式：顶部导航+轮播区+服务分类+新闻公告的门户布局
+  业务背景：
+    1. 政务服务统一入口
+    2. 办事指南和在线办理
+    3. 政务公开和信息查询
+
+  设计思路：
+    1. 红色主调体现政务风格
+    2. 服务分类清晰直观
+    3. 重要信息突出展示
+
+  技术要点：
+    - 政务门户网站风格
+    - float多栏布局
+    - 服务分类图标导航
+
+  适用迁移场景：
+    - 政务服务门户网站
+    - 政务服务大厅首页
+    - 在线办事服务平台
+
+  wjs created by 2019-06-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XX市政务服务网</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      background: #f5f5f5;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #f0f0f0;
+      height: 36px;
+      line-height: 36px;
+      font-size: 12px;
+      color: #666;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-left { float: left; }
+    .top-right { float: right; }
+    .top-right a {
+      color: #666;
+      text-decoration: none;
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .top-right a:hover { color: #c8161d; }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo-area {
+      float: left;
+      overflow: hidden;
+    }
+    .logo-icon {
+      float: left;
+      width: 60px;
+      height: 60px;
+      background: #c8161d;
+      border-radius: 50%;
+      margin-right: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .logo-text {
+      float: left;
+      padding-top: 8px;
+    }
+    .logo-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #c8161d;
+    }
+    .logo-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-top: 4px;
+      letter-spacing: 2px;
+    }
+    .header-right {
+      float: right;
+      padding-top: 12px;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-input {
+      width: 380px;
+      height: 40px;
+      padding: 0 100px 0 15px;
+      border: 2px solid #c8161d;
+      border-radius: 20px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 80px;
+      height: 36px;
+      background: #c8161d;
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .nav {
+      background: #c8161d;
+      height: 50px;
+    }
+    .nav-inner {
+      width: 1200px;
+      margin: 0 auto;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 30px;
+      line-height: 50px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .nav-item:hover { background: #a01015; }
+    .nav-item.active {
+      background: #a01015;
+      font-weight: bold;
+    }
+    .banner {
+      background: linear-gradient(135deg, #c8161d, #e64545);
+      min-height: 320px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .banner-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding-top: 70px;
+      position: relative;
+      z-index: 2;
+    }
+    .banner-title {
+      font-size: 42px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .banner-subtitle {
+      font-size: 20px;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+    .banner-btns {
+      overflow: hidden;
+    }
+    .banner-btn {
+      float: left;
+      padding: 12px 40px;
+      background: #fff;
+      color: #c8161d;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 20px;
+    }
+    .banner-btn.outline {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+    }
+    .main {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 30px 0;
+    }
+    .service-section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 25px;
+    }
+    .section-header {
+      overflow: hidden;
+      margin-bottom: 25px;
+    }
+    .section-title {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      padding-left: 15px;
+      border-left: 5px solid #c8161d;
+    }
+    .section-more {
+      float: right;
+      font-size: 14px;
+      color: #999;
+      line-height: 30px;
+      cursor: pointer;
+    }
+    .section-more:hover { color: #c8161d; }
+    .service-grid {
+      overflow: hidden;
+    }
+    .service-item {
+      float: left;
+      width: 12.5%;
+      text-align: center;
+      padding: 15px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 8px;
+    }
+    .service-item:hover {
+      background: #fff5f5;
+      transform: translateY(-3px);
+    }
+    .service-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .icon-1 { background: #fff1f0; color: #f5222d; }
+    .icon-2 { background: #fff7e6; color: #fa8c16; }
+    .icon-3 { background: #fcffe6; color: #a0d911; }
+    .icon-4 { background: #f6ffed; color: #52c41a; }
+    .icon-5 { background: #e6fffb; color: #13c2c2; }
+    .icon-6 { background: #e6f7ff; color: #1890ff; }
+    .icon-7 { background: #f0f5ff; color: #2f54eb; }
+    .icon-8 { background: #f9f0ff; color: #722ed1; }
+    .service-name {
+      font-size: 14px;
+      color: #555;
+    }
+    .two-col {
+      display: flex;
+      margin: 0 -12px;
+    }
+    .col {
+      width: 50%;
+      padding: 0 12px;
+    }
+    .news-panel {
+      background: #fff;
+      border-radius: 8px;
+      padding: 25px;
+    }
+    .news-tabs {
+      border-bottom: 2px solid #f0f0f0;
+      margin-bottom: 20px;
+    }
+    .news-tab {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .news-tab.active {
+      color: #c8161d;
+      border-bottom-color: #c8161d;
+      font-weight: bold;
+    }
+    .news-list {
+      list-style: none;
+    }
+    .news-list li {
+      padding: 10px 0;
+      border-bottom: 1px dashed #f0f0f0;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .news-list li:hover .news-title { color: #c8161d; }
+    .news-list li:last-child { border-bottom: none; }
+    .news-title {
+      float: left;
+      font-size: 14px;
+      color: #555;
+    }
+    .news-title::before {
+      content: "•";
+      color: #c8161d;
+      margin-right: 8px;
+    }
+    .news-date {
+      float: right;
+      font-size: 13px;
+      color: #bbb;
+    }
+    .hot-tag {
+      display: inline-block;
+      background: #fff1f0;
+      color: #f5222d;
+      font-size: 11px;
+      padding: 1px 5px;
+      border-radius: 2px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .quick-enter {
+      background: #fff;
+      border-radius: 8px;
+      padding: 25px;
+    }
+    .enter-grid {
+      overflow: hidden;
+    }
+    .enter-item {
+      float: left;
+      width: 33.33%;
+      text-align: center;
+      padding: 20px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .enter-item:hover { background: #fafafa; }
+    .enter-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    .enter-name {
+      font-size: 14px;
+      color: #555;
+    }
+    .enter-desc {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 5px;
+    }
+    .footer {
+      background: #333;
+      color: #999;
+      padding: 30px 0;
+      text-align: center;
+      margin-top: 30px;
+      font-size: 13px;
+    }
+    .footer-links {
+      margin-bottom: 15px;
+    }
+    .footer-links a {
+      color: #999;
+      text-decoration: none;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    .footer-links a:hover { color: #fff; }
+    .footer p { margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-left">欢迎来到XX市政务服务网！</div>
+      <div class="top-right">
+        <a>无障碍浏览</a>
+        <a>设为首页</a>
+        <a>加入收藏</a>
+        <a>登录</a>
+        <a>注册</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-area">
+        <div class="logo-icon">政</div>
+        <div class="logo-text">
+          <div class="logo-title">XX市政务服务网</div>
+          <div class="logo-subtitle">让数据多跑路 让群众少跑腿</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="搜索服务事项、办事指南...">
+          <button class="search-btn">搜索</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-item active">首页</div>
+      <div class="nav-item">个人办事</div>
+      <div class="nav-item">法人办事</div>
+      <div class="nav-item">部门服务</div>
+      <div class="nav-item">办事指南</div>
+      <div class="nav-item">政务公开</div>
+      <div class="nav-item">互动交流</div>
+      <div class="nav-item">数据开放</div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-inner">
+      <div class="banner-title">一网通办 便民服务</div>
+      <div class="banner-subtitle">XX市政务服务平台，为您提供高效便捷的政务服务</div>
+      <div class="banner-btns">
+        <button class="banner-btn">立即办事</button>
+        <button class="banner-btn outline">办事指南</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="service-section">
+      <div class="section-header">
+        <div class="section-title">热门服务</div>
+        <div class="section-more">全部服务 ›</div>
+      </div>
+      <div class="service-grid">
+        <div class="service-item">
+          <div class="service-icon icon-1">🏠</div>
+          <div class="service-name">户籍办理</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-2">💼</div>
+          <div class="service-name">社保服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-3">🏥</div>
+          <div class="service-name">医保服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-4">🎓</div>
+          <div class="service-name">教育服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-5">🏢</div>
+          <div class="service-name">企业开办</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-6">🚗</div>
+          <div class="service-name">车辆交管</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-7">📋</div>
+          <div class="service-name">证件办理</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-8">🏦</div>
+          <div class="service-name">公积金</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-1">👶</div>
+          <div class="service-name">生育服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-2">👴</div>
+          <div class="service-name">养老服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-3">🏗️</div>
+          <div class="service-name">住房服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-4">⚖️</div>
+          <div class="service-name">法律服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-5">📊</div>
+          <div class="service-name">税务服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-6">🌳</div>
+          <div class="service-name">环保服务</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-7">🚢</div>
+          <div class="service-name">交通出行</div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon icon-8">📚</div>
+          <div class="service-name">文化服务</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="col">
+        <div class="news-panel">
+          <div class="news-tabs">
+            <span class="news-tab active">通知公告</span>
+            <span class="news-tab">政务动态</span>
+            <span class="news-tab">政策文件</span>
+          </div>
+          <ul class="news-list">
+            <li>
+              <span class="news-title">关于优化营商环境的若干措施<span class="hot-tag">HOT</span></span>
+              <span class="news-date">06-15</span>
+            </li>
+            <li>
+              <span class="news-title">2019年XX市政务服务工作要点</span>
+              <span class="news-date">06-12</span>
+            </li>
+            <li>
+              <span class="news-title">关于开展"一网通办"专项行动的通知</span>
+              <span class="news-date">06-10</span>
+            </li>
+            <li>
+              <span class="news-title">XX市政务服务中心搬迁公告</span>
+              <span class="news-date">06-08</span>
+            </li>
+            <li>
+              <span class="news-title">关于办理时间调整的通知</span>
+              <span class="news-date">06-05</span>
+            </li>
+            <li>
+              <span class="news-title">2019年第二季度政务服务满意度调查</span>
+              <span class="news-date">06-03</span>
+            </li>
+            <li>
+              <span class="news-title">关于新增便民服务事项的公告</span>
+              <span class="news-date">06-01</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="quick-enter">
+          <div class="news-tabs">
+            <span class="news-tab active">便民服务</span>
+            <span class="news-tab">常用查询</span>
+          </div>
+          <div class="enter-grid">
+            <div class="enter-item">
+              <div class="enter-icon">📅</div>
+              <div class="enter-name">预约办事</div>
+              <div class="enter-desc">在线预约免排队</div>
+            </div>
+            <div class="enter-item">
+              <div class="enter-icon">📦</div>
+              <div class="enter-name">办件查询</div>
+              <div class="enter-desc">办理进度实时查</div>
+            </div>
+            <div class="enter-item">
+              <div class="enter-icon">💳</div>
+              <div class="enter-name">在线缴费</div>
+              <div class="enter-desc">多种支付方式</div>
+            </div>
+            <div class="enter-item">
+              <div class="enter-icon">📞</div>
+              <div class="enter-name">咨询投诉</div>
+              <div class="enter-desc">12345服务热线</div>
+            </div>
+            <div class="enter-item">
+              <div class="enter-icon">📋</div>
+              <div class="enter-name">办事指南</div>
+              <div class="enter-desc">办事流程说明</div>
+            </div>
+            <div class="enter-item">
+              <div class="enter-icon">📊</div>
+              <div class="enter-name">信息公开</div>
+              <div class="enter-desc">政务信息查询</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-links">
+      <a>关于我们</a>
+      <a>网站地图</a>
+      <a>法律声明</a>
+      <a>隐私保护</a>
+      <a>联系我们</a>
+    </div>
+    <p>主办单位：XX市人民政府办公厅</p>
+    <p>承办单位：XX市政务服务管理局</p>
+    <p>网站标识码：XXXXXXXX号 &nbsp; ICP备案号：XXICP备XXXXXXXX号</p>
+    <p>建议使用IE9及以上、Chrome、Firefox等浏览器访问本站</p>
+  </div>
+</body>
+</html>

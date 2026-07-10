@@ -1,0 +1,587 @@
+<!--
+  ============================================================
+  商品列表页 - 电商平台
+
+  页面功能：XX电商平台商品列表页，支持分类筛选和商品浏览
+  布局方式：顶部导航+左侧分类+右侧商品列表的电商经典布局
+  业务背景：
+    1. XX电商平台的商品展示核心页面
+    2. 用户通过分类和筛选找到目标商品
+    3. 支持多种排序方式和价格区间筛选
+
+  设计思路：
+    1. 左侧分类导航层级清晰，便于快速定位
+    2. 商品卡片网格布局，信息展示完整
+    3. 筛选条件灵活多样，提升用户查找效率
+
+  技术要点：
+    - 使用float实现左侧分类+右侧商品布局
+    - 商品卡片使用float网格排列
+    - 面包屑导航展示当前位置
+
+  适用迁移场景：
+    - 电商类商品列表页
+    - 资讯/文章列表页
+    - 产品目录展示页
+
+  wjs created by 2016-03-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品列表 - XX电商</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
+      height: 30px;
+      line-height: 30px;
+      font-size: 12px;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-bar-left {
+      float: left;
+      color: #666;
+    }
+    .top-bar-right {
+      float: right;
+    }
+    .top-bar-right a {
+      color: #666;
+      text-decoration: none;
+      margin-left: 15px;
+    }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+      border-bottom: 2px solid #ff6700;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 50px;
+    }
+    .search-box {
+      float: left;
+      margin-left: 100px;
+      margin-top: 8px;
+    }
+    .search-input {
+      width: 500px;
+      height: 40px;
+      border: 2px solid #ff6700;
+      padding: 0 15px;
+      font-size: 14px;
+      outline: none;
+      float: left;
+    }
+    .search-btn {
+      width: 80px;
+      height: 40px;
+      background: #ff6700;
+      color: #fff;
+      border: none;
+      float: left;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .cart-btn {
+      float: right;
+      margin-top: 8px;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 20px;
+      background: #ff6700;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .nav-main {
+      background: #ff6700;
+      color: #fff;
+    }
+    .nav-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .nav-item {
+      float: left;
+      padding: 12px 30px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .nav-item:hover {
+      background: #e65c00;
+    }
+    .nav-item.active {
+      background: #e65c00;
+      font-weight: bold;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a {
+      color: #666;
+      text-decoration: none;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 15px;
+    }
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .category-list li {
+      list-style: none;
+      padding: 8px 0;
+      font-size: 13px;
+      cursor: pointer;
+      color: #666;
+    }
+    .category-list li:hover {
+      color: #ff6700;
+    }
+    .category-list li.active {
+      color: #ff6700;
+      font-weight: bold;
+    }
+    .filter-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+    .filter-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .price-range input {
+      width: 70px;
+      height: 28px;
+      border: 1px solid #ddd;
+      padding: 0 5px;
+      font-size: 12px;
+    }
+    .price-range span {
+      margin: 0 5px;
+      color: #999;
+    }
+    .price-range button {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      height: 30px;
+      background: #ff6700;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .brand-list li {
+      list-style: none;
+      padding: 5px 0;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+    }
+    .brand-list li:hover {
+      color: #ff6700;
+    }
+    .content {
+      margin-left: 220px;
+    }
+    .filter-bar {
+      background: #fff;
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .filter-sort {
+      float: left;
+    }
+    .filter-sort span {
+      display: inline-block;
+      padding: 6px 15px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border: 1px solid #ddd;
+      margin-right: -1px;
+    }
+    .filter-sort span.active {
+      background: #ff6700;
+      color: #fff;
+      border-color: #ff6700;
+    }
+    .filter-count {
+      float: right;
+      font-size: 13px;
+      color: #666;
+      line-height: 30px;
+    }
+    .product-grid {
+      overflow: hidden;
+      margin: 0 -10px;
+    }
+    .product-item {
+      float: left;
+      width: 20%;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+    .product-card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 10px;
+      transition: box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .product-img {
+      width: 100%;
+      height: 200px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-img .placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 13px;
+    }
+    .product-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff6700;
+      margin-bottom: 5px;
+    }
+    .product-price small {
+      font-size: 13px;
+      font-weight: normal;
+    }
+    .product-name {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.4;
+      height: 36px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .product-info {
+      font-size: 12px;
+      color: #999;
+      overflow: hidden;
+    }
+    .product-sales {
+      float: left;
+    }
+    .product-shop {
+      float: right;
+    }
+    .pagination {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .pagination span {
+      display: inline-block;
+      padding: 8px 15px;
+      border: 1px solid #ddd;
+      margin: 0 3px;
+      cursor: pointer;
+      font-size: 13px;
+      background: #fff;
+      color: #666;
+    }
+    .pagination span.active {
+      background: #ff6700;
+      color: #fff;
+      border-color: #ff6700;
+    }
+    .pagination span:hover {
+      border-color: #ff6700;
+      color: #ff6700;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-left">欢迎来到XX电商！</div>
+      <div class="top-bar-right">
+        <a href="#">请登录</a>
+        <a href="#">免费注册</a>
+        <a href="#">我的订单</a>
+        <a href="#">会员中心</a>
+        <a href="#">客户服务</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX电商</div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索商品、店铺、品牌">
+        <button class="search-btn">搜索</button>
+      </div>
+      <div class="cart-btn">购物车 (3)</div>
+    </div>
+  </div>
+
+  <div class="nav-main">
+    <div class="nav-inner">
+      <div class="nav-item active">首页</div>
+      <div class="nav-item">服饰鞋包</div>
+      <div class="nav-item">手机数码</div>
+      <div class="nav-item">家用电器</div>
+      <div class="nav-item">家具家装</div>
+      <div class="nav-item">美妆个护</div>
+      <div class="nav-item">食品生鲜</div>
+      <div class="nav-item">图书音像</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> &gt; <a href="#">手机数码</a> &gt; <a href="#">手机通讯</a> &gt; 智能手机
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-title">商品分类</div>
+      <ul class="category-list">
+        <li>全部商品分类</li>
+        <li class="active">智能手机</li>
+        <li>平板电脑</li>
+        <li>笔记本电脑</li>
+        <li>台式电脑</li>
+        <li>智能手表</li>
+        <li>耳机音响</li>
+        <li>相机摄像</li>
+      </ul>
+
+      <div class="filter-section">
+        <div class="filter-title">价格区间</div>
+        <div class="price-range">
+          <input type="text" placeholder="最低价">
+          <span>-</span>
+          <input type="text" placeholder="最高价">
+          <button>确定</button>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title">品牌</div>
+        <ul class="brand-list">
+          <li>全部品牌</li>
+          <li>XX品牌A</li>
+          <li>XX品牌B</li>
+          <li>XX品牌C</li>
+          <li>XX品牌D</li>
+          <li>XX品牌E</li>
+        </ul>
+      </div>
+
+      <div class="filter-section">
+        <div class="filter-title">屏幕尺寸</div>
+        <ul class="brand-list">
+          <li>5.0英寸以下</li>
+          <li>5.0-5.5英寸</li>
+          <li>5.5-6.0英寸</li>
+          <li>6.0英寸以上</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="filter-bar">
+        <div class="filter-sort">
+          <span class="active">综合</span>
+          <span>销量</span>
+          <span>价格 ↑</span>
+          <span>价格 ↓</span>
+          <span>新品</span>
+          <span>评价</span>
+        </div>
+        <div class="filter-count">共找到 <strong style="color: #ff6700;">2,356</strong> 件商品</div>
+      </div>
+
+      <div class="product-grid">
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder">商品图片</div></div>
+            <div class="product-price"><small>¥</small>2,999.00</div>
+            <div class="product-name">XX品牌智能手机 全网通4G 64G内存 5.5英寸屏幕 超长待机</div>
+            <div class="product-info">
+              <span class="product-sales">月销 5,268件</span>
+              <span class="product-shop">XX官方旗舰店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>1,599.00</div>
+            <div class="product-name">XX品牌手机 青春版 双卡双待 高清摄像头 指纹解锁</div>
+            <div class="product-info">
+              <span class="product-sales">月销 3,125件</span>
+              <span class="product-shop">XX专营店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>4,599.00</div>
+            <div class="product-name">XX旗舰手机 Pro 64G 全金属 徕卡双摄 4G全网通</div>
+            <div class="product-info">
+              <span class="product-sales">月销 8,965件</span>
+              <span class="product-shop">XX官方旗舰店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>899.00</div>
+            <div class="product-name">XX入门手机 大屏大字 大音量 老人机 备用机</div>
+            <div class="product-info">
+              <span class="product-sales">月销 1,256件</span>
+              <span class="product-shop">XX手机店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>3,299.00</div>
+            <div class="product-name">XX游戏手机 高性能处理器 大内存 电竞屏 散热快</div>
+            <div class="product-info">
+              <span class="product-sales">月销 2,890件</span>
+              <span class="product-shop">XX旗舰店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>1,999.00</div>
+            <div class="product-name">XX拍照手机 4800万像素 前置美颜 夜拍清晰 防抖</div>
+            <div class="product-info">
+              <span class="product-sales">月销 4,568件</span>
+              <span class="product-shop">XX官方店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>5,699.00</div>
+            <div class="product-name">XX商务手机 4G全网通 3+32G 骁龙处理器 金属机身</div>
+            <div class="product-info">
+              <span class="product-sales">月销 986件</span>
+              <span class="product-shop">XX高端店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>1,299.00</div>
+            <div class="product-name">XX千元机 大电池 双卡双待 高清屏 学生手机 性价比高</div>
+            <div class="product-info">
+              <span class="product-sales">月销 6,753件</span>
+              <span class="product-shop">XX专营店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>2,499.00</div>
+            <div class="product-name">XX音乐手机 HiFi音质 独立芯片 耳机孔 超薄机身</div>
+            <div class="product-info">
+              <span class="product-sales">月销 1,890件</span>
+              <span class="product-shop">XX影音店</span>
+            </div>
+          </div>
+        </div>
+        <div class="product-item">
+          <div class="product-card">
+            <div class="product-img"><div class="placeholder" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);">商品图片</div></div>
+            <div class="product-price"><small>¥</small>3,799.00</div>
+            <div class="product-name">XX商务手机 安全加密 长续航 金属机身 双卡双待</div>
+            <div class="product-info">
+              <span class="product-sales">月销 2,345件</span>
+              <span class="product-shop">XX商务店</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination">
+        <span>上一页</span>
+        <span class="active">1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+        <span>...</span>
+        <span>118</span>
+        <span>下一页</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

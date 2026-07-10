@@ -1,0 +1,706 @@
+<!--
+  ============================================================
+  订单列表页 - 电商平台
+
+  页面功能：XX电商平台订单列表页面，展示全部订单和各状态订单
+  布局方式：顶部导航+订单状态标签+订单列表的经典电商布局
+  业务背景：
+    1. 电商用户订单管理页面
+    2. 支持按状态筛选和搜索
+    3. 订单操作入口统一管理
+
+  设计思路：
+    1. 订单状态标签快速切换
+    2. 订单信息完整展示
+    3. 操作按钮清晰可见
+
+  技术要点：
+    - 使用float实现订单商品排列
+    - 标签页切换订单状态
+    - 订单卡片式布局展示
+
+  适用迁移场景：
+    - 电商订单列表页
+    - 交易记录列表页
+    - 订单管理页面
+
+  wjs created by 2016-07-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的订单 - XX电商</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+    }
+    .top-bar {
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
+      height: 30px;
+      line-height: 30px;
+      font-size: 12px;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-bar-left { float: left; color: #666; }
+    .top-bar-right { float: right; }
+    .top-bar-right a { color: #666; text-decoration: none; margin-left: 15px; }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+      border-bottom: 2px solid #ff6700;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 50px;
+    }
+    .page-title {
+      float: left;
+      margin-left: 30px;
+      padding-left: 20px;
+      border-left: 2px solid #e0e0e0;
+      font-size: 22px;
+      line-height: 50px;
+      color: #333;
+    }
+    .header-right {
+      float: right;
+      line-height: 50px;
+      font-size: 14px;
+      color: #666;
+    }
+    .header-right a {
+      color: #ff6700;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .order-steps {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .step-item {
+      float: left;
+      width: 20%;
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ddd;
+      color: #fff;
+      line-height: 30px;
+      margin: 0 auto 8px;
+      font-weight: bold;
+    }
+    .step-item.active .step-num {
+      background: #ff6700;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #999;
+    }
+    .step-item.active .step-text {
+      color: #ff6700;
+      font-weight: bold;
+    }
+    .step-line {
+      position: absolute;
+      top: 15px;
+      left: 65%;
+      right: -15%;
+      height: 2px;
+      background: #ddd;
+    }
+    .step-item.active .step-line {
+      background: #ff6700;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .order-tabs {
+      border-bottom: 2px solid #f0f0f0;
+      padding: 0 20px;
+      background: #fafafa;
+      overflow: hidden;
+    }
+    .tab-item {
+      float: left;
+      padding: 15px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+      position: relative;
+    }
+    .tab-item.active {
+      color: #ff6700;
+      border-bottom-color: #ff6700;
+      font-weight: bold;
+      background: #fff;
+    }
+    .tab-item .count {
+      position: absolute;
+      top: 10px;
+      right: 8px;
+      min-width: 18px;
+      height: 18px;
+      line-height: 18px;
+      padding: 0 5px;
+      background: #ff6700;
+      color: #fff;
+      font-size: 11px;
+      border-radius: 9px;
+      text-align: center;
+      font-weight: normal;
+    }
+    .order-toolbar {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .toolbar-left {
+      float: left;
+    }
+    .date-select {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-right: 10px;
+      background: #fff;
+      outline: none;
+    }
+    .toolbar-right {
+      float: right;
+    }
+    .search-input {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      width: 220px;
+      outline: none;
+    }
+    .search-btn {
+      padding: 6px 15px;
+      background: #ff6700;
+      color: #fff;
+      border: 1px solid #ff6700;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: -1px;
+    }
+    .order-list {
+      padding: 0 20px 20px;
+    }
+    .order-card {
+      border: 1px solid #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .order-card:hover {
+      border-color: #ff6700;
+    }
+    .order-header {
+      background: #fafafa;
+      padding: 12px 20px;
+      overflow: hidden;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .order-info-left {
+      float: left;
+    }
+    .order-time {
+      color: #666;
+      margin-right: 20px;
+    }
+    .order-no {
+      color: #999;
+    }
+    .order-no a {
+      color: #333;
+      text-decoration: none;
+    }
+    .order-no a:hover {
+      color: #ff6700;
+    }
+    .order-info-right {
+      float: right;
+    }
+    .shop-name {
+      color: #333;
+      font-weight: bold;
+      margin-right: 20px;
+    }
+    .shop-name:hover {
+      color: #ff6700;
+      cursor: pointer;
+    }
+    .order-body {
+      padding: 20px;
+      overflow: hidden;
+    }
+    .goods-list {
+      float: left;
+      width: 55%;
+    }
+    .goods-item {
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .goods-item:last-child {
+      margin-bottom: 0;
+    }
+    .goods-img {
+      float: left;
+      width: 80px;
+      height: 80px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 12px;
+      margin-right: 15px;
+    }
+    .goods-info {
+      overflow: hidden;
+      padding-top: 5px;
+    }
+    .goods-name {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .goods-name:hover {
+      color: #ff6700;
+    }
+    .goods-spec {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .goods-price-row {
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .goods-price {
+      float: left;
+      color: #ff6700;
+      font-weight: bold;
+    }
+    .goods-num {
+      float: right;
+      color: #999;
+    }
+    .order-col {
+      float: left;
+      width: 15%;
+      text-align: center;
+      padding-top: 25px;
+    }
+    .amount-col {
+      float: left;
+      width: 15%;
+      text-align: center;
+      padding-top: 20px;
+    }
+    .order-amount {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff6700;
+      margin-bottom: 3px;
+    }
+    .order-fee {
+      font-size: 12px;
+      color: #999;
+    }
+    .status-col {
+      float: left;
+      width: 15%;
+      text-align: center;
+      padding-top: 20px;
+    }
+    .order-status {
+      font-size: 14px;
+      color: #ff6700;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .order-status.success { color: #52c41a; }
+    .order-status.pending { color: #ff6700; }
+    .order-status.shipped { color: #1890ff; }
+    .order-actions {
+      margin-top: 10px;
+    }
+    .order-actions a {
+      display: block;
+      color: #ff6700;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    .order-actions a:hover {
+      text-decoration: underline;
+    }
+    .action-btn {
+      display: inline-block;
+      padding: 6px 15px;
+      border: 1px solid #ff6700;
+      background: #fff;
+      color: #ff6700;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .action-btn.primary {
+      background: #ff6700;
+      color: #fff;
+    }
+    .action-btn.primary:hover {
+      background: #e65c00;
+    }
+    .pagination {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .pagination span {
+      display: inline-block;
+      padding: 8px 15px;
+      border: 1px solid #ddd;
+      margin: 0 3px;
+      cursor: pointer;
+      font-size: 13px;
+      border-radius: 4px;
+      color: #666;
+      background: #fff;
+    }
+    .pagination span.active {
+      background: #ff6700;
+      color: #fff;
+      border-color: #ff6700;
+    }
+    .pagination span:hover {
+      border-color: #ff6700;
+      color: #ff6700;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-left">欢迎来到XX电商！</div>
+      <div class="top-bar-right">
+        <a href="#">张女士，你好</a>
+        <a href="#">我的订单</a>
+        <a href="#">会员中心</a>
+        <a href="#">客户服务</a>
+        <a href="#">退出</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX电商</div>
+      <div class="page-title">我的订单</div>
+      <div class="header-right">
+        共 <strong style="color: #ff6700;">38</strong> 笔订单
+        <a href="#">继续购物</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> &gt; <a href="#">会员中心</a> &gt; <span style="color: #ff6700;">我的订单</span>
+    </div>
+
+    <div class="panel">
+      <div class="order-tabs">
+        <span class="tab-item active">全部订单<span class="count">38</span></span>
+        <span class="tab-item">待付款<span class="count">5</span></span>
+        <span class="tab-item">待发货<span class="count">3</span></span>
+        <span class="tab-item">待收货<span class="count">2</span></span>
+        <span class="tab-item">待评价<span class="count">8</span></span>
+        <span class="tab-item">退款/售后</span>
+      </div>
+
+      <div class="order-toolbar">
+        <div class="toolbar-left">
+          <select class="date-select">
+            <option>全部时间</option>
+            <option>近三个月</option>
+            <option>近一个月</option>
+            <option>2016年</option>
+            <option>2015年</option>
+          </select>
+          <select class="date-select">
+            <option>全部订单类型</option>
+            <option>普通订单</option>
+            <option>团购订单</option>
+            <option>预售订单</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <input type="text" class="search-input" placeholder="搜索商品名称/订单号">
+          <button class="search-btn">搜索</button>
+        </div>
+      </div>
+
+      <div class="order-list">
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-info-left">
+              <span class="order-time">下单时间：2016-07-08 14:32:18</span>
+              <span class="order-no">订单号：<a href="#">DD2016070812345</a></span>
+            </div>
+            <div class="order-info-right">
+              <span class="shop-name">XX官方旗舰店</span>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="goods-list">
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX品牌智能手机 Pro 全网通4G 4+64G 全金属旗舰手机</div>
+                  <div class="goods-spec">颜色：星空黑 / 版本：4+64G</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 4,299.00</span>
+                    <span class="goods-num">× 1</span>
+                  </div>
+                </div>
+              </div>
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX品牌无线蓝牙耳机 主动降噪 超长续航</div>
+                  <div class="goods-spec">颜色：白色</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 299.00</span>
+                    <span class="goods-num">× 2</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="order-col">
+              <div style="font-size:13px;color:#666;">张女士<br>138****5678</div>
+            </div>
+            <div class="amount-col">
+              <div class="order-amount">¥ 4,897.00</div>
+              <div class="order-fee">含运费 ¥0.00</div>
+            </div>
+            <div class="status-col">
+              <div class="order-status pending">待付款</div>
+              <button class="action-btn primary">立即付款</button>
+              <div class="order-actions">
+                <a>取消订单</a>
+                <a>修改地址</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-info-left">
+              <span class="order-time">下单时间：2016-07-05 10:15:30</span>
+              <span class="order-no">订单号：<a href="#">DD2016070567890</a></span>
+            </div>
+            <div class="order-info-right">
+              <span class="shop-name">XX数码专营店</span>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="goods-list">
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX旗舰手机 Pro 64G 全金属 徕卡双摄 4G全网通</div>
+                  <div class="goods-spec">颜色：极光蓝 / 版本：4+64G</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 4,599.00</span>
+                    <span class="goods-num">× 1</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="order-col">
+              <div style="font-size:13px;color:#666;">张女士<br>138****5678</div>
+            </div>
+            <div class="amount-col">
+              <div class="order-amount">¥ 4,599.00</div>
+              <div class="order-fee">含运费 ¥0.00</div>
+            </div>
+            <div class="status-col">
+              <div class="order-status shipped">已发货</div>
+              <button class="action-btn primary">确认收货</button>
+              <div class="order-actions">
+                <a>查看物流</a>
+                <a>申请退款</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-info-left">
+              <span class="order-time">下单时间：2016-06-28 16:45:22</span>
+              <span class="order-no">订单号：<a href="#">DD2016062811223</a></span>
+            </div>
+            <div class="order-info-right">
+              <span class="shop-name">XX生活家居馆</span>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="goods-list">
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX品牌加湿器 静音卧室家用大容量 空气净化</div>
+                  <div class="goods-spec">颜色：白色 / 容量：5L</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 199.00</span>
+                    <span class="goods-num">× 1</span>
+                  </div>
+                </div>
+              </div>
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX品牌电动牙刷 声波震动 智能定时</div>
+                  <div class="goods-spec">颜色：粉色 / 模式：5种</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 399.00</span>
+                    <span class="goods-num">× 1</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="order-col">
+              <div style="font-size:13px;color:#666;">张女士<br>138****5678</div>
+            </div>
+            <div class="amount-col">
+              <div class="order-amount">¥ 598.00</div>
+              <div class="order-fee">含运费 ¥0.00</div>
+            </div>
+            <div class="status-col">
+              <div class="order-status success">交易成功</div>
+              <button class="action-btn">评价晒单</button>
+              <div class="order-actions">
+                <a>申请售后</a>
+                <a>再次购买</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-info-left">
+              <span class="order-time">下单时间：2016-06-20 09:20:15</span>
+              <span class="order-no">订单号：<a href="#">DD2016062044556</a></span>
+            </div>
+            <div class="order-info-right">
+              <span class="shop-name">XX图书专营店</span>
+            </div>
+          </div>
+          <div class="order-body">
+            <div class="goods-list">
+              <div class="goods-item">
+                <div class="goods-img" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">商品图</div>
+                <div class="goods-info">
+                  <div class="goods-name">XX编程入门到精通 零基础学编程 畅销书籍</div>
+                  <div class="goods-spec">版本：平装</div>
+                  <div class="goods-price-row">
+                    <span class="goods-price">¥ 68.00</span>
+                    <span class="goods-num">× 2</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="order-col">
+              <div style="font-size:13px;color:#666;">张女士<br>138****5678</div>
+            </div>
+            <div class="amount-col">
+              <div class="order-amount">¥ 136.00</div>
+              <div class="order-fee">含运费 ¥5.00</div>
+            </div>
+            <div class="status-col">
+              <div class="order-status pending">待发货</div>
+              <button class="action-btn">提醒发货</button>
+              <div class="order-actions">
+                <a>修改地址</a>
+                <a>申请退款</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination">
+        <span>上一页</span>
+        <span class="active">1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+        <span>...</span>
+        <span>10</span>
+        <span>下一页</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

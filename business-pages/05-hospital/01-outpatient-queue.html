@@ -1,0 +1,404 @@
+<!--
+  ============================================================
+  门诊排队叫号页 - 医院管理系统
+
+  页面功能：XX医院门诊排队叫号系统，展示当前叫号和等待队列
+  布局方式：大屏幕展示布局，当前叫号醒目+等待列表
+  业务背景：
+    1. 医院门诊大厅叫号显示屏
+    2. 实时展示当前叫号和等待情况
+    3. 缓解患者焦虑，提高就诊效率
+
+  设计思路：
+    1. 当前叫号大字体醒目展示
+    2. 等待队列清晰展示序号
+    3. 配色采用医疗行业绿色系
+
+  技术要点：
+    - 使用大字号突出重要信息
+    - 表格展示排队列表
+    - 医疗绿色主题配色
+
+  适用迁移场景：
+    - 医院排队叫号系统
+    - 政务大厅叫号屏
+    - 银行/营业厅排队显示
+
+  wjs created by 2017-06-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>门诊排队叫号 - XX医院</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #0a2e1a;
+      color: #fff;
+      min-height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    /* 自定义横向滚动条 - 医疗绿色主题 */
+    body::-webkit-scrollbar {
+      height: 10px;
+    }
+    body::-webkit-scrollbar-track {
+      background: #0a2e1a;
+      border-top: 1px solid #1a4e2a;
+    }
+    body::-webkit-scrollbar-thumb {
+      background: #2ecc71;
+      border-radius: 5px;
+      border: 2px solid #0a2e1a;
+    }
+    body::-webkit-scrollbar-thumb:hover {
+      background: #27ae60;
+    }
+    .header {
+      background: linear-gradient(90deg, #0a5c36, #12884f);
+      padding: 20px 40px;
+      overflow: hidden;
+      border-bottom: 3px solid #ffd700;
+    }
+    .hospital-name {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 5px;
+    }
+    .hospital-name span {
+      color: #ffd700;
+    }
+    .header-right {
+      float: right;
+      text-align: right;
+    }
+    .date-time {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+    .weather {
+      font-size: 14px;
+      color: #a8d8b9;
+    }
+    .main {
+      padding: 30px 40px 60px;
+    }
+    .current-section {
+      background: linear-gradient(135deg, #0d4a2a 0%, #12884f 100%);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+      border: 2px solid #2ecc71;
+      box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
+    }
+    .current-label {
+      font-size: 24px;
+      color: #a8d8b9;
+      margin-bottom: 15px;
+      letter-spacing: 3px;
+    }
+    .current-number {
+      font-size: 120px;
+      font-weight: bold;
+      color: #ffd700;
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      margin-bottom: 10px;
+      letter-spacing: 10px;
+    }
+    .current-info {
+      font-size: 28px;
+      color: #fff;
+      margin-top: 15px;
+    }
+    .current-info span {
+      margin: 0 30px;
+    }
+    .current-info strong {
+      color: #ffd700;
+    }
+    .content-row {
+      overflow: hidden;
+      margin: 0 -15px;
+    }
+    .content-col {
+      float: left;
+      width: 50%;
+      padding: 0 15px;
+    }
+    .queue-box {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+    .queue-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2ecc71;
+      color: #ffd700;
+    }
+    .queue-title span {
+      float: right;
+      font-size: 14px;
+      color: #a8d8b9;
+      font-weight: normal;
+    }
+    .queue-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .queue-table th {
+      padding: 12px;
+      text-align: center;
+      font-size: 16px;
+      color: #a8d8b9;
+      border-bottom: 1px solid rgba(46, 204, 113, 0.3);
+      font-weight: normal;
+    }
+    .queue-table td {
+      padding: 14px 12px;
+      text-align: center;
+      font-size: 18px;
+      border-bottom: 1px solid rgba(46, 204, 113, 0.1);
+    }
+    .queue-table tr:nth-child(1) td {
+      color: #ffd700;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .queue-table tr:nth-child(2) td {
+      color: #f39c12;
+      font-size: 20px;
+    }
+    .queue-table tr:nth-child(3) td {
+      color: #3498db;
+    }
+    .notice-box {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      margin-top: 20px;
+    }
+    .notice-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 12px;
+    }
+    .notice-content {
+      font-size: 15px;
+      line-height: 2;
+      color: #d0e8dc;
+    }
+    .notice-content li {
+      list-style: none;
+      padding-left: 20px;
+      position: relative;
+    }
+    .notice-content li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #2ecc71;
+    }
+    .doctor-panel {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+      margin-bottom: 20px;
+    }
+    .doctor-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #2ecc71;
+    }
+    .doctor-card {
+      overflow: hidden;
+      background: rgba(46, 204, 113, 0.1);
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .doctor-avatar {
+      float: left;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-right: 20px;
+    }
+    .doctor-info {
+      overflow: hidden;
+      padding-top: 8px;
+    }
+    .doctor-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .doctor-title-text {
+      font-size: 14px;
+      color: #a8d8b9;
+      margin-bottom: 5px;
+    }
+    .doctor-dept {
+      font-size: 13px;
+      color: #ffd700;
+    }
+    .bottom-ticker {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0a5c36;
+      padding: 12px 0;
+      border-top: 2px solid #ffd700;
+      overflow: hidden;
+    }
+    .ticker-content {
+      white-space: nowrap;
+      animation: scroll 30s linear infinite;
+      font-size: 16px;
+      color: #ffd700;
+    }
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="hospital-name">XX<span>医院</span> 门诊排队叫号系统</div>
+    <div class="header-right">
+      <div class="date-time">2017年6月15日 星期四 上午 09:32:45</div>
+      <div class="weather">天气：晴 26°C  |  空气质量：优</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="current-section">
+      <div class="current-label">★ 当 前 叫 号 ★</div>
+      <div class="current-number">A 0 2 3</div>
+      <div class="current-info">
+        <span>科室：<strong>内科门诊</strong></span>
+        <span>诊室：<strong>3号诊室</strong></span>
+        <span>医生：<strong>王主任</strong></span>
+      </div>
+    </div>
+
+    <div class="content-row">
+      <div class="content-col">
+        <div class="doctor-panel">
+          <div class="doctor-title">今日出诊医生</div>
+          <div class="doctor-card">
+            <div class="doctor-avatar">王</div>
+            <div class="doctor-info">
+              <div class="doctor-name">王建国 主任医师</div>
+              <div class="doctor-title-text">内科主任 · 医学博士</div>
+              <div class="doctor-dept">擅长：心血管疾病、高血压、冠心病</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="queue-box">
+          <div class="queue-title">
+            等待队列
+            <span>共 15 人等待</span>
+          </div>
+          
+            <div style="overflow-x:auto;">
+<table class="queue-table">
+            <thead>
+              <tr>
+                <th width="30%">序号</th>
+                <th width="40%">姓名</th>
+                <th width="30%">状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A024</td><td>张**</td><td>候诊中</td></tr>
+              <tr><td>A025</td><td>李**</td><td>候诊中</td></tr>
+              <tr><td>A026</td><td>王**</td><td>候诊中</td></tr>
+              <tr><td>A027</td><td>赵**</td><td>候诊中</td></tr>
+              <tr><td>A028</td><td>刘**</td><td>候诊中</td></tr>
+              <tr><td>A029</td><td>陈**</td><td>候诊中</td></tr>
+              <tr><td>A030</td><td>杨**</td><td>候诊中</td></tr>
+              <tr><td>A031</td><td>黄**</td><td>候诊中</td></tr>
+            </tbody>
+          </table>
+            </div>
+        </div>
+      </div>
+
+      <div class="content-col">
+        <div class="queue-box">
+          <div class="queue-title">其他科室叫号</div>
+          
+            <div style="overflow-x:auto;">
+<table class="queue-table">
+            <thead>
+              <tr>
+                <th width="25%">科室</th>
+                <th width="25%">当前号</th>
+                <th width="25%">诊室</th>
+                <th width="25%">等待</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>外科门诊</td><td>B018</td><td>5号诊室</td><td>12人</td></tr>
+              <tr><td>儿科门诊</td><td>C032</td><td>8号诊室</td><td>20人</td></tr>
+              <tr><td>妇产科</td><td>D015</td><td>10号诊室</td><td>8人</td></tr>
+              <tr><td>眼科</td><td>E008</td><td>12号诊室</td><td>6人</td></tr>
+              <tr><td>口腔科</td><td>F012</td><td>15号诊室</td><td>10人</td></tr>
+              <tr><td>皮肤科</td><td>G006</td><td>18号诊室</td><td>5人</td></tr>
+              <tr><td>中医科</td><td>H022</td><td>20号诊室</td><td>15人</td></tr>
+            </tbody>
+          </table>
+            </div>
+        </div>
+
+        <div class="notice-box">
+          <div class="notice-title">温馨提示</div>
+          <ul class="notice-content">
+            <li>请保持安静，不要大声喧哗</li>
+            <li>叫号后请到相应诊室就诊，过号需重新排队</li>
+            <li>就诊前请先到分诊台签到</li>
+            <li>需要化验单的患者请到自助机打印</li>
+            <li>如有疑问请咨询导医台工作人员</li>
+            <li>急诊患者请到一楼急诊科就诊</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-ticker">
+    <div class="ticker-content">
+      欢迎来到XX医院！我院是集医疗、教学、科研为一体的三级甲等综合性医院。 今日专家门诊：内科王主任、外科李主任、儿科张主任。 温馨提示：夏季来临，注意防暑降温，多喝水，多吃新鲜蔬果。 医保政策宣传：我院已开通全国医保异地结算，详情请咨询医保窗口。
+    </div>
+  </div>
+</body>
+</html>

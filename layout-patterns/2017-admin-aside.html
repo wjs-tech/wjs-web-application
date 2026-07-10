@@ -1,0 +1,202 @@
+﻿<!--
+  ============================================================
+  后台管理布局 - 左侧固定菜单+右侧内容区，顶部导航，flex实现
+
+  布局方式：Flex 弹性布局 + 固定定位
+  布局思想：
+    1. 整体使用 flex 布局，左侧菜单定宽，右侧内容区自适应
+    2. 左侧菜单固定高度，内部可滚动
+    3. 右侧内容区 flex: 1 自适应，内部包含顶部导航和主内容
+
+  适用场景：
+    - 企业后台管理系统
+    - CMS内容管理系统
+    - CRM/ERP等企业级应用
+    - 数据管理平台
+
+  技术要点：
+    - 外层容器 display: flex，高度 100vh
+    - 左侧菜单固定宽度，overflow-y: auto 可滚动
+    - 右侧内容区 flex: 1，内部 flex 垂直布局
+    - 顶部导航固定高度，内容区 flex: 1 可滚动
+    - 使用 vh 单位实现全屏高度
+
+  可迁移性：
+    - 可直接迁移到任何后台管理系统
+    - 适配各种尺寸的桌面端屏幕
+    - 可扩展为响应式，移动端菜单折叠
+
+  wjs created by 2017-06-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台管理布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #304156;
+      color: #bfcbd9;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar .logo {
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background: #2b2f3a;
+    }
+    .sidebar .menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+    .sidebar .menu-item {
+      padding: 12px 20px;
+      cursor: pointer;
+    }
+    .sidebar .menu-item:hover {
+      background: #263445;
+      color: #fff;
+    }
+    .sidebar .menu-item.active {
+      background: #409eff;
+      color: #fff;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .header {
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e6e6e6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+    .header .breadcrumb {
+      color: #606266;
+    }
+    .header .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #409eff;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    .content .card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .stats .stat-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stats .stat-card h3 {
+      font-size: 28px;
+      color: #303133;
+      margin-bottom: 8px;
+    }
+    .stats .stat-card p {
+      color: #909399;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">管理系统</div>
+      <div class="menu">
+        <div class="menu-item active">仪表盘</div>
+        <div class="menu-item">用户管理</div>
+        <div class="menu-item">订单管理</div>
+        <div class="menu-item">商品管理</div>
+        <div class="menu-item">数据统计</div>
+        <div class="menu-item">系统设置</div>
+        <div class="menu-item">权限管理</div>
+        <div class="menu-item">日志管理</div>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="header">
+        <div class="breadcrumb">首页 / 仪表盘</div>
+        <div class="user">
+          <span>管理员</span>
+          <div class="avatar">A</div>
+        </div>
+      </header>
+      <div class="content">
+        <div class="stats">
+          <div class="stat-card">
+            <h3>1,234</h3>
+            <p>总用户数</p>
+          </div>
+          <div class="stat-card">
+            <h3>567</h3>
+            <p>今日订单</p>
+          </div>
+          <div class="stat-card">
+            <h3>¥89,012</h3>
+            <p>今日销售额</p>
+          </div>
+          <div class="stat-card">
+            <h3>98%</h3>
+            <p>系统稳定性</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>欢迎使用后台管理系统</h3>
+          <p style="margin-top: 10px; color: #606266;">这是一个典型的后台管理布局，左侧固定菜单，顶部导航，右侧内容区可滚动。</p>
+          <p style="margin-top: 10px; color: #606266;">使用 Flex 布局实现，结构清晰，易于扩展。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

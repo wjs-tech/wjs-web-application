@@ -1,0 +1,587 @@
+<!--
+  ============================================================
+  购物车页 - 电商平台
+
+  页面功能：XX电商平台购物车页面，管理待购买商品
+  布局方式：顶部导航+商品列表+右侧结算栏布局
+  业务背景：
+    1. 电商购物流程中的关键环节
+    2. 用户可管理购物车中的商品
+    3. 支持批量选择和结算
+
+  设计思路：
+    1. 商品列表清晰展示，信息完整
+    2. 结算栏悬浮右侧，金额信息醒目
+    3. 全选和批量操作提升效率
+
+  技术要点：
+    - 表格形式展示购物车商品
+    - 右侧结算栏固定布局
+    - 数量加减和总价计算逻辑
+
+  适用迁移场景：
+    - 电商购物车页面
+    - 订单确认前的商品列表
+    - 商品清单类页面
+
+  wjs created by 2016-05-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的购物车 - XX电商</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #f0f0f0;
+      border-bottom: 1px solid #e0e0e0;
+      height: 30px;
+      line-height: 30px;
+      font-size: 12px;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .top-bar-left { float: left; color: #666; }
+    .top-bar-right { float: right; }
+    .top-bar-right a { color: #666; text-decoration: none; margin-left: 15px; }
+    .header {
+      background: #fff;
+      padding: 20px 0;
+      border-bottom: 2px solid #ff6700;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 50px;
+    }
+    .cart-title {
+      float: left;
+      margin-left: 30px;
+      padding-left: 20px;
+      border-left: 2px solid #e0e0e0;
+      font-size: 22px;
+      line-height: 50px;
+      color: #333;
+    }
+    .header-right {
+      float: right;
+      line-height: 50px;
+      font-size: 14px;
+      color: #666;
+    }
+    .header-right a {
+      color: #ff6700;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+    }
+    .cart-steps {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .step-item {
+      float: left;
+      width: 25%;
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ddd;
+      color: #fff;
+      line-height: 30px;
+      margin: 0 auto 8px;
+      font-weight: bold;
+    }
+    .step-item.active .step-num {
+      background: #ff6700;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #999;
+    }
+    .step-item.active .step-text {
+      color: #ff6700;
+      font-weight: bold;
+    }
+    .step-line {
+      position: absolute;
+      top: 15px;
+      left: 65%;
+      right: -15%;
+      height: 2px;
+      background: #ddd;
+    }
+    .step-item.active .step-line {
+      background: #ff6700;
+    }
+    .cart-table {
+      background: #fff;
+      border-radius: 4px;
+      overflow: visible;
+    }
+    .cart-table::after {
+      content: "";
+      display: block;
+      clear: both;
+    }
+    .cart-header {
+      background: #f9f9f9;
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      font-size: 14px;
+      color: #666;
+    }
+    .cart-col {
+      float: none;
+    }
+    .col-check { width: 50px; }
+    .col-img { width: 100px; }
+    .col-info { width: auto; flex: 1; }
+    .col-price { width: 120px; text-align: center; }
+    .col-quantity { width: 150px; text-align: center; }
+    .col-subtotal { width: 130px; text-align: center; }
+    .col-action { width: 140px; text-align: center; }
+    .cart-item {
+      padding: 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+    }
+    .cart-item:hover {
+      background: #fafafa;
+    }
+    .col-check input {
+      margin-top: 0;
+    }
+    .col-img .item-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 12px;
+    }
+    .col-info .item-name {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .col-info .item-name:hover {
+      color: #ff6700;
+      cursor: pointer;
+    }
+    .col-info .item-spec {
+      font-size: 12px;
+      color: #999;
+    }
+    .col-price .price {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 80px;
+    }
+    .col-quantity .qty-control {
+      display: inline-block;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      margin-top: 0;
+      overflow: hidden;
+    }
+    .col-quantity button {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: #f5f5f5;
+      cursor: pointer;
+      font-size: 16px;
+      float: left;
+    }
+    .col-quantity input {
+      width: 50px;
+      height: 28px;
+      border: none;
+      border-left: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      text-align: center;
+      font-size: 14px;
+      float: left;
+      outline: none;
+    }
+    .col-subtotal .subtotal {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff6700;
+      line-height: 80px;
+    }
+    .col-action .actions {
+      line-height: 80px;
+      white-space: nowrap;
+    }
+    .col-action a {
+      color: #666;
+      text-decoration: none;
+      font-size: 13px;
+      display: inline-block;
+      margin: 0 6px;
+    }
+    .col-action a:hover {
+      color: #ff6700;
+    }
+    .cart-footer {
+      background: #f9f9f9;
+      padding: 20px;
+      overflow: hidden;
+      position: sticky;
+      bottom: 0;
+    }
+    .footer-left {
+      float: left;
+      line-height: 40px;
+      font-size: 14px;
+    }
+    .footer-left label {
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    .footer-left a {
+      color: #666;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+    .footer-left a:hover {
+      color: #ff6700;
+    }
+    .footer-right {
+      float: right;
+      text-align: right;
+    }
+    .total-info {
+      display: inline-block;
+      margin-right: 20px;
+    }
+    .total-info p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .total-info p span {
+      color: #ff6700;
+      font-weight: bold;
+    }
+    .total-info .total-price {
+      font-size: 24px;
+    }
+    .checkout-btn {
+      display: inline-block;
+      width: 160px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      background: #ff6700;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 18px;
+      cursor: pointer;
+      vertical-align: top;
+    }
+    .checkout-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .recommend-section {
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+    }
+    .recommend-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .recommend-grid {
+      overflow: hidden;
+      margin: 0 -10px;
+    }
+    .recommend-item {
+      float: left;
+      width: 20%;
+      padding: 0 10px;
+    }
+    .recommend-card {
+      text-align: center;
+    }
+    .recommend-img {
+      width: 100%;
+      height: 180px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #bbb;
+      font-size: 13px;
+    }
+    .recommend-name {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 8px;
+      line-height: 1.4;
+      height: 36px;
+      overflow: hidden;
+    }
+    .recommend-price {
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff6700;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-left">欢迎来到XX电商！</div>
+      <div class="top-bar-right">
+        <a href="#">请登录</a>
+        <a href="#">免费注册</a>
+        <a href="#">我的订单</a>
+        <a href="#">会员中心</a>
+        <a href="#">客户服务</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX电商</div>
+      <div class="cart-title">我的购物车</div>
+      <div class="header-right">
+        共 <strong style="color: #ff6700;">3</strong> 件商品
+        <a href="#">继续购物</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="cart-steps">
+      <div class="step-item active">
+        <div class="step-num">1</div>
+        <div class="step-text">我的购物车</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-text">填写订单</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-text">付款</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-text">确认收货</div>
+      </div>
+    </div>
+
+    <div class="cart-table">
+      <div class="cart-header">
+        <div class="cart-col col-check"><input type="checkbox" checked> 全选</div>
+        <div class="cart-col col-img">商品图片</div>
+        <div class="cart-col col-info">商品信息</div>
+        <div class="cart-col col-price">单价</div>
+        <div class="cart-col col-quantity">数量</div>
+        <div class="cart-col col-subtotal">小计</div>
+        <div class="cart-col col-action">操作</div>
+      </div>
+
+      <div class="cart-item">
+        <div class="cart-col col-check"><input type="checkbox" checked></div>
+        <div class="cart-col col-img">
+          <div class="item-img" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">商品图</div>
+        </div>
+        <div class="cart-col col-info">
+          <div class="item-name">XX品牌智能手机 Pro 全网通4G 4+64G 全金属旗舰手机</div>
+          <div class="item-spec">颜色：星空黑 / 版本：4+64G</div>
+        </div>
+        <div class="cart-col col-price">
+          <div class="price">¥ 4,299.00</div>
+        </div>
+        <div class="cart-col col-quantity">
+          <div class="qty-control">
+            <button>-</button>
+            <input type="text" value="1">
+            <button>+</button>
+          </div>
+        </div>
+        <div class="cart-col col-subtotal">
+          <div class="subtotal">¥ 4,299.00</div>
+        </div>
+        <div class="cart-col col-action">
+          <div class="actions">
+            <a href="#">移入收藏</a>
+            <a href="#">删除</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-item">
+        <div class="cart-col col-check"><input type="checkbox" checked></div>
+        <div class="cart-col col-img">
+          <div class="item-img" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">商品图</div>
+        </div>
+        <div class="cart-col col-info">
+          <div class="item-name">XX品牌无线蓝牙耳机 主动降噪 超长续航 运动耳机</div>
+          <div class="item-spec">颜色：白色</div>
+        </div>
+        <div class="cart-col col-price">
+          <div class="price">¥ 299.00</div>
+        </div>
+        <div class="cart-col col-quantity">
+          <div class="qty-control">
+            <button>-</button>
+            <input type="text" value="2">
+            <button>+</button>
+          </div>
+        </div>
+        <div class="cart-col col-subtotal">
+          <div class="subtotal">¥ 598.00</div>
+        </div>
+        <div class="cart-col col-action">
+          <div class="actions">
+            <a href="#">移入收藏</a>
+            <a href="#">删除</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-item">
+        <div class="cart-col col-check"><input type="checkbox" checked></div>
+        <div class="cart-col col-img">
+          <div class="item-img" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">商品图</div>
+        </div>
+        <div class="cart-col col-info">
+          <div class="item-name">XX品牌手机保护壳 超薄防摔 透明硅胶软壳</div>
+          <div class="item-spec">适用型号：XX-Pro / 颜色：透明</div>
+        </div>
+        <div class="cart-col col-price">
+          <div class="price">¥ 39.00</div>
+        </div>
+        <div class="cart-col col-quantity">
+          <div class="qty-control">
+            <button>-</button>
+            <input type="text" value="1">
+            <button>+</button>
+          </div>
+        </div>
+        <div class="cart-col col-subtotal">
+          <div class="subtotal">¥ 39.00</div>
+        </div>
+        <div class="cart-col col-action">
+          <div class="actions">
+            <a href="#">移入收藏</a>
+            <a href="#">删除</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-footer">
+        <div class="footer-left">
+          <label><input type="checkbox" checked> 全选</label>
+          <a href="#">删除选中</a>
+          <a href="#">移到收藏夹</a>
+          <a href="#">清空购物车</a>
+        </div>
+        <div class="footer-right">
+          <div class="total-info">
+            <p>已选择 <span>3</span> 件商品</p>
+            <p>商品总计：<span class="total-price">¥ 4,936.00</span></p>
+          </div>
+          <button class="checkout-btn">去结算</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="recommend-section">
+      <h3 class="recommend-title">猜你喜欢</h3>
+      <div class="recommend-grid">
+        <div class="recommend-item">
+          <div class="recommend-card">
+            <div class="recommend-img" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);">推荐商品</div>
+            <div class="recommend-name">XX品牌原装充电器 快充头</div>
+            <div class="recommend-price">¥ 89.00</div>
+          </div>
+        </div>
+        <div class="recommend-item">
+          <div class="recommend-card">
+            <div class="recommend-img" style="background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);">推荐商品</div>
+            <div class="recommend-name">XX品牌手机膜 钢化膜 高清防指纹</div>
+            <div class="recommend-price">¥ 29.00</div>
+          </div>
+        </div>
+        <div class="recommend-item">
+          <div class="recommend-card">
+            <div class="recommend-img" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">推荐商品</div>
+            <div class="recommend-name">XX品牌数据线 快充Type-C</div>
+            <div class="recommend-price">¥ 39.00</div>
+          </div>
+        </div>
+        <div class="recommend-item">
+          <div class="recommend-card">
+            <div class="recommend-img" style="background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);">推荐商品</div>
+            <div class="recommend-name">XX品牌充电宝 20000毫安 大容量</div>
+            <div class="recommend-price">¥ 159.00</div>
+          </div>
+        </div>
+        <div class="recommend-item">
+          <div class="recommend-card">
+            <div class="recommend-img" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">推荐商品</div>
+            <div class="recommend-name">XX品牌手机支架 桌面懒人支架</div>
+            <div class="recommend-price">¥ 25.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

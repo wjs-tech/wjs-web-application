@@ -1,0 +1,460 @@
+<!--
+  ============================================================
+  账户总览页 - 银行系统
+
+  页面功能：XX银行网银账户总览页面，展示用户所有账户资产信息
+  布局方式：顶部导航+左侧菜单+右侧内容区三栏布局
+  业务背景：
+    1. 用户登录后首先看到的账户汇总页面
+    2. 展示储蓄卡、信用卡、理财等多种账户类型
+    3. 提供快速入口到常用功能
+
+  设计思路：
+    1. 资产总额醒目展示在页面顶部
+    2. 账户卡片按类型分区展示，清晰易读
+    3. 常用功能快捷入口便于用户操作
+
+  技术要点：
+    - 使用float实现经典三栏后台布局
+    - 卡片式设计展示各类账户信息
+    - 数据图表区域用色块模拟
+
+  适用迁移场景：
+    - 各类后台管理系统首页
+    - 金融理财类资产总览页
+    - 数据仪表盘类页面
+
+  wjs created by 2015-07-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>账户总览 - XX银行个人网上银行</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-header {
+      height: 60px;
+      background: linear-gradient(90deg, #c81623, #8b0000);
+      color: #fff;
+    }
+    .header-inner {
+      width: 100%;
+      height: 100%;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 60px;
+    }
+    .user-info {
+      float: right;
+      line-height: 60px;
+      font-size: 14px;
+    }
+    .user-info span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .main-container {
+      width: 100%;
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #2c3e50;
+      min-height: calc(100vh - 60px);
+      color: #fff;
+    }
+    .menu-title {
+      padding: 15px 20px;
+      font-size: 13px;
+      color: #95a5a6;
+      background: #1a252f;
+    }
+    .menu-list li {
+      list-style: none;
+      padding: 12px 20px 12px 40px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .menu-list li:hover {
+      background: #34495e;
+    }
+    .menu-list li.active {
+      background: #c81623;
+      border-left: 3px solid #ffd700;
+    }
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .asset-summary {
+      background: linear-gradient(135deg, #c81623 0%, #e74c3c 100%);
+      color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .asset-main {
+      float: left;
+      width: 50%;
+    }
+    .asset-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+    .asset-amount {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    .asset-amount small {
+      font-size: 16px;
+      font-weight: normal;
+    }
+    .asset-quick {
+      float: right;
+      width: 50%;
+      text-align: right;
+    }
+    .quick-btn {
+      display: inline-block;
+      padding: 10px 25px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .quick-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 25px 0 15px;
+      padding-left: 10px;
+      border-left: 4px solid #c81623;
+    }
+    .account-cards {
+      overflow: hidden;
+      margin: 0 -10px;
+    }
+    .account-card {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+    .card-inner {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card-type {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    .card-balance {
+      font-size: 24px;
+      font-weight: bold;
+      color: #c81623;
+      margin-bottom: 8px;
+    }
+    .card-no {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .card-actions {
+      border-top: 1px solid #f0f0f0;
+      padding-top: 15px;
+      overflow: hidden;
+    }
+    .card-actions span {
+      float: left;
+      width: 33.33%;
+      text-align: center;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+    }
+    .card-actions span:hover {
+      color: #c81623;
+    }
+    .chart-section {
+      display: flex;
+      margin: 0 -10px;
+    }
+    .chart-box {
+      width: 50%;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+    .chart-inner {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chart-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .chart-placeholder {
+      height: 240px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      position: relative;
+      overflow: visible;
+      flex: 1;
+    }
+    .chart-bars {
+      position: absolute;
+      bottom: 30px;
+      left: 40px;
+      right: 20px;
+      height: 140px;
+    }
+    .chart-bar {
+      float: left;
+      width: 12%;
+      margin: 0 1%;
+      height: 100%;
+      position: relative;
+    }
+    .chart-bar .bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, #e74c3c, #c81623);
+      border-radius: 3px 3px 0 0;
+    }
+    .chart-bar .label {
+      position: absolute;
+      bottom: -25px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+    }
+    .pie-chart {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: conic-gradient(#c81623 0deg 120deg, #3498db 120deg 200deg, #f39c12 200deg 280deg, #2ecc71 280deg 360deg);
+      margin: 20px auto;
+      position: relative;
+    }
+    .pie-chart::after {
+      content: "";
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      right: 25px;
+      bottom: 25px;
+      background: #fff;
+      border-radius: 50%;
+    }
+    .pie-legend {
+      text-align: center;
+      font-size: 13px;
+    }
+    .pie-legend span {
+      display: inline-block;
+      margin: 0 10px;
+    }
+    .pie-legend i {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-inner">
+      <div class="logo">XX银行 个人网上银行</div>
+      <div class="user-info">
+        <span>欢迎您，张女士</span>
+        <span>安全中心</span>
+        <span>退出登录</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="menu-title">账户管理</div>
+      <ul class="menu-list">
+        <li class="active">账户总览</li>
+        <li>账户查询</li>
+        <li>交易明细</li>
+        <li>账户设置</li>
+      </ul>
+      <div class="menu-title">转账汇款</div>
+      <ul class="menu-list">
+        <li>行内转账</li>
+        <li>跨行转账</li>
+        <li>批量转账</li>
+        <li>收款人名册</li>
+      </ul>
+      <div class="menu-title">投资理财</div>
+      <ul class="menu-list">
+        <li>理财产品</li>
+        <li>基金投资</li>
+        <li>贵金属</li>
+        <li>我的资产</li>
+      </ul>
+      <div class="menu-title">信用卡</div>
+      <ul class="menu-list">
+        <li>信用卡查询</li>
+        <li>信用卡还款</li>
+        <li>账单管理</li>
+      </ul>
+      <div class="menu-title">生活服务</div>
+      <ul class="menu-list">
+        <li>水电缴费</li>
+        <li>手机充值</li>
+        <li>有线电视</li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <div class="breadcrumb">首页 &gt; 账户管理 &gt; 账户总览</div>
+
+      <div class="asset-summary">
+        <div class="asset-main">
+          <div class="asset-label">总资产（元）</div>
+          <div class="asset-amount">128,560.88 <small>CNY</small></div>
+        </div>
+        <div class="asset-quick">
+          <span class="quick-btn">转账汇款</span>
+          <span class="quick-btn">理财产品</span>
+          <span class="quick-btn">信用卡还款</span>
+        </div>
+      </div>
+
+      <div class="section-title">我的账户</div>
+      <div class="account-cards">
+        <div class="account-card">
+          <div class="card-inner">
+            <div class="card-type">储蓄卡</div>
+            <div class="card-balance">¥ 58,320.50</div>
+            <div class="card-no">**** **** **** 6288</div>
+            <div class="card-actions">
+              <span>明细</span>
+              <span>转账</span>
+              <span>更多</span>
+            </div>
+          </div>
+        </div>
+        <div class="account-card">
+          <div class="card-inner">
+            <div class="card-type">储蓄卡</div>
+            <div class="card-balance">¥ 12,680.00</div>
+            <div class="card-no">**** **** **** 3356</div>
+            <div class="card-actions">
+              <span>明细</span>
+              <span>转账</span>
+              <span>更多</span>
+            </div>
+          </div>
+        </div>
+        <div class="account-card">
+          <div class="card-inner">
+            <div class="card-type">信用卡</div>
+            <div class="card-balance">¥ -3,580.62</div>
+            <div class="card-no">**** **** **** 8899</div>
+            <div class="card-actions">
+              <span>账单</span>
+              <span>还款</span>
+              <span>更多</span>
+            </div>
+          </div>
+        </div>
+        <div class="account-card">
+          <div class="card-inner">
+            <div class="card-type">理财账户</div>
+            <div class="card-balance">¥ 61,141.00</div>
+            <div class="card-no">持有理财产品 3 只</div>
+            <div class="card-actions">
+              <span>详情</span>
+              <span>购买</span>
+              <span>更多</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">资产概览</div>
+      <div class="chart-section">
+        <div class="chart-box">
+          <div class="chart-inner">
+            <div class="chart-title">近6个月收支趋势</div>
+            <div class="chart-placeholder">
+              <div class="chart-bars">
+                <div class="chart-bar"><div class="bar" style="height: 60%;"></div><div class="label">2月</div></div>
+                <div class="chart-bar"><div class="bar" style="height: 75%;"></div><div class="label">3月</div></div>
+                <div class="chart-bar"><div class="bar" style="height: 45%;"></div><div class="label">4月</div></div>
+                <div class="chart-bar"><div class="bar" style="height: 80%;"></div><div class="label">5月</div></div>
+                <div class="chart-bar"><div class="bar" style="height: 65%;"></div><div class="label">6月</div></div>
+                <div class="chart-bar"><div class="bar" style="height: 90%;"></div><div class="label">7月</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-inner">
+            <div class="chart-title">资产分布</div>
+            <div class="pie-chart"></div>
+            <div class="pie-legend">
+              <span><i style="background: #c81623;"></i>活期存款</span>
+              <span><i style="background: #3498db;"></i>定期理财</span>
+              <span><i style="background: #f39c12;"></i>基金</span>
+              <span><i style="background: #2ecc71;"></i>其他</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

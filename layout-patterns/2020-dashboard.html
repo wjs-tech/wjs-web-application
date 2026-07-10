@@ -1,0 +1,260 @@
+﻿<!--
+  ============================================================
+  Dashboard 仪表盘布局 - 数据大屏布局，上下左右分块，grid实现
+
+  布局方式：CSS Grid 网格布局
+  布局思想：
+    1. 使用 Grid 二维布局能力，将大屏划分为多个数据模块
+    2. 顶部标题区，中间主体区划分为左中右三部分
+    3. 各模块可独立配置跨越行数和列数，灵活组合
+
+  适用场景：
+    - 数据可视化大屏
+    - 企业数据监控中心
+    - 实时数据展示看板
+    - 运营数据仪表盘
+    - BI 数据分析报表
+
+  技术要点：
+    - display: grid + grid-template-columns/rows 定义整体网格
+    - grid-column / grid-row 控制各模块跨越多行多列
+    - gap 控制模块间距
+    - fr 单位按比例分配空间
+    - 各模块内部可继续使用 flex/grid 布局
+    - 通常配合 ECharts 等图表库使用
+
+  可迁移性：
+    - 可迁移到任何数据大屏/仪表盘项目
+    - Grid 方案灵活，可根据需求调整模块位置和大小
+    - 适配各种分辨率的大屏显示器
+
+  wjs created by 2020-05-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard 仪表盘布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #0a1628;
+      color: #fff;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      grid-template-rows: 70px 1fr;
+      gap: 15px;
+      height: 100vh;
+      padding: 15px;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(0, 150, 255, 0.2) 0%, transparent 100%);
+      border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+      position: relative;
+    }
+    .header h1 {
+      font-size: 28px;
+      background: linear-gradient(180deg, #fff 0%, #00d4ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 4px;
+    }
+    .header .time {
+      position: absolute;
+      right: 20px;
+      font-size: 14px;
+      color: #00d4ff;
+    }
+
+    .panel {
+      background: rgba(16, 32, 64, 0.6);
+      border: 1px solid rgba(0, 150, 255, 0.2);
+      border-radius: 4px;
+      padding: 15px;
+    }
+    .panel-title {
+      font-size: 16px;
+      color: #00d4ff;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(0, 150, 255, 0.2);
+    }
+
+    .left-col {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    .center-col {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 15px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+    .stat-card {
+      background: rgba(16, 32, 64, 0.6);
+      border: 1px solid rgba(0, 150, 255, 0.2);
+      border-radius: 4px;
+      padding: 15px;
+      text-align: center;
+    }
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #00d4ff;
+      margin-bottom: 5px;
+    }
+    .stat-card .label {
+      font-size: 12px;
+      color: #8899aa;
+    }
+
+    .main-chart {
+      background: rgba(16, 32, 64, 0.6);
+      border: 1px solid rgba(0, 150, 255, 0.2);
+      border-radius: 4px;
+      padding: 15px;
+    }
+    .chart-placeholder {
+      width: 100%;
+      height: calc(100% - 40px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 150, 255, 0.05);
+      border: 1px dashed rgba(0, 150, 255, 0.2);
+      color: #667788;
+      font-size: 14px;
+    }
+
+    .right-col {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    .data-list {
+      list-style: none;
+    }
+    .data-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 150, 255, 0.1);
+      font-size: 13px;
+    }
+    .data-list li:last-child {
+      border-bottom: none;
+    }
+    .data-list .name {
+      color: #aabbcc;
+    }
+    .data-list .value {
+      color: #00d4ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="header">
+      <h1>数据可视化大屏展示系统</h1>
+      <div class="time">2024-01-01 12:00:00</div>
+    </div>
+
+    <div class="left-col">
+      <div class="panel">
+        <div class="panel-title">数据概览</div>
+        <ul class="data-list">
+          <li><span class="name">总访问量</span><span class="value">128,456</span></li>
+          <li><span class="name">今日访问</span><span class="value">3,256</span></li>
+          <li><span class="name">活跃用户</span><span class="value">1,892</span></li>
+          <li><span class="name">新增用户</span><span class="value">256</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title">地区分布</div>
+        <div class="chart-placeholder">地图图表区域</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">实时动态</div>
+        <ul class="data-list">
+          <li><span class="name">用户A下单</span><span class="value">刚刚</span></li>
+          <li><span class="name">用户B注册</span><span class="value">1分钟前</span></li>
+          <li><span class="name">订单支付</span><span class="value">2分钟前</span></li>
+          <li><span class="name">新评论</span><span class="value">5分钟前</span></li>
+          <li><span class="name">系统通知</span><span class="value">10分钟前</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="center-col">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="number">¥1.2M</div>
+          <div class="label">总销售额</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">8,456</div>
+          <div class="label">订单总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">96.8%</div>
+          <div class="label">转化率</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">23,890</div>
+          <div class="label">用户总数</div>
+        </div>
+      </div>
+      <div class="main-chart">
+        <div class="panel-title">核心数据趋势</div>
+        <div class="chart-placeholder">主图表区域（折线图/柱状图等）</div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="panel">
+        <div class="panel-title">销售排行</div>
+        <ul class="data-list">
+          <li><span class="name">商品A</span><span class="value">1,234</span></li>
+          <li><span class="name">商品B</span><span class="value">987</span></li>
+          <li><span class="name">商品C</span><span class="value">856</span></li>
+          <li><span class="name">商品D</span><span class="value">743</span></li>
+          <li><span class="name">商品E</span><span class="value">621</span></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-title">渠道占比</div>
+        <div class="chart-placeholder">饼图区域</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">系统状态</div>
+        <ul class="data-list">
+          <li><span class="name">CPU使用率</span><span class="value">45%</span></li>
+          <li><span class="name">内存使用</span><span class="value">62%</span></li>
+          <li><span class="name">磁盘空间</span><span class="value">38%</span></li>
+          <li><span class="name">网络状态</span><span class="value">正常</span></li>
+          <li><span class="name">运行时长</span><span class="value">15天</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+﻿<!--
+  ============================================================
+  Sticky Footer 底部粘滞布局 - footer始终在页面底部，内容不足时也在底部
+
+  布局方式：Flex 弹性布局（min-height + flex-direction: column）
+  布局思想：
+    1. 外层容器设置 min-height: 100vh，保证至少占满一屏
+    2. 使用 flex-direction: column 垂直排列
+    3. 主内容区 flex: 1，自动撑满剩余空间，将footer推到底部
+
+  适用场景：
+    - 内容较少的页面（登录页、404页、关于页）
+    - 企业官网底部版权信息
+    - 需要footer始终在底部的任何页面
+    - 后台管理系统底部
+
+  技术要点：
+    - 外层容器 min-height: 100vh + display: flex + flex-direction: column
+    - 主内容区域 flex: 1 自动填充剩余空间
+    - 无需知道footer的具体高度
+    - 现代浏览器均支持，实现简单优雅
+    - 旧版方案：负margin、padding-bottom等，需要知道footer高度
+
+  可迁移性：
+    - 可迁移到任何需要底部粘滞的网页
+    - Flex方案简单可靠，推荐使用
+    - 兼容所有现代浏览器
+
+  wjs created by 2019-01-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticky Footer 底部粘滞布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; }
+
+    .layout {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      height: 60px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 60px;
+      text-align: center;
+    }
+
+    .main {
+      flex: 1;
+      width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .main .box {
+      background: #ecf0f1;
+      padding: 30px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .main .toggle-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .main .toggle-btn:hover {
+      background: #2980b9;
+    }
+    .extra-content {
+      display: none;
+      margin-top: 20px;
+    }
+    .extra-content.show {
+      display: block;
+    }
+
+    .footer {
+      height: 80px;
+      background: #34495e;
+      color: #fff;
+      line-height: 80px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="header">头部 - Sticky Footer Demo</div>
+    <div class="main">
+      <div class="box">
+        <h2>主内容区</h2>
+        <p style="margin-top: 10px;">当前内容较少，底部仍然固定在页面底部。</p>
+        <p style="margin-top: 10px;">核心实现：外层 flex-direction: column + min-height: 100vh，主内容区 flex: 1</p>
+        <button class="toggle-btn" onclick="toggleContent()">点击切换更多内容</button>
+      </div>
+      <div class="extra-content" id="extraContent">
+        <div class="box">
+          <h3>更多内容 1</h3>
+          <p style="margin-top: 10px;">当内容足够多时，footer 会被内容推到下方，随页面滚动。</p>
+        </div>
+        <div class="box">
+          <h3>更多内容 2</h3>
+          <p style="margin-top: 10px;">这就是 Sticky Footer 的特点：内容不足时粘在底部，内容充足时随内容流动。</p>
+        </div>
+        <div class="box">
+          <h3>更多内容 3</h3>
+          <p style="margin-top: 10px;">Flex 方案无需知道 footer 的具体高度，非常灵活。</p>
+        </div>
+        <div class="box">
+          <h3>更多内容 4</h3>
+          <p style="margin-top: 10px;">这是现代前端开发中最推荐的 Sticky Footer 实现方式。</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">底部 Footer - 始终在页面底部</div>
+  </div>
+  <script>
+    function toggleContent() {
+      var content = document.getElementById('extraContent');
+      content.classList.toggle('show');
+    }
+  </script>
+</body>
+</html>

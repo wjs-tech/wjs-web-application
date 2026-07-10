@@ -1,0 +1,183 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  02-layout.css - 布局工具类
+
+  功能说明：
+    1. 浮动：左浮动、右浮动、清除浮动
+    2. 显示：块级、行内、行内块、隐藏
+    3. 可见性：可见、不可见
+    4. 位置：相对定位、绝对定位、固定定位、粘性定位
+    5. 定位：绝对居中、充满父元素
+    6. 溢出：隐藏、自动、滚动
+    7. 宽度：全宽、半宽、三分之一宽、自动
+    8. 高度：全高、自动
+
+  适用场景：
+    - 页面基础布局搭建
+    - 元素显示与隐藏控制
+    - 元素定位与尺寸调整
+
+  技术要点：
+    - 使用伪元素实现 clearfix 清除浮动
+    - 使用 transform 实现绝对定位居中
+    - 宽度使用百分比实现自适应布局
+
+  wjs created by 2015-08-20
+  ============================================================
+*/
+
+/* ========== 浮动 ========== */
+
+/* 左浮动 */
+.fl {
+  float: left;
+}
+
+/* 右浮动 */
+.fr {
+  float: right;
+}
+
+/* 清除浮动 */
+.clearfix::before,
+.clearfix::after {
+  display: table;
+  content: "";
+}
+.clearfix::after {
+  clear: both;
+}
+
+/* ========== 显示 ========== */
+
+/* 块级显示 */
+.block {
+  display: block;
+}
+
+/* 行内显示 */
+.inline {
+  display: inline;
+}
+
+/* 行内块显示 */
+.inline-block {
+  display: inline-block;
+}
+
+/* 隐藏（不占空间） */
+.hidden {
+  display: none;
+}
+
+/* 隐藏（不占空间，别名为 none） */
+.none {
+  display: none;
+}
+
+/* ========== 可见性 ========== */
+
+/* 可见 */
+.visible {
+  visibility: visible;
+}
+
+/* 不可见（仍占空间） */
+.invisible {
+  visibility: hidden;
+}
+
+/* ========== 位置 ========== */
+
+/* 相对定位 */
+.relative {
+  position: relative;
+}
+
+/* 绝对定位 */
+.absolute {
+  position: absolute;
+}
+
+/* 固定定位 */
+.fixed {
+  position: fixed;
+}
+
+/* 粘性定位 */
+.sticky {
+  position: sticky;
+}
+
+/* ========== 定位 ========== */
+
+/* 绝对定位居中（水平垂直居中） */
+.pos-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+/* 充满父元素 */
+.pos-full {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* ========== 溢出 ========== */
+
+/* 溢出隐藏 */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+/* 溢出自动 */
+.overflow-auto {
+  overflow: auto;
+}
+
+/* 溢出滚动 */
+.overflow-scroll {
+  overflow: scroll;
+}
+
+/* ========== 宽度 ========== */
+
+/* 全宽 100% */
+.w-full {
+  width: 100%;
+}
+
+/* 半宽 50% */
+.w-half {
+  width: 50%;
+}
+
+/* 三分之一宽 33.33% */
+.w-third {
+  width: 33.333333%;
+}
+
+/* 宽度自动 */
+.w-auto {
+  width: auto;
+}
+
+/* ========== 高度 ========== */
+
+/* 全高 100% */
+.h-full {
+  height: 100%;
+}
+
+/* 高度自动 */
+.h-auto {
+  height: auto;
+}

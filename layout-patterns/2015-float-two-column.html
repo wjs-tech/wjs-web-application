@@ -1,0 +1,91 @@
+﻿<!--
+  ============================================================
+  浮动左右两栏布局 - 经典两列布局，左定宽右自适应，float+margin实现
+
+  布局方式：float浮动 + margin外边距
+  布局思想：
+    1. 左侧栏使用float:left脱离文档流，定宽显示
+    2. 主内容区通过margin-left避开左侧栏，实现宽度自适应
+    3. 父容器使用overflow:hidden触发BFC，清除浮动影响
+
+  适用场景：
+    - 博客文章页（左侧导航+右侧正文）
+    - 后台管理页面的简单两栏结构
+    - 商品列表页（左侧筛选+右侧列表）
+
+  技术要点：
+    - float:left 使元素浮动并脱离文档流
+    - margin-left 为主内容区留出浮动元素的空间
+    - overflow:hidden 触发BFC清除浮动
+    - 需要考虑浮动元素高度超出父容器的问题
+
+  可迁移性：
+    - 可迁移到任何需要两栏布局的传统网页
+    - 兼容IE6+等老旧浏览器
+
+  wjs created by 2015-07-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>浮动左右两栏布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; }
+    .header {
+      height: 60px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 60px;
+      text-align: center;
+    }
+    .container {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 250px;
+      height: 500px;
+      background: #3498db;
+      color: #fff;
+      padding: 20px;
+    }
+    .main {
+      margin-left: 270px;
+      height: 500px;
+      background: #ecf0f1;
+      padding: 20px;
+    }
+    .footer {
+      clear: both;
+      height: 50px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">头部 - 浮动两栏布局 Demo</div>
+  <div class="container">
+    <div class="sidebar">
+      <h3>左侧边栏</h3>
+      <p>定宽 250px</p>
+      <p>float: left</p>
+    </div>
+    <div class="main">
+      <h2>主内容区</h2>
+      <p>自适应宽度</p>
+      <p>float + margin 实现</p>
+      <p>左侧浮动脱离文档流，右侧通过 margin-left 留出空间</p>
+    </div>
+  </div>
+  <div class="footer">底部 - clear: both 清除浮动</div>
+</body>
+</html>

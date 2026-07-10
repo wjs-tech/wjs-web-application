@@ -1,0 +1,132 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  03-color.css - 颜色工具类
+
+  功能说明：
+    1. 文字颜色：主色、成功、警告、危险、信息、柔和
+    2. 背景色：主色、成功、警告、危险、信息、白色、灰色
+    3. 边框色：主色、成功、警告、危险
+    4. 主题色变量：CSS变量版本（后期新增）
+
+  适用场景：
+    - 按钮、标签、提示框等组件配色
+    - 文字强调与状态标识
+    - 页面主题色统一管理
+
+  技术要点：
+    - 采用语义化命名，便于理解与使用
+    - 后期新增CSS变量版本，支持主题切换
+    - 颜色值参考Bootstrap配色方案
+
+  wjs created by 2016-03-15
+  ============================================================
+*/
+
+/* ========== 文字颜色 ========== */
+
+/* 主色文字 */
+.text-primary {
+  color: #337ab7;
+}
+
+/* 成功色文字 */
+.text-success {
+  color: #5cb85c;
+}
+
+/* 警告色文字 */
+.text-warning {
+  color: #f0ad4e;
+}
+
+/* 危险色文字 */
+.text-danger {
+  color: #d9534f;
+}
+
+/* 信息色文字 */
+.text-info {
+  color: #5bc0de;
+}
+
+/* 柔和色文字 */
+.text-muted {
+  color: #999;
+}
+
+/* ========== 背景色 ========== */
+
+/* 主色背景 */
+.bg-primary {
+  background-color: #337ab7;
+}
+
+/* 成功色背景 */
+.bg-success {
+  background-color: #5cb85c;
+}
+
+/* 警告色背景 */
+.bg-warning {
+  background-color: #f0ad4e;
+}
+
+/* 危险色背景 */
+.bg-danger {
+  background-color: #d9534f;
+}
+
+/* 信息色背景 */
+.bg-info {
+  background-color: #5bc0de;
+}
+
+/* 白色背景 */
+.bg-white {
+  background-color: #fff;
+}
+
+/* 灰色背景 */
+.bg-gray {
+  background-color: #f5f5f5;
+}
+
+/* ========== 边框色 ========== */
+
+/* 主色边框 */
+.border-primary {
+  border-color: #337ab7;
+}
+
+/* 成功色边框 */
+.border-success {
+  border-color: #5cb85c;
+}
+
+/* 警告色边框 */
+.border-warning {
+  border-color: #f0ad4e;
+}
+
+/* 危险色边框 */
+.border-danger {
+  border-color: #d9534f;
+}
+
+/* ========== 主题色变量（CSS变量版本 - 后期新增） ========== */
+/*
+  说明：以下CSS变量为后期新增，用于支持主题切换功能
+  使用方式：color: var(--primary-color);
+*/
+
+:root {
+  /* 主题色变量 */
+  --primary-color: #337ab7;
+  --success-color: #5cb85c;
+  --warning-color: #f0ad4e;
+  --danger-color: #d9534f;
+  --info-color: #5bc0de;
+  --muted-color: #999;
+}

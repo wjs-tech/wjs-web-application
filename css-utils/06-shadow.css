@@ -1,0 +1,72 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  06-shadow.css - 阴影工具类
+
+  功能说明：
+    1. 盒子阴影：小阴影、默认阴影、中阴影、大阴影、超大阴影、无阴影
+    2. 文字阴影：小文字阴影、默认文字阴影、大文字阴影
+
+  适用场景：
+    - 卡片、按钮、弹窗等元素阴影效果
+    - 元素悬浮状态的阴影变化
+    - 标题、强调文字的阴影装饰
+
+  技术要点：
+    - 使用 box-shadow 实现盒子阴影
+    - 使用 text-shadow 实现文字阴影
+    - 阴影层级递进，营造层次感
+
+  wjs created by 2017-09-05
+  ============================================================
+*/
+
+/* ========== 盒子阴影 ========== */
+
+/* 小阴影 */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 默认阴影 */
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* 中阴影 */
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* 大阴影 */
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
+/* 超大阴影 */
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* 无阴影 */
+.shadow-none {
+  box-shadow: none;
+}
+
+/* ========== 文字阴影 ========== */
+
+/* 小文字阴影 */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 默认文字阴影 */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 大文字阴影 */
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}

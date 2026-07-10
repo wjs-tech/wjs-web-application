@@ -1,0 +1,535 @@
+<!--
+  ============================================================
+  患者病历详情页 - 医院管理系统
+
+  页面功能：XX医院患者电子病历详情页面，展示患者就诊记录和病历信息
+  布局方式：左侧患者信息+右侧病历详情的两栏布局
+  业务背景：
+    1. 医院电子病历系统核心页面
+    2. 医生查看和记录患者病情
+    3. 包含基本信息、诊断、处方等
+
+  设计思路：
+    1. 患者基本信息固定展示
+    2. 病历内容分区展示，层次清晰
+    3. 诊断和用药信息突出显示
+
+  技术要点：
+    - 左右两栏float布局
+    - 信息分组展示
+    - 医疗行业专业布局
+
+  适用迁移场景：
+    - 电子病历系统
+    - 患者信息管理
+    - 医疗记录查看
+
+  wjs created by 2017-07-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>患者病历详情 - XX医院</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #007d65;
+      color: #fff;
+      padding: 15px 30px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 40px;
+    }
+    .logo span { color: #ffd700; }
+    .user-info {
+      float: right;
+      line-height: 40px;
+      font-size: 14px;
+    }
+    .user-info span { margin-left: 20px; }
+    .main {
+      padding: 20px 30px;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #666; text-decoration: none; }
+    .container {
+      overflow: hidden;
+    }
+    .patient-sidebar {
+      float: left;
+      width: 280px;
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .patient-avatar {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #f0f0f0;
+      margin-bottom: 20px;
+    }
+    .avatar-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00b894, #007d65);
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #fff;
+    }
+    .patient-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .patient-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      background: #e8f5e9;
+      color: #007d65;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    .patient-info-item {
+      padding: 10px 0;
+      border-bottom: 1px dashed #f0f0f0;
+      overflow: hidden;
+    }
+    .patient-info-label {
+      float: left;
+      color: #999;
+      width: 80px;
+    }
+    .patient-info-value {
+      margin-left: 80px;
+      color: #333;
+    }
+    .sidebar-actions {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .sidebar-btn {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #007d65;
+      border-radius: 4px;
+      background: #fff;
+      color: #007d65;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .sidebar-btn.primary {
+      background: #007d65;
+      color: #fff;
+    }
+    .record-main {
+      margin-left: 300px;
+    }
+    .record-card {
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .record-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .record-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #007d65;
+    }
+    .record-date {
+      float: right;
+      color: #999;
+      font-size: 13px;
+    }
+    .record-body {
+      padding: 20px;
+      min-height: auto;
+}
+    .record-section {
+      margin-bottom: 20px;
+    }
+    .record-section:last-child {
+      margin-bottom: 0;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #007d65;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+    .info-grid {
+      display: table;
+      width: 100%;
+    }
+    .info-row {
+      display: table-row;
+    }
+    .info-cell {
+      display: table-cell;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-bottom: 1px solid #fafafa;
+    }
+    .info-cell.label {
+      color: #999;
+      width: 120px;
+    }
+    .info-cell.value {
+      color: #333;
+    }
+    .prescription-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .prescription-table th {
+      background: #f5f5f5;
+      padding: 10px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .prescription-table td {
+      padding: 10px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .diagnosis-content {
+      line-height: 1.8;
+      color: #444;
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 4px;
+      border-left: 3px solid #007d65;
+    }
+    .visit-list {
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .visit-tabs {
+      overflow: hidden;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .visit-tab {
+      float: left;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #666;
+      border-bottom: 2px solid transparent;
+    }
+    .visit-tab.active {
+      color: #007d65;
+      border-bottom-color: #007d65;
+      font-weight: bold;
+    }
+    .visit-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .visit-item:hover { background: #f9f9f9; }
+    .visit-item.active { background: #e8f5e9; }
+    .visit-date {
+      float: left;
+      width: 100px;
+      color: #007d65;
+      font-weight: bold;
+    }
+    .visit-dept {
+      float: left;
+      width: 150px;
+      color: #666;
+    }
+    .visit-doctor {
+      float: left;
+      width: 120px;
+      color: #666;
+    }
+    .visit-diagnosis {
+      margin-left: 370px;
+      color: #999;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX<span>医院</span> 电子病历系统</div>
+    <div class="user-info">
+      <span>当前医生：王主任</span>
+      <span>内科门诊</span>
+      <span>退出</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> / <a href="#">患者管理</a> / <a href="#">病历查询</a> / <span>病历详情</span>
+    </div>
+
+    <div class="container">
+      <div class="patient-sidebar">
+        <div class="patient-avatar">
+          <div class="avatar-circle">张</div>
+          <div class="patient-name">张**</div>
+          <span class="patient-tag">复诊患者</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">患者姓名</span>
+          <span class="patient-info-value">张**</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">性别 / 年龄</span>
+          <span class="patient-info-value">男 / 52岁</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">病历号</span>
+          <span class="patient-info-value">BL2017XXXX023</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">身份证号</span>
+          <span class="patient-info-value">110***********1234</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">联系电话</span>
+          <span class="patient-info-value">138****5678</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">血型</span>
+          <span class="patient-info-value">A型 Rh(+)</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">过敏史</span>
+          <span class="patient-info-value">青霉素过敏</span>
+        </div>
+        <div class="patient-info-item">
+          <span class="patient-info-label">建档时间</span>
+          <span class="patient-info-value">2015-03-15</span>
+        </div>
+        <div class="sidebar-actions">
+          <button class="sidebar-btn primary">编辑病历</button>
+          <button class="sidebar-btn">打印病历</button>
+          <button class="sidebar-btn">开具处方</button>
+        </div>
+      </div>
+
+      <div class="record-main">
+        <div class="visit-list">
+          <div class="visit-tabs">
+            <div class="visit-tab active">历史就诊记录 (8次)</div>
+          </div>
+          <div class="visit-item active">
+            <div class="visit-date">2017-07-20</div>
+            <div class="visit-dept">心血管内科</div>
+            <div class="visit-doctor">王建国 主任</div>
+            <div class="visit-diagnosis">高血压2级（高危）、冠心病</div>
+          </div>
+          <div class="visit-item">
+            <div class="visit-date">2017-05-18</div>
+            <div class="visit-dept">心血管内科</div>
+            <div class="visit-doctor">王建国 主任</div>
+            <div class="visit-diagnosis">高血压复诊，调整用药</div>
+          </div>
+          <div class="visit-item">
+            <div class="visit-date">2017-03-10</div>
+            <div class="visit-dept">心血管内科</div>
+            <div class="visit-doctor">李副主任</div>
+            <div class="visit-diagnosis">高血压、高血脂</div>
+          </div>
+          <div class="visit-item">
+            <div class="visit-date">2016-12-05</div>
+            <div class="visit-dept">内分泌科</div>
+            <div class="visit-doctor">赵医生</div>
+            <div class="visit-diagnosis">2型糖尿病</div>
+          </div>
+        </div>
+
+        <div class="record-card">
+          <div class="record-header">
+            <div class="record-title">门诊病历</div>
+            <div class="record-date">就诊时间：2017-07-20 上午 09:30</div>
+          </div>
+          <div class="record-body">
+            <div class="record-section">
+              <div class="section-title">基本信息</div>
+              <div class="info-grid">
+                <div class="info-row">
+                  <div class="info-cell label">就诊科室</div>
+                  <div class="info-cell value">心血管内科</div>
+                  <div class="info-cell label">主治医生</div>
+                  <div class="info-cell value">王建国 主任医师</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">就诊类型</div>
+                  <div class="info-cell value">复诊</div>
+                  <div class="info-cell label">病历类型</div>
+                  <div class="info-cell value">门诊病历</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">主诉</div>
+              <div class="diagnosis-content">
+                反复头晕、头痛3年，加重1周。患者3年前无明显诱因出现头晕、头痛，呈阵发性，测血压偏高，最高达180/110mmHg，诊断为"高血压病"，长期口服降压药物治疗。近1周来自觉头晕加重，伴胸闷、心悸，遂来我院就诊。
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">现病史</div>
+              <div class="diagnosis-content">
+                患者神志清，精神可，饮食睡眠可，大小便正常。近期体重无明显变化。既往有"糖尿病"史5年，口服降糖药物治疗，血糖控制尚可。否认"肝炎、结核"等传染病史，否认手术、外伤史，否认食物过敏史，青霉素过敏。
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">体格检查</div>
+              <div class="info-grid">
+                <div class="info-row">
+                  <div class="info-cell label">体温</div>
+                  <div class="info-cell value">36.5℃</div>
+                  <div class="info-cell label">脉搏</div>
+                  <div class="info-cell value">78次/分</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">呼吸</div>
+                  <div class="info-cell value">18次/分</div>
+                  <div class="info-cell label">血压</div>
+                  <div class="info-cell value">165/105mmHg</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">身高</div>
+                  <div class="info-cell value">175cm</div>
+                  <div class="info-cell label">体重</div>
+                  <div class="info-cell value">82kg</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">辅助检查</div>
+              <div class="diagnosis-content">
+                心电图：窦性心律，左室肥厚伴劳损<br>
+                心脏彩超：左房增大，左室壁增厚，EF 55%<br>
+                血脂：总胆固醇 6.2mmol/L，LDL-C 4.1mmol/L<br>
+                血糖：空腹血糖 7.8mmol/L，糖化血红蛋白 7.2%
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">诊断</div>
+              <div class="diagnosis-content">
+                1. 高血压病2级（很高危组）<br>
+                2. 冠状动脉粥样硬化性心脏病<br>
+                3. 2型糖尿病<br>
+                4. 高脂血症
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">处理意见 / 处方</div>
+              
+                <div style="overflow-x:auto;">
+<table class="prescription-table">
+                <thead>
+                  <tr>
+                    <th width="30%">药品名称</th>
+                    <th width="15%">规格</th>
+                    <th width="15%">数量</th>
+                    <th width="20%">用法用量</th>
+                    <th width="20%">注意事项</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>XX降压片</td>
+                    <td>10mg*30片</td>
+                    <td>2盒</td>
+                    <td>每日1次，每次1片，晨起口服</td>
+                    <td>监测血压</td>
+                  </tr>
+                  <tr>
+                    <td>XX他汀钙片</td>
+                    <td>20mg*7片</td>
+                    <td>4盒</td>
+                    <td>每晚1次，每次1片</td>
+                    <td>定期复查肝功</td>
+                  </tr>
+                  <tr>
+                    <td>XX降糖胶囊</td>
+                    <td>0.5g*60粒</td>
+                    <td>2盒</td>
+                    <td>每日3次，每次2粒，饭前服</td>
+                    <td>监测血糖</td>
+                  </tr>
+                  <tr>
+                    <td>XX阿司匹林肠溶片</td>
+                    <td>100mg*30片</td>
+                    <td>1盒</td>
+                    <td>每日1次，每次1片</td>
+                    <td>注意出血倾向</td>
+                  </tr>
+                </tbody>
+              </table>
+                </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">医嘱</div>
+              <div class="diagnosis-content">
+                1. 低盐低脂糖尿病饮食，适量运动，控制体重<br>
+                2. 规律服药，不可自行停药或调整剂量<br>
+                3. 每日监测血压、血糖，定期复诊<br>
+                4. 1个月后复查血脂、肝肾功能<br>
+                5. 心内科、内分泌科随诊，不适及时就诊
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

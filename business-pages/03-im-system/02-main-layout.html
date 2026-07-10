@@ -1,0 +1,581 @@
+<!--
+  ============================================================
+  主界面布局 - IM即时通讯系统
+
+  页面功能：XX企业IM主界面，包含会话列表和聊天区域
+  布局方式：左侧导航+中间会话列表+右侧聊天区的三栏布局
+  业务背景：
+    1. IM系统的核心主界面
+    2. 用户日常沟通的主要操作界面
+    3. 集成消息、联系人、群组等功能模块
+
+  设计思路：
+    1. 三栏式经典IM布局，功能分区明确
+    2. 会话列表支持搜索和快速切换
+    3. 聊天区域布局合理，信息层次清晰
+
+  技术要点：
+    - 使用float实现三栏布局
+    - 消息气泡左右区分发送方
+    - 固定高度区域，内部滚动
+
+  适用迁移场景：
+    - 即时通讯软件主界面
+    - 在线客服系统
+    - 团队协作工具界面
+
+  wjs created by 2016-08-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XX企业IM</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .im-container {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .nav-left {
+      float: left;
+      width: 60px;
+      height: 100%;
+      background: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding-top: 20px;
+      position: relative;
+    }
+    .nav-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 30px;
+    }
+    .nav-item {
+      padding: 15px 0;
+      cursor: pointer;
+      color: #95a5a6;
+      font-size: 20px;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-item:hover {
+      color: #fff;
+    }
+    .nav-item.active {
+      color: #fff;
+    }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 15px;
+      bottom: 15px;
+      width: 3px;
+      background: #3498db;
+      border-radius: 0 2px 2px 0;
+    }
+    .nav-badge {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      min-width: 18px;
+      height: 18px;
+      background: #e74c3c;
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 18px;
+      padding: 0 5px;
+    }
+    .nav-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+    }
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #3498db;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .session-panel {
+      float: left;
+      width: 280px;
+      height: 100%;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+    }
+    .session-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #e8e8e8;
+      border-radius: 18px;
+      padding: 0 15px 0 35px;
+      font-size: 13px;
+      outline: none;
+      background: #f5f5f5;
+    }
+    .search-box input:focus {
+      border-color: #3498db;
+      background: #fff;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bdc3c7;
+      font-size: 14px;
+    }
+    .session-tabs {
+      padding: 10px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .session-tab {
+      float: left;
+      width: 33.33%;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .session-tab.active {
+      color: #3498db;
+      border-bottom-color: #3498db;
+      font-weight: bold;
+    }
+    .session-list {
+      height: calc(100vh - 140px);
+      overflow-y: auto;
+    }
+    .session-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #fafafa;
+      overflow: hidden;
+      transition: background 0.2s;
+    }
+    .session-item:hover {
+      background: #f5f7fa;
+    }
+    .session-item.active {
+      background: #e8f4fd;
+    }
+    .session-avatar {
+      float: left;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      margin-right: 12px;
+      position: relative;
+    }
+    .online-dot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      background: #2ecc71;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .session-content {
+      margin-left: 52px;
+    }
+    .session-top {
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .session-name {
+      float: left;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    .session-time {
+      float: right;
+      font-size: 11px;
+      color: #bbb;
+    }
+    .session-msg {
+      font-size: 12px;
+      color: #999;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .unread-badge {
+      float: right;
+      min-width: 18px;
+      height: 18px;
+      background: #e74c3c;
+      color: #fff;
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      padding: 0 5px;
+    }
+    .chat-panel {
+      margin-left: 340px;
+      height: 100%;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chat-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    .chat-subtitle {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .chat-actions {
+      color: #666;
+      font-size: 16px;
+    }
+    .chat-actions span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .message-time {
+      text-align: center;
+      font-size: 12px;
+      color: #bbb;
+      margin: 10px 0 20px;
+    }
+    .message-item {
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 13px;
+    }
+    .message-item.receive .message-avatar {
+      float: left;
+      background: #3498db;
+    }
+    .message-item.send .message-avatar {
+      float: right;
+      background: #2ecc71;
+    }
+    .message-content {
+      max-width: 60%;
+    }
+    .message-item.receive .message-content {
+      float: left;
+      margin-left: 12px;
+    }
+    .message-item.send .message-content {
+      float: right;
+      margin-right: 12px;
+      text-align: right;
+    }
+    .message-name {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .message-bubble {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 100%;
+      word-break: break-word;
+      text-align: left;
+    }
+    .message-item.receive .message-bubble {
+      background: #fff;
+      color: #333;
+      border-top-left-radius: 2px;
+    }
+    .message-item.send .message-bubble {
+      background: #3498db;
+      color: #fff;
+      border-top-right-radius: 2px;
+    }
+    .chat-input-area {
+      background: #fff;
+      border-top: 1px solid #e8e8e8;
+      padding: 15px 20px;
+    }
+    .input-toolbar {
+      margin-bottom: 10px;
+      color: #666;
+      font-size: 16px;
+    }
+    .input-toolbar span {
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    .input-box {
+      min-height: 80px;
+      padding: 10px;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+    }
+    .input-footer {
+      text-align: right;
+      margin-top: 10px;
+    }
+    .send-btn {
+      padding: 8px 25px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .send-btn:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="im-container">
+    <div class="nav-left">
+      <div class="nav-logo">XX</div>
+      <div class="nav-item active">💬<span class="nav-badge">12</span></div>
+      <div class="nav-item">👥</div>
+      <div class="nav-item">📁</div>
+      <div class="nav-item">📅<span class="nav-badge">3</span></div>
+      <div class="nav-bottom">
+        <div class="nav-item">⚙️</div>
+        <div class="nav-avatar">我</div>
+      </div>
+    </div>
+
+    <div class="session-panel">
+      <div class="session-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="搜索联系人、聊天记录">
+        </div>
+      </div>
+      <div class="session-tabs">
+        <div class="session-tab active">全部消息</div>
+        <div class="session-tab">未读</div>
+        <div class="session-tab">群聊</div>
+      </div>
+      <div class="session-list">
+        <div class="session-item active">
+          <div class="session-avatar">李<span class="online-dot"></span></div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">李明-产品部</span>
+              <span class="session-time">14:32</span>
+            </div>
+            <div class="session-msg">好的，我稍后发你文档</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #e74c3c;">产</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">产品设计讨论组</span>
+              <span class="unread-badge">8</span>
+            </div>
+            <div class="session-msg">王经理：这个方案我们再讨论一下</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #f39c12;">张<span class="online-dot"></span></div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">张总</span>
+              <span class="session-time">11:20</span>
+            </div>
+            <div class="session-msg">下午三点开会讨论项目进度</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #9b59b6;">技</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">技术研发群</span>
+              <span class="unread-badge">25</span>
+            </div>
+            <div class="session-msg">陈工：接口文档已经更新了</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #1abc9c;">王<span class="online-dot"></span></div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">王丽-人事部</span>
+              <span class="session-time">昨天</span>
+            </div>
+            <div class="session-msg">请假单我已经审批了</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #e67e22;">财</div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">财务部</span>
+              <span class="session-time">昨天</span>
+            </div>
+            <div class="session-msg">本月报销截止到25号</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-avatar" style="background: #34495e;">赵<span class="online-dot"></span></div>
+          <div class="session-content">
+            <div class="session-top">
+              <span class="session-name">赵设计</span>
+              <span class="session-time">周一</span>
+            </div>
+            <div class="session-msg">设计稿已经发你邮箱了</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div>
+          <div class="chat-title">李明-产品部</div>
+          <div class="chat-subtitle">在线 · 产品经理</div>
+        </div>
+        <div class="chat-actions">
+          <span>📞</span>
+          <span>📹</span>
+          <span>📁</span>
+          <span>⋯</span>
+        </div>
+      </div>
+
+      <div class="chat-messages">
+        <div class="message-time">今天 14:20</div>
+
+        <div class="message-item receive">
+          <div class="message-avatar">李</div>
+          <div class="message-content">
+            <div class="message-name">李明</div>
+            <div class="message-bubble">你好，关于那个新功能的需求文档，我整理好了，你看一下？</div>
+          </div>
+        </div>
+
+        <div class="message-item send">
+          <div class="message-avatar">我</div>
+          <div class="message-content">
+            <div class="message-bubble">好的，发我看看吧</div>
+          </div>
+        </div>
+
+        <div class="message-item receive">
+          <div class="message-avatar">李</div>
+          <div class="message-content">
+            <div class="message-name">李明</div>
+            <div class="message-bubble">主要是用户反馈的几个痛点，我们想在下个版本优化一下<br>包括：<br>1. 消息列表加载速度<br>2. 搜索功能增强<br>3. 文件传输稳定性</div>
+          </div>
+        </div>
+
+        <div class="message-item send">
+          <div class="message-avatar">我</div>
+          <div class="message-content">
+            <div class="message-bubble">收到，我先评估一下工作量</div>
+          </div>
+        </div>
+
+        <div class="message-time">14:30</div>
+
+        <div class="message-item receive">
+          <div class="message-avatar">李</div>
+          <div class="message-content">
+            <div class="message-name">李明</div>
+            <div class="message-bubble">文档我稍后发你，有问题随时沟通</div>
+          </div>
+        </div>
+
+        <div class="message-item send">
+          <div class="message-avatar">我</div>
+          <div class="message-content">
+            <div class="message-bubble">好的，没问题 👍</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-toolbar">
+          <span>😊</span>
+          <span>🖼️</span>
+          <span>📎</span>
+          <span>📁</span>
+          <span>📹</span>
+          <span>📝</span>
+        </div>
+        <div class="input-box" contenteditable="true" placeholder="输入消息，按Enter发送..."></div>
+        <div class="input-footer">
+          <button class="send-btn">发送 (Enter)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

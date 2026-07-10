@@ -1,0 +1,654 @@
+<!--
+  ============================================================
+  联系人列表页 - IM即时通讯系统
+
+  页面功能：XX企业IM联系人列表页面，按组织架构展示联系人
+  布局方式：左侧导航+中间组织架构+右侧联系人详情
+  业务背景：
+    1. 企业内部通讯录查询功能
+    2. 按部门组织架构展示人员
+    3. 支持搜索和快速查找联系人
+
+  设计思路：
+    1. 组织架构树状展示，层级清晰
+    2. 联系人卡片展示关键信息
+    3. 右侧详情区展示完整信息
+
+  技术要点：
+    - 三栏式布局，左中右结构
+    - 树形结构展示组织架构
+    - 列表卡片式展示人员信息
+
+  适用迁移场景：
+    - 企业通讯录页面
+    - 组织架构管理
+    - 人员信息查询系统
+
+  wjs created by 2016-09-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>联系人 - XX企业IM</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: #f0f2f5;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .im-container {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .nav-left {
+      float: left;
+      width: 60px;
+      height: 100%;
+      background: #2c3e50;
+      color: #fff;
+      text-align: center;
+      padding-top: 20px;
+      position: relative;
+    }
+    .nav-logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #3498db;
+      margin-bottom: 30px;
+    }
+    .nav-item {
+      padding: 15px 0;
+      cursor: pointer;
+      color: #95a5a6;
+      font-size: 20px;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .nav-item:hover {
+      color: #fff;
+    }
+    .nav-item.active {
+      color: #fff;
+    }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 15px;
+      bottom: 15px;
+      width: 3px;
+      background: #3498db;
+      border-radius: 0 2px 2px 0;
+    }
+    .nav-bottom {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+    }
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #3498db;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+    }
+    .dept-panel {
+      float: left;
+      width: 240px;
+      height: 100%;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+    }
+    .panel-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #e8e8e8;
+      border-radius: 17px;
+      padding: 0 15px 0 35px;
+      font-size: 13px;
+      outline: none;
+      background: #f5f5f5;
+    }
+    .search-box input:focus {
+      border-color: #3498db;
+      background: #fff;
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #bdc3c7;
+      font-size: 14px;
+    }
+    .dept-tabs {
+      padding: 10px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .dept-tab {
+      float: left;
+      width: 50%;
+      text-align: center;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .dept-tab.active {
+      color: #3498db;
+      border-bottom-color: #3498db;
+      font-weight: bold;
+    }
+    .dept-tree {
+      height: calc(100vh - 110px);
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+    .dept-node {
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .dept-title {
+      padding: 8px 15px;
+      color: #333;
+      transition: background 0.2s;
+    }
+    .dept-title:hover {
+      background: #f5f7fa;
+    }
+    .dept-title.active {
+      background: #e8f4fd;
+      color: #3498db;
+      font-weight: bold;
+    }
+    .dept-title .arrow {
+      display: inline-block;
+      width: 16px;
+      color: #999;
+    }
+    .dept-title .count {
+      float: right;
+      color: #999;
+      font-size: 12px;
+    }
+    .dept-children {
+      display: none;
+    }
+    .dept-children.open {
+      display: block;
+    }
+    .dept-children .dept-title {
+      padding-left: 35px;
+    }
+    .dept-children .dept-children .dept-title {
+      padding-left: 55px;
+    }
+    .contact-panel {
+      margin-left: 300px;
+      margin-right: 300px;
+      background: #f5f5f5;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .contact-header {
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .contact-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+    }
+    .contact-title small {
+      font-size: 13px;
+      color: #999;
+      margin-left: 10px;
+      font-weight: normal;
+    }
+    .contact-actions {
+      color: #666;
+      font-size: 14px;
+    }
+    .contact-actions span {
+      margin-left: 15px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .contact-actions span:hover {
+      background: #f0f0f0;
+    }
+    .contact-list-area {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .letter-group {
+      margin-bottom: 20px;
+    }
+    .letter-title {
+      font-size: 13px;
+      color: #999;
+      padding: 5px 10px;
+      margin-bottom: 8px;
+    }
+    .contact-grid {
+      overflow: hidden;
+      margin: 0 -8px;
+    }
+    .contact-card {
+      float: left;
+      width: 25%;
+      padding: 0 8px;
+      margin-bottom: 12px;
+    }
+    .contact-inner {
+      background: #fff;
+      border-radius: 6px;
+      padding: 15px;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    .contact-inner:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .contact-top {
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .contact-avatar {
+      float: left;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 18px;
+      margin-right: 12px;
+      position: relative;
+    }
+    .online-dot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 14px;
+      height: 14px;
+      background: #2ecc71;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    .contact-info {
+      margin-left: 60px;
+      padding-top: 5px;
+    }
+    .contact-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    .contact-position {
+      font-size: 12px;
+      color: #999;
+    }
+    .contact-dept {
+      font-size: 12px;
+      color: #666;
+      padding-top: 10px;
+      border-top: 1px solid #f5f5f5;
+    }
+    .contact-dept::before {
+      content: "🏢 ";
+      margin-right: 4px;
+    }
+    .detail-panel {
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background: #fff;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+      z-index: 100;
+      padding: 30px 20px;
+    }
+    .detail-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #3498db;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 32px;
+    }
+    .detail-name {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .detail-position {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .detail-actions {
+      text-align: center;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+    .detail-btn {
+      display: inline-block;
+      padding: 8px 20px;
+      border: 1px solid #3498db;
+      border-radius: 4px;
+      color: #3498db;
+      font-size: 13px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    .detail-btn.primary {
+      background: #3498db;
+      color: #fff;
+    }
+    .detail-info {
+      border-top: 1px solid #f0f0f0;
+      padding-top: 20px;
+    }
+    .detail-row {
+      padding: 10px 0;
+      font-size: 13px;
+      color: #666;
+    }
+    .detail-row .label {
+      display: inline-block;
+      width: 60px;
+      color: #999;
+    }
+    .detail-row .value {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="im-container">
+    <div class="nav-left">
+      <div class="nav-logo">XX</div>
+      <div class="nav-item">💬</div>
+      <div class="nav-item active">👥</div>
+      <div class="nav-item">📁</div>
+      <div class="nav-item">📅</div>
+      <div class="nav-bottom">
+        <div class="nav-item">⚙️</div>
+        <div class="nav-avatar">我</div>
+      </div>
+    </div>
+
+    <div class="dept-panel">
+      <div class="panel-header">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="搜索联系人">
+        </div>
+      </div>
+      <div class="dept-tabs">
+        <div class="dept-tab active">组织架构</div>
+        <div class="dept-tab">我的关注</div>
+      </div>
+      <div class="dept-tree">
+        <div class="dept-node">
+          <div class="dept-title active">
+            <span class="arrow">▼</span>XX公司 <span class="count">128</span>
+          </div>
+          <div class="dept-children open">
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▼</span>技术部 <span class="count">35</span>
+              </div>
+              <div class="dept-children open">
+                <div class="dept-title"><span class="arrow">•</span>前端组 <span class="count">8</span></div>
+                <div class="dept-title"><span class="arrow">•</span>后端组 <span class="count">12</span></div>
+                <div class="dept-title"><span class="arrow">•</span>测试组 <span class="count">6</span></div>
+                <div class="dept-title"><span class="arrow">•</span>运维组 <span class="count">4</span></div>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>产品部 <span class="count">15</span>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>设计部 <span class="count">12</span>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>市场部 <span class="count">20</span>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>人事部 <span class="count">8</span>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>财务部 <span class="count">6</span>
+              </div>
+            </div>
+            <div class="dept-node">
+              <div class="dept-title">
+                <span class="arrow">▶</span>行政部 <span class="count">5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="contact-panel">
+      <div class="contact-header">
+        <div class="contact-title">
+          前端组 <small>共 8 人</small>
+        </div>
+        <div class="contact-actions">
+          <span>📋 名单</span>
+          <span>🖼️ 卡片</span>
+          <span>↗️ 发起群聊</span>
+        </div>
+      </div>
+
+      <div class="contact-list-area">
+        <div class="letter-group">
+          <div class="letter-title">C</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #e74c3c;">陈<span class="online-dot"></span></div>
+                  <div class="contact-info">
+                    <div class="contact-name">陈工</div>
+                    <div class="contact-position">高级前端工程师</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="letter-group">
+          <div class="letter-title">L</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #3498db;">李<span class="online-dot"></span></div>
+                  <div class="contact-info">
+                    <div class="contact-name">李明</div>
+                    <div class="contact-position">前端组组长</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #9b59b6;">刘</div>
+                  <div class="contact-info">
+                    <div class="contact-name">刘设计</div>
+                    <div class="contact-position">前端工程师</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="letter-group">
+          <div class="letter-title">W</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #1abc9c;">王<span class="online-dot"></span></div>
+                  <div class="contact-info">
+                    <div class="contact-name">小王</div>
+                    <div class="contact-position">前端工程师</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #f39c12;">吴</div>
+                  <div class="contact-info">
+                    <div class="contact-name">吴同学</div>
+                    <div class="contact-position">实习前端</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="letter-group">
+          <div class="letter-title">Z</div>
+          <div class="contact-grid">
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #e67e22;">张<span class="online-dot"></span></div>
+                  <div class="contact-info">
+                    <div class="contact-name">小张</div>
+                    <div class="contact-position">前端工程师</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+            <div class="contact-card">
+              <div class="contact-inner">
+                <div class="contact-top">
+                  <div class="contact-avatar" style="background: #34495e;">赵<span class="online-dot"></span></div>
+                  <div class="contact-info">
+                    <div class="contact-name">赵开发</div>
+                    <div class="contact-position">资深前端工程师</div>
+                  </div>
+                </div>
+                <div class="contact-dept">技术部-前端组</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-panel">
+      <div class="detail-avatar" style="background: #3498db;">李</div>
+      <div class="detail-name">李明</div>
+      <div class="detail-position">前端组组长</div>
+      <div class="detail-actions">
+        <span class="detail-btn primary">发消息</span>
+        <span class="detail-btn">打电话</span>
+      </div>
+      <div class="detail-info">
+        <div class="detail-row">
+          <span class="label">部门</span>
+          <span class="value">技术部-前端组</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">工号</span>
+          <span class="value">EMP00123</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">手机</span>
+          <span class="value">138****8888</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">邮箱</span>
+          <span class="value">liming@xx.com</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">办公电话</span>
+          <span class="value">010-8888XXXX</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">办公地点</span>
+          <span class="value">A座15层-1503</span>
+        </div>
+        <div class="detail-row">
+          <span class="label">入职时间</span>
+          <span class="value">2014-05-12</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

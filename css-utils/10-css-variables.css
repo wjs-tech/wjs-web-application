@@ -1,0 +1,223 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  10-css-variables.css - CSS变量主题
+
+  功能说明：
+    1. 主题色变量：主色、成功、警告、危险、信息
+    2. 字体变量：基准字号、小号、大号、字体族
+    3. 间距变量：超小、小号、中号、大号、超大
+    4. 圆角变量：小圆角、默认圆角、大圆角
+    5. 阴影变量：小阴影、默认阴影、大阴影
+    6. 过渡变量：过渡时长、过渡时间函数
+    7. 暗色模式变量：背景色、文字色、边框色
+
+  适用场景：
+    - 项目主题色统一管理
+    - 亮色/暗色模式切换
+    - 设计系统基础变量定义
+    - 快速定制项目样式风格
+
+  技术要点：
+    - 使用CSS自定义属性（CSS Variables）
+    - 支持 :root 全局变量定义
+    - 可通过JS动态修改变量实现主题切换
+    - 暗色模式使用 [data-theme="dark"] 选择器
+
+  wjs created by 2022-05-15
+  ============================================================
+*/
+
+/* ========== 默认主题（亮色模式） ========== */
+
+:root {
+  /* ---------- 主题色变量 ---------- */
+
+  /* 主色调 */
+  --primary-color: #337ab7;
+  --primary-color-hover: #286090;
+  --primary-color-light: #d9edf7;
+
+  /* 成功色 */
+  --success-color: #5cb85c;
+  --success-color-hover: #4cae4c;
+  --success-color-light: #dff0d8;
+
+  /* 警告色 */
+  --warning-color: #f0ad4e;
+  --warning-color-hover: #eea236;
+  --warning-color-light: #fcf8e3;
+
+  /* 危险色 */
+  --danger-color: #d9534f;
+  --danger-color-hover: #d43f3a;
+  --danger-color-light: #f2dede;
+
+  /* 信息色 */
+  --info-color: #5bc0de;
+  --info-color-hover: #46b8da;
+  --info-color-light: #d9edf7;
+
+  /* ---------- 字体变量 ---------- */
+
+  /* 基准字号 16px */
+  --font-size-base: 1rem;
+
+  /* 小号字号 14px */
+  --font-size-sm: 0.875rem;
+
+  /* 大号字号 18px */
+  --font-size-lg: 1.125rem;
+
+  /* 字体族 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* 行高 */
+  --line-height-base: 1.5;
+
+  /* ---------- 间距变量 ---------- */
+
+  /* 超小间距 4px */
+  --spacing-xs: 0.25rem;
+
+  /* 小间距 8px */
+  --spacing-sm: 0.5rem;
+
+  /* 中间距 16px */
+  --spacing-md: 1rem;
+
+  /* 大间距 24px */
+  --spacing-lg: 1.5rem;
+
+  /* 超大间距 32px */
+  --spacing-xl: 2rem;
+
+  /* ---------- 圆角变量 ---------- */
+
+  /* 小圆角 2px */
+  --border-radius-sm: 2px;
+
+  /* 默认圆角 4px */
+  --border-radius: 4px;
+
+  /* 大圆角 8px */
+  --border-radius-lg: 8px;
+
+  /* ---------- 阴影变量 ---------- */
+
+  /* 小阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+
+  /* 默认阴影 */
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  /* 大阴影 */
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* ---------- 过渡变量 ---------- */
+
+  /* 过渡时长 */
+  --transition-duration: 0.3s;
+
+  /* 过渡时间函数 */
+  --transition-timing-function: ease;
+
+  /* 完整过渡 */
+  --transition: all var(--transition-duration) var(--transition-timing-function);
+
+  /* ---------- 基础色（亮色模式） ---------- */
+
+  /* 背景色 */
+  --bg-color: #ffffff;
+  --bg-color-secondary: #f5f5f5;
+  --bg-color-tertiary: #eeeeee;
+
+  /* 文字色 */
+  --text-color: #333333;
+  --text-color-secondary: #666666;
+  --text-color-muted: #999999;
+
+  /* 边框色 */
+  --border-color: #dddddd;
+  --border-color-light: #eeeeee;
+
+  /* 分割线 */
+  --divider-color: #e5e5e5;
+}
+
+/* ========== 暗色模式变量 ========== */
+/* 使用方式：在 <html> 或 <body> 标签添加 data-theme="dark" */
+
+[data-theme="dark"] {
+  /* ---------- 主题色变量（暗色模式） ---------- */
+
+  --primary-color: #4a9eff;
+  --primary-color-hover: #66b0ff;
+  --primary-color-light: #1a3a5c;
+
+  --success-color: #67c267;
+  --success-color-hover: #7dcf7d;
+  --success-color-light: #1e3a1e;
+
+  --warning-color: #f5b85a;
+  --warning-color-hover: #f7c878;
+  --warning-color-light: #3d3018;
+
+  --danger-color: #e06a67;
+  --danger-color-hover: #e88784;
+  --danger-color-light: #3d2020;
+
+  --info-color: #6ecfea;
+  --info-color-hover: #8cd9ef;
+  --info-color-light: #1a3540;
+
+  /* ---------- 基础色（暗色模式） ---------- */
+
+  /* 背景色 */
+  --bg-color: #1a1a2e;
+  --bg-color-secondary: #16213e;
+  --bg-color-tertiary: #0f3460;
+
+  /* 文字色 */
+  --text-color: #e8e8e8;
+  --text-color-secondary: #b0b0b0;
+  --text-color-muted: #808080;
+
+  /* 边框色 */
+  --border-color: #3a3a5c;
+  --border-color-light: #2a2a4a;
+
+  /* 分割线 */
+  --divider-color: #2d2d44;
+
+  /* ---------- 阴影变量（暗色模式） ---------- */
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+}
+
+/* ========== 使用示例（注释说明） ========== */
+/*
+  使用方式：
+  1. 在项目中引入本文件
+  2. 在CSS中使用 var() 函数引用变量
+
+  示例：
+  .button {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+
+  .button:hover {
+    background-color: var(--primary-color-hover);
+  }
+
+  主题切换（JS）：
+  document.documentElement.setAttribute('data-theme', 'dark');
+  document.documentElement.setAttribute('data-theme', 'light');
+*/

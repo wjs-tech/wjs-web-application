@@ -1,0 +1,655 @@
+<!--
+  ============================================================
+  学习报告页 - 教育学习平台
+
+  页面功能：XX教育平台个人学习报告，展示学习数据和进度
+  布局方式：顶部概览+下方数据卡片网格的布局
+  业务背景：
+    1. 学习数据统计和分析
+    2. 学习进度和成就展示
+    3. 学习时长和课程完成情况
+
+  设计思路：
+    1. 数据可视化展示学习成果
+    2. 进度条直观展示完成度
+    3. 成就徽章激励学习
+
+  技术要点：
+    - CSS进度条样式
+    - 数据卡片网格布局
+    - 统计数据视觉层次
+
+  适用迁移场景：
+    - 学习数据统计报告
+    - 个人学习中心
+    - 学习成就展示页
+
+  wjs created by 2018-06-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习报告 - XX教育</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 12px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      color: #673ab7;
+      line-height: 36px;
+    }
+    .logo span { color: #ff9800; }
+    .nav-menu { float: left; margin-left: 40px; }
+    .nav-item {
+      float: left;
+      padding: 0 18px;
+      line-height: 36px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #673ab7; }
+    .nav-item.active { color: #673ab7; font-weight: bold; }
+    .user-info {
+      float: right;
+      line-height: 36px;
+      font-size: 14px;
+    }
+    .user-avatar {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #673ab7;
+      color: #fff;
+      text-align: center;
+      line-height: 28px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+    }
+    .report-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 35px 40px;
+      color: #fff;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .report-header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 50%;
+    }
+    .report-header::after {
+      content: "";
+      position: absolute;
+      bottom: -30%;
+      right: 15%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+    .report-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .report-subtitle {
+      font-size: 15px;
+      opacity: 0.85;
+      margin-bottom: 25px;
+    }
+    .header-stats {
+      overflow: hidden;
+    }
+    .stat-item {
+      float: left;
+      margin-right: 60px;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .stat-value small {
+      font-size: 16px;
+      font-weight: normal;
+      opacity: 0.8;
+      margin-left: 3px;
+    }
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 25px 0 15px;
+      padding-left: 12px;
+      border-left: 4px solid #673ab7;
+    }
+    .card-row {
+      overflow: hidden;
+      margin: 0 -10px;
+    }
+    .stat-card {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+      margin-bottom: 20px;
+    }
+    .card-inner {
+      background: #fff;
+      border-radius: 10px;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform 0.2s;
+    }
+    .card-inner:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .icon-blue { background: #e6f7ff; }
+    .icon-green { background: #f6ffed; }
+    .icon-orange { background: #fff7e6; }
+    .icon-purple { background: #f9f0ff; }
+    .card-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .card-value small {
+      font-size: 14px;
+      color: #999;
+      font-weight: normal;
+      margin-left: 3px;
+    }
+    .card-label {
+      font-size: 14px;
+      color: #999;
+    }
+    .two-col {
+      overflow: hidden;
+    }
+    .left-col {
+      float: left;
+      width: 65%;
+    }
+    .right-col {
+      float: right;
+      width: 33%;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .panel-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .course-progress-item {
+      margin-bottom: 18px;
+    }
+    .course-progress-item:last-child {
+      margin-bottom: 0;
+    }
+    .progress-header {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-name {
+      float: left;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+    .progress-percent {
+      float: right;
+      font-size: 13px;
+      color: #673ab7;
+      font-weight: bold;
+    }
+    .progress-bar {
+      height: 8px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.5s;
+    }
+    .progress-meta {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #bbb;
+    }
+    .achievement-list {
+      overflow: hidden;
+    }
+    .achievement-item {
+      float: left;
+      width: 33.33%;
+      text-align: center;
+      padding: 15px 5px;
+    }
+    .badge {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .badge-gold {
+      background: linear-gradient(135deg, #ffd700, #ffb300);
+      color: #fff;
+    }
+    .badge-silver {
+      background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+      color: #fff;
+    }
+    .badge-bronze {
+      background: linear-gradient(135deg, #cd7f32, #b87333);
+      color: #fff;
+    }
+    .badge-blue {
+      background: linear-gradient(135deg, #64b5f6, #42a5f5);
+      color: #fff;
+    }
+    .badge-green {
+      background: linear-gradient(135deg, #81c784, #66bb6a);
+      color: #fff;
+    }
+    .badge-purple {
+      background: linear-gradient(135deg, #ba68c8, #ab47bc);
+      color: #fff;
+    }
+    .badge.locked {
+      background: #f0f0f0;
+      color: #ccc;
+      filter: grayscale(100%);
+      opacity: 0.5;
+    }
+    .badge-name {
+      font-size: 13px;
+      color: #555;
+    }
+    .chart-area {
+      height: 280px;
+      background: linear-gradient(180deg, #f9f7ff 0%, #fff 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      padding: 20px 20px 40px;
+      position: relative;
+      box-sizing: border-box;
+    }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      width: 100%;
+      height: 100%;
+    }
+    .chart-bar {
+      width: 28px;
+      background: linear-gradient(180deg, #667eea, #9c27b0);
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: height 0.5s;
+    }
+    .chart-bar::after {
+      content: attr(data-hours);
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #673ab7;
+      font-weight: bold;
+    }
+    .chart-bar span {
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #999;
+      white-space: nowrap;
+    }
+    .rank-panel {
+      margin-top: 15px;
+    }
+    .rank-list {
+      margin-top: 10px;
+    }
+    .rank-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+      overflow: hidden;
+    }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-num {
+      float: left;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 50%;
+      background: #f0f0f0;
+      color: #999;
+      font-size: 13px;
+      font-weight: bold;
+      margin-right: 12px;
+    }
+    .rank-num.top1 { background: #ffd700; color: #fff; }
+    .rank-num.top2 { background: #c0c0c0; color: #fff; }
+    .rank-num.top3 { background: #cd7f32; color: #fff; }
+    .rank-name {
+      float: left;
+      line-height: 30px;
+      font-size: 14px;
+      color: #555;
+    }
+    .rank-item.mine .rank-name { color: #673ab7; font-weight: bold; }
+    .rank-hours {
+      float: right;
+      line-height: 30px;
+      font-size: 13px;
+      color: #673ab7;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX<span>教育</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item">全部课程</div>
+        <div class="nav-item">我的学习</div>
+        <div class="nav-item active">学习报告</div>
+        <div class="nav-item">社区</div>
+      </div>
+      <div class="user-info">
+        <span class="user-avatar">学</span>
+        学员你好
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="report-header">
+      <div class="header-content">
+        <div class="report-title">2018年上半年学习报告</div>
+        <div class="report-subtitle">2018.01.01 - 2018.06.30 · 坚持学习，遇见更好的自己</div>
+        <div class="header-stats">
+          <div class="stat-item">
+            <div class="stat-value">186<small>小时</small></div>
+            <div class="stat-label">累计学习时长</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">12<small>门</small></div>
+            <div class="stat-label">已完成课程</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">156<small>天</small></div>
+            <div class="stat-label">连续学习天数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">TOP 5%</div>
+            <div class="stat-label">全站排名</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">学习概览</div>
+    <div class="card-row">
+      <div class="stat-card">
+        <div class="card-inner">
+          <div class="card-icon icon-blue">📚</div>
+          <div class="card-value">24<small>门</small></div>
+          <div class="card-label">在学课程</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="card-inner">
+          <div class="card-icon icon-green">✅</div>
+          <div class="card-value">12<small>门</small></div>
+          <div class="card-label">已完成课程</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="card-inner">
+          <div class="card-icon icon-orange">📝</div>
+          <div class="card-value">328<small>节</small></div>
+          <div class="card-label">已学课时</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="card-inner">
+          <div class="card-icon icon-purple">📊</div>
+          <div class="card-value">92.5<small>%</small></div>
+          <div class="card-label">平均完成率</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="left-col">
+        <div class="panel">
+          <div class="panel-title">在学课程进度</div>
+          <div class="course-progress-item">
+            <div class="progress-header">
+              <span class="progress-name">Vue.js全家桶实战开发</span>
+              <span class="progress-percent">78%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 78%"></div>
+            </div>
+            <div class="progress-meta">76/98 课时 · 已学 35小时20分</div>
+          </div>
+          <div class="course-progress-item">
+            <div class="progress-header">
+              <span class="progress-name">JavaScript高级程序设计</span>
+              <span class="progress-percent">65%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 65%"></div>
+            </div>
+            <div class="progress-meta">52/80 课时 · 已学 28小时15分</div>
+          </div>
+          <div class="course-progress-item">
+            <div class="progress-header">
+              <span class="progress-name">React从入门到精通</span>
+              <span class="progress-percent">42%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 42%"></div>
+            </div>
+            <div class="progress-meta">47/112 课时 · 已学 22小时10分</div>
+          </div>
+          <div class="course-progress-item">
+            <div class="progress-header">
+              <span class="progress-name">Node.js服务端开发</span>
+              <span class="progress-percent">25%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 25%"></div>
+            </div>
+            <div class="progress-meta">27/108 课时 · 已学 12小时30分</div>
+          </div>
+          <div class="course-progress-item">
+            <div class="progress-header">
+              <span class="progress-name">TypeScript深入理解</span>
+              <span class="progress-percent">58%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 58%"></div>
+            </div>
+            <div class="progress-meta">42/72 课时 · 已学 18小时45分</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="panel">
+          <div class="panel-title">获得的成就</div>
+          <div class="achievement-list">
+            <div class="achievement-item">
+              <div class="badge badge-gold">🏆</div>
+              <div class="badge-name">学习达人</div>
+            </div>
+            <div class="achievement-item">
+              <div class="badge badge-blue">⭐</div>
+              <div class="badge-name">坚持标兵</div>
+            </div>
+            <div class="achievement-item">
+              <div class="badge badge-green">📖</div>
+              <div class="badge-name">知识渊博</div>
+            </div>
+            <div class="achievement-item">
+              <div class="badge badge-purple">💻</div>
+              <div class="badge-name">技术先锋</div>
+            </div>
+            <div class="achievement-item">
+              <div class="badge badge-silver">🥈</div>
+              <div class="badge-name">进阶学者</div>
+            </div>
+            <div class="achievement-item">
+              <div class="badge locked">🔒</div>
+              <div class="badge-name">全栈大师</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top: 20px;">
+      <div class="left-col">
+        <div class="panel">
+          <div class="panel-title">近6个月学习时长</div>
+          <div class="chart-area">
+            <div class="chart-bars">
+              <div class="chart-bar" data-hours="22h" style="height: 35%">
+                <span>1月</span>
+              </div>
+              <div class="chart-bar" data-hours="28h" style="height: 45%">
+                <span>2月</span>
+              </div>
+              <div class="chart-bar" data-hours="35h" style="height: 56%">
+                <span>3月</span>
+              </div>
+              <div class="chart-bar" data-hours="32h" style="height: 51%">
+                <span>4月</span>
+              </div>
+              <div class="chart-bar" data-hours="42h" style="height: 67%">
+                <span>5月</span>
+              </div>
+              <div class="chart-bar" data-hours="48h" style="height: 77%">
+                <span>6月</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col">
+        <div class="panel rank-panel">
+          <div class="panel-title">学习排行榜</div>
+          <div class="rank-list">
+            <div class="rank-item">
+              <div class="rank-num top1">1</div>
+              <div class="rank-name">学***8</div>
+              <div class="rank-hours">328h</div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-num top2">2</div>
+              <div class="rank-name">程***者</div>
+              <div class="rank-hours">295h</div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-num top3">3</div>
+              <div class="rank-name">前***神</div>
+              <div class="rank-hours">268h</div>
+            </div>
+            <div class="rank-item mine">
+              <div class="rank-num">12</div>
+              <div class="rank-name">我（学员）</div>
+              <div class="rank-hours">186h</div>
+            </div>
+            <div class="rank-item">
+              <div class="rank-num">13</div>
+              <div class="rank-name">码***农</div>
+              <div class="rank-hours">182h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

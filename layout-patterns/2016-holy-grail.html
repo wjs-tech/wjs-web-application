@@ -1,0 +1,116 @@
+﻿<!--
+  ============================================================
+  圣杯布局 - 经典三栏布局，中间列优先渲染，负margin实现
+
+  布局方式：float浮动 + 负margin + relative定位
+  布局思想：
+    1. 中间列放在HTML最前面，优先渲染，提升SEO和首屏体验
+    2. 三列全部使用float:left，通过负margin把左右栏拉到中间列两侧
+    3. 父容器使用左右padding为左右栏预留空间，相对定位微调位置
+
+  适用场景：
+    - 内容优先的门户网站三栏布局
+    - 电商商品详情页（中间主图+价格最重要）
+    - 博客文章页（中间正文优先加载）
+
+  技术要点：
+    - 中间列放在HTML结构最前面
+    - 三列全部float:left
+    - 左栏 margin-left: -100% 拉到最左边
+    - 右栏 margin-left: -右栏宽度 拉到最右边
+    - 父容器 padding 为左右栏预留空间
+    - 左右栏使用 position: relative 调整位置
+
+  可迁移性：
+    - 可迁移到任何需要三栏布局的网页
+    - 是经典布局方案，兼容性好
+    - 双飞翼布局是其改进版本
+
+  wjs created by 2016-08-05
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圣杯布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; min-width: 600px; }
+    .header {
+      height: 60px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 60px;
+      text-align: center;
+    }
+    .container {
+      padding: 0 200px 0 220px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+    .main {
+      float: left;
+      width: 100%;
+      height: 500px;
+      background: #ecf0f1;
+      padding: 20px;
+    }
+    .left {
+      float: left;
+      width: 200px;
+      margin-left: -100%;
+      position: relative;
+      left: -220px;
+      height: 500px;
+      background: #e74c3c;
+      color: #fff;
+      padding: 20px;
+    }
+    .right {
+      float: left;
+      width: 180px;
+      margin-left: -180px;
+      position: relative;
+      right: -200px;
+      height: 500px;
+      background: #9b59b6;
+      color: #fff;
+      padding: 20px;
+    }
+    .footer {
+      clear: both;
+      height: 50px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">头部 - 圣杯布局 Demo (中间列优先)</div>
+  <div class="container">
+    <div class="main">
+      <h2>主内容区（中间列）</h2>
+      <p>HTML结构中排在第一位</p>
+      <p>优先渲染，SEO友好</p>
+      <p>宽度自适应</p>
+    </div>
+    <div class="left">
+      <h3>左侧栏</h3>
+      <p>定宽 200px</p>
+      <p>margin-left: -100%</p>
+      <p>position: relative</p>
+    </div>
+    <div class="right">
+      <h3>右侧栏</h3>
+      <p>定宽 180px</p>
+      <p>margin-left: -180px</p>
+      <p>position: relative</p>
+    </div>
+  </div>
+  <div class="footer">底部</div>
+</body>
+</html>

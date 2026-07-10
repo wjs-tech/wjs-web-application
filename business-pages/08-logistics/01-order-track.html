@@ -1,0 +1,592 @@
+<!--
+  ============================================================
+  订单物流追踪页 - 物流管理系统
+
+  页面功能：XX物流订单物流追踪页面，展示包裹运输轨迹
+  布局方式：左侧订单信息+右侧物流轨迹的两栏布局
+  业务背景：
+    1. 物流订单实时追踪
+    2. 包裹运输节点展示
+    3. 配送员和网点信息展示
+
+  设计思路：
+    1. 时间轴展示物流轨迹
+    2. 当前状态醒目展示
+    3. 信息层次分明
+
+  技术要点：
+    - 时间轴样式实现
+    - float两栏布局
+    - 状态颜色区分
+
+  适用迁移场景：
+    - 物流订单追踪页
+    - 快递查询页面
+    - 订单配送跟踪
+
+  wjs created by 2019-02-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>订单物流追踪 - XX物流</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 26px;
+      font-weight: bold;
+      color: #1890ff;
+      line-height: 40px;
+    }
+    .logo span { color: #666; font-weight: normal; font-size: 14px; margin-left: 10px; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 40px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #1890ff; }
+    .nav-item.active { color: #1890ff; font-weight: bold; }
+    .search-box {
+      float: right;
+      margin-top: 5px;
+    }
+    .search-input {
+      width: 280px;
+      height: 36px;
+      padding: 0 90px 0 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 18px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 70px;
+      height: 32px;
+      background: #1890ff;
+      color: #fff;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .search-box { position: relative; }
+    .main {
+      width: 1200px;
+      margin: 25px auto;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a {
+      color: #999;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { color: #1890ff; }
+    .left-panel {
+      float: left;
+      width: 340px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 15px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #1890ff;
+    }
+    .card-body {
+      padding: 20px;
+}
+    .order-status {
+      text-align: center;
+      padding: 10px 0 20px;
+    }
+    .status-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #e6f7ff;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .status-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1890ff;
+      margin-bottom: 5px;
+    }
+    .status-desc {
+      font-size: 13px;
+      color: #999;
+    }
+    .info-item {
+      padding: 10px 0;
+      font-size: 13px;
+      border-bottom: 1px dashed #f0f0f0;
+      overflow: hidden;
+    }
+    .info-item:last-child { border-bottom: none; }
+    .info-label {
+      float: left;
+      color: #999;
+      width: 80px;
+    }
+    .info-value {
+      margin-left: 80px;
+      color: #333;
+    }
+    .info-value.copy {
+      color: #1890ff;
+      cursor: pointer;
+    }
+    .address-box {
+      background: #fafafa;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+    .address-header {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .address-type {
+      float: left;
+      background: #1890ff;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .address-type.receiver { background: #52c41a; }
+    .address-name {
+      float: left;
+      font-size: 14px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .address-phone {
+      float: right;
+      font-size: 13px;
+      color: #666;
+    }
+    .address-detail {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .courier-card {
+      text-align: center;
+      padding: 10px 0;
+    }
+    .courier-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    .courier-name {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .courier-phone {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .courier-btn {
+      padding: 6px 20px;
+      border: 1px solid #1890ff;
+      background: #fff;
+      color: #1890ff;
+      border-radius: 15px;
+      font-size: 13px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    .courier-btn.primary {
+      background: #1890ff;
+      color: #fff;
+    }
+    .right-panel {
+      margin-left: 360px;
+    }
+    .timeline-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px 40px;
+    }
+    .timeline-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .timeline-title span {
+      font-size: 14px;
+      color: #999;
+      font-weight: normal;
+      margin-left: 15px;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 5px;
+      bottom: 5px;
+      width: 2px;
+      background: #f0f0f0;
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 25px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot {
+      position: absolute;
+      left: -30px;
+      top: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      border: 4px solid #d9d9d9;
+    }
+    .timeline-item.active .timeline-dot {
+      background: #1890ff;
+      border-color: #bae7ff;
+    }
+    .timeline-item.done .timeline-dot {
+      background: #52c41a;
+      border-color: #d9f7be;
+    }
+    .timeline-date {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .timeline-item.active .timeline-date {
+      color: #1890ff;
+      font-weight: bold;
+    }
+    .timeline-content {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .timeline-item.active .timeline-content {
+      color: #1890ff;
+      font-weight: 600;
+    }
+    .timeline-detail {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 5px;
+    }
+    .goods-box {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .goods-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .goods-item {
+      padding: 12px 0;
+      border-bottom: 1px dashed #f5f5f5;
+      overflow: hidden;
+    }
+    .goods-item:last-child { border-bottom: none; }
+    .goods-img {
+      float: left;
+      width: 50px;
+      height: 50px;
+      background: #f5f5f5;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .goods-info {
+      margin-left: 65px;
+    }
+    .goods-name {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .goods-spec {
+      font-size: 12px;
+      color: #999;
+    }
+    .goods-right {
+      float: right;
+      text-align: right;
+    }
+    .goods-price {
+      font-size: 14px;
+      color: #f5222d;
+      font-weight: bold;
+    }
+    .goods-count {
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX物流<span>专业物流服务平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item active">物流追踪</div>
+        <div class="nav-item">运单管理</div>
+        <div class="nav-item">网点查询</div>
+        <div class="nav-item">价格查询</div>
+      </div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="输入运单号查询">
+        <button class="search-btn">查询</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>物流追踪</a> / <span style="color: #333;">运单详情</span>
+    </div>
+
+    <div class="left-panel">
+      <div class="card">
+        <div class="card-body">
+          <div class="order-status">
+            <div class="status-icon">🚚</div>
+            <div class="status-text">运输中</div>
+            <div class="status-desc">预计2019-02-18 18:00前送达</div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">运单号</span>
+            <span class="info-value copy">SF201902150012345</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">下单时间</span>
+            <span class="info-value">2019-02-15 10:25:36</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">物品类型</span>
+            <span class="info-value">电子产品</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">运费</span>
+            <span class="info-value" style="color: #f5222d; font-weight: bold;">¥ 25.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">收寄信息</div>
+        </div>
+        <div class="card-body">
+          <div class="address-box">
+            <div class="address-header">
+              <span class="address-type">寄件</span>
+              <span class="address-name">张**</span>
+              <span class="address-phone">138****8888</span>
+            </div>
+            <div class="address-detail">
+              广东省深圳市南山区科技园XX大厦A座15楼
+            </div>
+          </div>
+          <div class="address-box">
+            <div class="address-header">
+              <span class="address-type receiver">收件</span>
+              <span class="address-name">李**</span>
+              <span class="address-phone">139****6666</span>
+            </div>
+            <div class="address-detail">
+              北京市朝阳区XX路XX号XX小区B栋802室
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">配送员信息</div>
+        </div>
+        <div class="card-body">
+          <div class="courier-card">
+            <div class="courier-avatar">王</div>
+            <div class="courier-name">王师傅</div>
+            <div class="courier-phone">136****9999</div>
+            <div>
+              <button class="courier-btn">📞 拨打电话</button>
+              <button class="courier-btn primary">💬 发消息</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <div class="timeline-card">
+        <div class="timeline-title">
+          物流轨迹
+          <span>共 8 个节点</span>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-item active">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-16 14:25:18</div>
+            <div class="timeline-content">快件已到达【北京朝阳区转运中心】，正在分拣中</div>
+            <div class="timeline-detail">操作员：刘师傅 · 扫描设备：PDA0235</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-16 08:30:42</div>
+            <div class="timeline-content">快件已从【石家庄转运中心】发出，正在运往下一站</div>
+            <div class="timeline-detail">车辆：京A·12345 · 司机：赵师傅</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-16 02:15:33</div>
+            <div class="timeline-content">快件已到达【石家庄转运中心】</div>
+            <div class="timeline-detail">操作员：张师傅 · 扫描设备：PDA0156</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-15 22:40:15</div>
+            <div class="timeline-content">快件已从【郑州转运中心】发出，正在运往下一站</div>
+            <div class="timeline-detail">车辆：豫A·88888 · 司机：李师傅</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-15 18:55:28</div>
+            <div class="timeline-content">快件已到达【郑州转运中心】</div>
+            <div class="timeline-detail">操作员：王师傅 · 扫描设备：PDA0089</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-15 15:20:41</div>
+            <div class="timeline-content">快件已从【深圳南山集散中心】发出，正在运往下一站</div>
+            <div class="timeline-detail">车辆：粤B·66666 · 司机：陈师傅</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-15 14:05:12</div>
+            <div class="timeline-content">快件已到达【深圳南山集散中心】</div>
+            <div class="timeline-detail">操作员：林师傅 · 扫描设备：PDA0056</div>
+          </div>
+
+          <div class="timeline-item done">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">2019-02-15 10:25:36</div>
+            <div class="timeline-content">快件已揽收，揽收员：王师傅</div>
+            <div class="timeline-detail">揽收网点：深圳科技园营业部</div>
+          </div>
+        </div>
+
+        <div class="goods-box">
+          <div class="goods-title">商品清单（共2件）</div>
+          <div class="goods-item">
+            <div class="goods-img">📱</div>
+            <div class="goods-info">
+              <div class="goods-name">XX品牌智能手机 Pro版</div>
+              <div class="goods-spec">颜色：曜石黑 · 容量：256GB</div>
+            </div>
+            <div class="goods-right">
+              <div class="goods-price">¥ 4,999.00</div>
+              <div class="goods-count">× 1</div>
+            </div>
+          </div>
+          <div class="goods-item">
+            <div class="goods-img">🎧</div>
+            <div class="goods-info">
+              <div class="goods-name">XX品牌无线蓝牙耳机</div>
+              <div class="goods-spec">颜色：白色</div>
+            </div>
+            <div class="goods-right">
+              <div class="goods-price">¥ 299.00</div>
+              <div class="goods-count">× 1</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

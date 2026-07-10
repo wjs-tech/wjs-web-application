@@ -1,0 +1,723 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IM即时通讯 - wjs-web-application</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f5f7fa;
+  color: #303133;
+  overflow: hidden;
+  height: 100vh;
+}
+
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a1f3a 0%, #252b4b 50%, #1a1f3a 100%);
+  color: #fff;
+  z-index: 1000;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed:hover {
+  width: 280px;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 80px;
+  position: relative;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 20px 14px;
+  justify-content: center;
+}
+
+.sidebar-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+}
+
+.sidebar.collapsed .sidebar-icon {
+  width: 36px;
+  height: 36px;
+  font-size: 1.5rem;
+}
+
+.sidebar-title-group {
+  flex: 1;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .sidebar-title-group {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+}
+
+.sidebar.collapsed:hover .sidebar-title-group {
+  opacity: 1;
+  pointer-events: auto;
+  width: auto;
+}
+
+.sidebar-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.sidebar-year {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+}
+
+.collapse-btn {
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transition: transform 0.3s;
+  z-index: 1001;
+}
+
+.sidebar.collapsed .collapse-btn {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding: 16px 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.sidebar.collapsed .sidebar-menu {
+  padding: 16px 6px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.2s;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+
+.sidebar.collapsed .menu-item {
+  padding: 12px 10px;
+  justify-content: center;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0 2px 2px 0;
+  transition: height 0.3s;
+}
+
+.sidebar.collapsed .menu-item::before {
+  left: -6px;
+}
+
+.menu-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.menu-item.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
+  color: #fff;
+}
+
+.menu-item.active::before {
+  height: 28px;
+}
+
+.menu-item-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  flex-shrink: 0;
+}
+
+.menu-item.active .menu-item-num {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.menu-item-text {
+  flex: 1;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .menu-item-text {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+}
+
+.sidebar.collapsed:hover .menu-item-text {
+  opacity: 1;
+  pointer-events: auto;
+  width: auto;
+}
+
+.menu-item-name {
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.menu-item-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-item.active .menu-item-desc {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-footer {
+  padding: 16px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 16px 6px;
+}
+
+.back-home {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.sidebar.collapsed .back-home {
+  padding: 12px 10px;
+  justify-content: center;
+}
+
+.back-home:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.back-home-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.back-home-text {
+  flex: 1;
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.sidebar.collapsed .back-home-text {
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+}
+
+.sidebar.collapsed:hover .back-home-text {
+  opacity: 1;
+  pointer-events: auto;
+  width: auto;
+}
+
+.main-content {
+  margin-left: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar.collapsed ~ .main-content {
+  margin-left: 60px;
+}
+
+.top-bar {
+  height: 56px;
+  background: #fff;
+  border-bottom: 1px solid #ebeef5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-list-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  color: #606266;
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.back-list-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f5f7ff;
+}
+
+.current-page-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #303133;
+}
+
+.current-page-title .current-page-desc {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #909399;
+  margin-left: 10px;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.top-bar-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.top-bar-btn.secondary {
+  background: #fff;
+  color: #667eea;
+  border: 1px solid #dcdfe6;
+}
+
+.top-bar-btn.secondary:hover {
+  border-color: #667eea;
+  background: #f5f7ff;
+  box-shadow: none;
+}
+
+.iframe-container {
+  flex: 1;
+  position: relative;
+  background: #fff;
+  overflow: hidden;
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  transition: opacity 0.3s;
+}
+
+.iframe-container iframe.loading {
+  opacity: 0;
+}
+
+.iframe-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #909399;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #ebeef5;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.mobile-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #606266;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.mobile-overlay.show {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 280px;
+  }
+  
+  .sidebar.mobile-show {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 280px;
+  }
+  
+  .sidebar.collapsed:hover {
+    width: 280px;
+  }
+  
+  .sidebar.collapsed .sidebar-header,
+  .sidebar.collapsed .sidebar-menu,
+  .sidebar.collapsed .sidebar-footer {
+    padding: 24px 20px;
+  }
+  
+  .sidebar.collapsed .sidebar-title-group,
+  .sidebar.collapsed .menu-item-text,
+  .sidebar.collapsed .back-home-text {
+    opacity: 1;
+    pointer-events: auto;
+    width: auto;
+  }
+  
+  .sidebar.collapsed .menu-item {
+    justify-content: flex-start;
+    padding: 12px 14px;
+  }
+  
+  .sidebar.collapsed .menu-item::before {
+    left: -10px;
+  }
+  
+  .sidebar.collapsed .collapse-btn {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+  }
+  
+  .mobile-overlay {
+    display: block;
+  }
+  
+  .top-bar {
+    padding: 0 16px;
+  }
+  
+  .current-page-title .current-page-desc {
+    display: none;
+  }
+  
+  .back-list-btn span:last-child,
+  .top-bar-btn span:last-child {
+    display: none;
+  }
+  
+  .back-list-btn,
+  .top-bar-btn {
+    padding: 8px 10px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-icon">💬</div>
+    <div class="sidebar-title-group">
+      <div class="sidebar-title">IM即时通讯</div>
+      <div class="sidebar-year">4个页面 · 2016年</div>
+    </div>
+    <button class="collapse-btn" onclick="toggleSidebar()" title="收起/展开侧边栏">‹</button>
+  </div>
+  
+  <div class="sidebar-menu" id="menuList">
+  </div>
+  
+  <div class="sidebar-footer">
+    <a href="../../index.html#module1" class="back-home">
+      <span class="back-home-icon">🏠</span>
+      <span class="back-home-text">返回首页</span>
+    </a>
+  </div>
+</div>
+
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileMenu()"></div>
+
+<div class="main-content">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+      <a href="../../index.html#module1" class="back-list-btn">
+        <span>←</span>
+        <span>返回列表</span>
+      </a>
+      <div class="current-page-title" id="currentPageTitle">
+        IM登录页
+        <span class="current-page-desc">账号密码登录，记住登录状态</span>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <button class="top-bar-btn secondary" onclick="reloadIframe()" title="刷新">
+        <span>🔄</span>
+        <span>刷新</span>
+      </button>
+      <a href="" class="top-bar-btn" id="newWindowBtn" target="_blank">
+        <span>↗</span>
+        <span>新窗口打开</span>
+      </a>
+    </div>
+  </div>
+  
+  <div class="iframe-container">
+    <div class="iframe-loading" id="iframeLoading">
+      <div class="spinner"></div>
+      <div>页面加载中...</div>
+    </div>
+    <iframe id="previewFrame" src="01-login.html" onload="hideLoading()"></iframe>
+  </div>
+</div>
+
+<script>
+var pages = [
+  { file: '01-login.html', name: 'IM登录页', desc: '账号密码登录，记住登录状态' },
+  { file: '02-main-layout.html', name: '主界面布局', desc: '左侧会话列表 + 右侧聊天区' },
+  { file: '03-contact-list.html', name: '联系人列表页', desc: '好友分组、搜索、在线状态' },
+  { file: '04-group-chat.html', name: '群聊页面', desc: '群成员列表、群公告、消息记录' }
+];
+
+var currentIndex = 0;
+var sidebar = document.getElementById('sidebar');
+var mobileOverlay = document.getElementById('mobileOverlay');
+var previewFrame = document.getElementById('previewFrame');
+var newWindowBtn = document.getElementById('newWindowBtn');
+var currentPageTitle = document.getElementById('currentPageTitle');
+var iframeLoading = document.getElementById('iframeLoading');
+
+function renderMenu() {
+  var menuList = document.getElementById('menuList');
+  var html = '';
+  pages.forEach(function(page, index) {
+    html += '<div class="menu-item' + (index === currentIndex ? ' active' : '') + '" onclick="switchPage(' + index + ')">';
+    html += '<div class="menu-item-num">' + (index + 1) + '</div>';
+    html += '<div class="menu-item-text">';
+    html += '<div class="menu-item-name">' + page.name + '</div>';
+    html += '<div class="menu-item-desc">' + page.desc + '</div>';
+    html += '</div></div>';
+  });
+  menuList.innerHTML = html;
+}
+
+function switchPage(index) {
+  if (index === currentIndex) return;
+  currentIndex = index;
+  var page = pages[index];
+  
+  var menuItems = document.querySelectorAll('.menu-item');
+  menuItems.forEach(function(item, i) {
+    item.classList.toggle('active', i === index);
+  });
+  
+  currentPageTitle.innerHTML = page.name + '<span class="current-page-desc">' + page.desc + '</span>';
+  newWindowBtn.href = page.file;
+  
+  showLoading();
+  previewFrame.src = page.file;
+  
+  if (window.innerWidth <= 768) {
+    toggleMobileMenu();
+  }
+}
+
+function toggleSidebar() {
+  sidebar.classList.toggle('collapsed');
+  localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+}
+
+function toggleMobileMenu() {
+  sidebar.classList.toggle('mobile-show');
+  mobileOverlay.classList.toggle('show');
+}
+
+function showLoading() {
+  iframeLoading.style.display = 'flex';
+  previewFrame.classList.add('loading');
+}
+
+function hideLoading() {
+  iframeLoading.style.display = 'none';
+  previewFrame.classList.remove('loading');
+}
+
+function reloadIframe() {
+  showLoading();
+  previewFrame.src = previewFrame.src;
+}
+
+function init() {
+  renderMenu();
+  newWindowBtn.href = pages[0].file;
+  
+  var collapsed = localStorage.getItem('sidebarCollapsed');
+  if (collapsed === 'true') {
+    sidebar.classList.add('collapsed');
+  }
+  
+  if (window.innerWidth <= 768) {
+    sidebar.classList.remove('collapsed');
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>

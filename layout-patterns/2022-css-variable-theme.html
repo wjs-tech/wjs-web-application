@@ -1,0 +1,407 @@
+﻿<!--
+  ============================================================
+  CSS变量主题切换布局 - 支持明暗主题切换的页面布局
+
+  布局方式：CSS自定义属性（CSS Variables）+ :root + class切换
+  布局思想：
+    1. 使用CSS变量定义主题色、背景色、文字色等所有主题相关属性
+    2. 通过切换body或html的class来切换不同主题的变量值
+    3. 配合transition实现主题切换的平滑过渡效果
+
+  适用场景：
+    - 需要暗色/亮色主题切换的网站
+    - 支持多主题定制的应用
+    - 阅读类APP（日间/夜间模式）
+    - 后台管理系统
+    - 追求个性化的现代网页
+
+  技术要点：
+    - :root 定义全局CSS变量（--color-primary等）
+    - [data-theme="dark"] 定义暗色主题变量覆盖
+    - var(--变量名) 使用变量
+    - 配合 JS 切换 data-theme 属性实现主题切换
+    - transition 实现颜色过渡动画
+    - 可结合 localStorage 保存用户主题偏好
+
+  可迁移性：
+    - 可迁移到任何需要主题切换的网页
+    - 现代浏览器广泛支持CSS变量
+    - 与组件化开发配合良好
+    - 易于扩展更多主题
+
+  wjs created by 2022-06-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS变量主题切换布局</title>
+  <style>
+    /* 亮色主题（默认） */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f7fa;
+      --bg-card: #ffffff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --primary-color: #667eea;
+      --primary-hover: #5a67d8;
+      --success-color: #48bb78;
+      --warning-color: #ed8936;
+      --danger-color: #f56565;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    /* 暗色主题 */
+    [data-theme="dark"] {
+      --bg-primary: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --bg-card: #16213e;
+      --text-primary: #e8e8e8;
+      --text-secondary: #a0aec0;
+      --text-muted: #718096;
+      --border-color: #2d3748;
+      --primary-color: #805ad5;
+      --primary-hover: #9f7aea;
+      --success-color: #68d391;
+      --warning-color: #f6ad55;
+      --danger-color: #fc8181;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .header {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 30px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .header .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    .theme-toggle:hover {
+      background: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+    }
+    .theme-toggle .icon {
+      font-size: 18px;
+    }
+    .theme-toggle .text {
+      font-size: 14px;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    .main h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .main .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      transition: color 0.3s ease;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+    .stat-card .label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      transition: color 0.3s ease;
+    }
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .stat-card .trend {
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .stat-card .trend.up { color: var(--success-color); }
+    .stat-card .trend.down { color: var(--danger-color); }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      transition: color 0.3s ease;
+    }
+    .card p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      transition: color 0.3s ease;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      transition: border-color 0.3s ease;
+    }
+    .list-item:last-child {
+      border-bottom: none;
+    }
+    .list-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+    .list-item .dot.green { background: var(--success-color); }
+    .list-item .dot.yellow { background: var(--warning-color); }
+    .list-item .dot.red { background: var(--danger-color); }
+    .list-item .text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color 0.3s ease;
+    }
+    .list-item .time {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: color 0.3s ease;
+    }
+
+    .var-demo {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary-color);
+      transition: all 0.3s ease;
+    }
+    .var-demo h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: var(--primary-color);
+      transition: color 0.3s ease;
+    }
+    .var-demo code {
+      font-size: 13px;
+      color: var(--warning-color);
+      background: var(--bg-primary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">🎨 CSS变量主题切换</div>
+    <div class="theme-toggle" onclick="toggleTheme()">
+      <span class="icon" id="themeIcon">🌙</span>
+      <span class="text" id="themeText">暗色模式</span>
+    </div>
+  </header>
+
+  <main class="main">
+    <h1>欢迎来到主题切换演示</h1>
+    <p class="subtitle">点击右上角按钮切换亮色/暗色主题，体验CSS变量的魅力</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">总用户数</div>
+        <div class="value">12,845</div>
+        <div class="trend up">↑ 12.5% 较上月</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">今日访问</div>
+        <div class="value">3,256</div>
+        <div class="trend up">↑ 8.2% 较昨日</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">订单数量</div>
+        <div class="value">856</div>
+        <div class="trend down">↓ 3.1% 较昨日</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">营收金额</div>
+        <div class="value">¥128K</div>
+        <div class="trend up">↑ 15.3% 较上月</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="card">
+        <h2>CSS 自定义属性（CSS Variables）</h2>
+        <p>CSS变量（CSS Custom Properties）是CSS3引入的一项强大功能，它允许我们定义可重用的CSS属性值。通过在根元素上定义变量，我们可以在整个文档中重复使用这些值，并且可以通过JavaScript动态修改，从而轻松实现主题切换等功能。</p>
+        <p>使用CSS变量的好处：代码更易维护、主题切换更简单、减少重复代码、与JavaScript交互更方便。</p>
+        <button class="btn">了解更多</button>
+
+        <div class="var-demo">
+          <h3>💡 使用方式</h3>
+          <p>定义变量：<code>--primary-color: #667eea;</code></p>
+          <p style="margin-top: 6px;">使用变量：<code>color: var(--primary-color);</code></p>
+          <p style="margin-top: 6px;">切换主题：<code>document.documentElement.dataset.theme = 'dark'</code></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>最新动态</h2>
+        <div class="list-item">
+          <span class="dot green"></span>
+          <span class="text">用户张三完成注册</span>
+          <span class="time">刚刚</span>
+        </div>
+        <div class="list-item">
+          <span class="dot yellow"></span>
+          <span class="text">系统维护通知</span>
+          <span class="time">10分钟前</span>
+        </div>
+        <div class="list-item">
+          <span class="dot green"></span>
+          <span class="text">订单#12345已发货</span>
+          <span class="time">30分钟前</span>
+        </div>
+        <div class="list-item">
+          <span class="dot red"></span>
+          <span class="text">服务器负载告警</span>
+          <span class="time">1小时前</span>
+        </div>
+        <div class="list-item">
+          <span class="dot green"></span>
+          <span class="text">新功能上线公告</span>
+          <span class="time">2小时前</span>
+        </div>
+        <div class="list-item">
+          <span class="dot yellow"></span>
+          <span class="text">本月数据报告生成</span>
+          <span class="time">3小时前</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      if (newTheme === 'dark') {
+        icon.textContent = '☀️';
+        text.textContent = '亮色模式';
+      } else {
+        icon.textContent = '🌙';
+        text.textContent = '暗色模式';
+      }
+
+      try {
+        localStorage.setItem('theme', newTheme);
+      } catch (e) {}
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+      let savedTheme = null;
+      try {
+        savedTheme = localStorage.getItem('theme');
+      } catch (e) {}
+
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        const icon = document.getElementById('themeIcon');
+        const text = document.getElementById('themeText');
+        if (savedTheme === 'dark') {
+          icon.textContent = '☀️';
+          text.textContent = '亮色模式';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

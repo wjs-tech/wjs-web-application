@@ -1,0 +1,497 @@
+﻿<!--
+  ============================================================
+  CSS Container Queries 容器查询布局 - 现代CSS容器查询，根据父容器尺寸自适应
+
+  布局方式：CSS Container Queries（@container）
+  布局思想：
+    1. 组件样式根据父容器的尺寸而非视口尺寸来调整
+    2. 真正的组件级响应式，组件在任何容器中都能自适应
+    3. 比媒体查询更灵活，适合组件化开发
+
+  适用场景：
+    - 组件库开发（组件需要在不同容器中自适应）
+    - 卡片布局（卡片根据容器宽度改变排列）
+    - 侧边栏组件（侧边栏宽度变化时内部布局调整）
+    - 仪表盘模块（不同尺寸的面板展示不同布局）
+    - 任何需要组件级响应式的场景
+
+  技术要点：
+    - container-type: inline-size 声明容器为查询容器
+    - container-name 为容器命名（可选，用于区分多个容器）
+    - @container 规则根据容器尺寸应用样式
+    - 可以查询宽度、高度等属性
+    - cqw / cqh 容器查询单位（1%的容器宽度/高度）
+    - 现代浏览器支持，Chrome 105+ / Safari 16+ / Firefox 110+
+
+  可迁移性：
+    - 可迁移到任何组件化的现代项目
+    - 特别适合设计系统和组件库
+    - 是未来响应式布局的重要方向
+    - 与Media Query互补，提供更细粒度的控制
+
+  wjs created by 2024-03-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Container Queries 容器查询布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      padding: 30px;
+      background: #f0f2f5;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #1a1a2e;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 14px;
+    }
+    .hint {
+      text-align: center;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 35px 0 15px;
+      color: #333;
+    }
+    .label {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #388e3c;
+      padding: 3px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* 容器大小演示：可拖动调整的容器 */
+    .resizable-demo {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .resizable-container {
+      container-type: inline-size;
+      container-name: card-container;
+      resize: horizontal;
+      overflow: hidden;
+      min-width: 200px;
+      max-width: 100%;
+      width: 500px;
+      height: auto;
+      background: #fff;
+      border: 2px dashed #aaa;
+      border-radius: 12px;
+      padding: 10px;
+      cursor: col-resize;
+    }
+    .resizable-hint {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      padding: 5px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    /* 卡片组件 - 使用容器查询 */
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      color: #fff;
+    }
+    .product-card .image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .product-card .info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .product-card .title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .product-card .desc {
+      font-size: 13px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+    .product-card .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    .product-card .price {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .product-card .btn {
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* 容器查询：容器宽度 >= 450px 时，卡片改为左右布局 */
+    @container card-container (min-width: 450px) {
+      .product-card {
+        flex-direction: row;
+        align-items: stretch;
+      }
+      .product-card .image {
+        width: 180px;
+        flex-shrink: 0;
+        aspect-ratio: auto;
+      }
+      .product-card .info {
+        flex: 1;
+      }
+    }
+
+    /* 容器查询：容器宽度 >= 600px 时，样式进一步调整 */
+    @container card-container (min-width: 600px) {
+      .product-card {
+        padding: 24px;
+        gap: 24px;
+      }
+      .product-card .image {
+        width: 240px;
+        font-size: 60px;
+      }
+      .product-card .title {
+        font-size: 20px;
+      }
+      .product-card .desc {
+        font-size: 14px;
+      }
+      .product-card .price {
+        font-size: 24px;
+      }
+    }
+
+    /* 演示二：不同宽度的列布局中的卡片 */
+    .multi-column-demo {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 20px;
+    }
+    .column {
+      container-type: inline-size;
+      container-name: list-container;
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .column h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+      color: #333;
+    }
+
+    .list-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .list-item .item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .list-item .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .list-item .name {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .list-item .detail {
+      font-size: 12px;
+      color: #666;
+      display: none;
+    }
+
+    /* 容器查询：列表容器宽度 >= 280px 时显示详情 */
+    @container list-container (min-width: 280px) {
+      .list-item .detail {
+        display: block;
+      }
+    }
+
+    /* 容器查询：列表容器宽度 >= 400px 时改为水平布局 */
+    @container list-container (min-width: 400px) {
+      .list-item {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+      }
+      .list-item .item-header {
+        flex-shrink: 0;
+      }
+      .list-item .avatar {
+        width: 48px;
+        height: 48px;
+        font-size: 16px;
+      }
+      .list-item .name {
+        font-size: 15px;
+      }
+      .list-item .detail {
+        flex: 1;
+        text-align: right;
+        font-size: 13px;
+      }
+    }
+
+    /* 演示三：容器查询单位 cqw */
+    .unit-demo {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .unit-container {
+      container-type: inline-size;
+      container-name: unit-demo;
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .unit-box {
+      width: 50cqw;
+      height: 80px;
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      border-radius: 8px;
+      margin: 10px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .unit-note {
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Container Queries 容器查询</h1>
+  <p class="subtitle">根据父容器尺寸而非视口尺寸来调整组件样式，真正的组件级响应式</p>
+
+  <div class="hint">
+    💡 拖动第一个演示中容器的右下角，调整宽度，观察卡片布局如何随容器变化！
+  </div>
+
+  <h2>演示一：可调整大小容器中的产品卡片</h2>
+  <span class="label">拖动调整容器宽度 → 卡片布局自动变化（垂直 → 水平 → 更大尺寸）</span>
+  <div class="resizable-demo">
+    <div class="resizable-container">
+      <div class="resizable-hint">↔ 拖动右下角调整宽度</div>
+      <div class="product-card">
+        <div class="image">🎧</div>
+        <div class="info">
+          <div class="title">高保真降噪耳机</div>
+          <div class="desc">采用最新降噪技术，支持30小时续航，Hi-Res认证音质，佩戴舒适。</div>
+          <div class="meta">
+            <div class="price">¥999</div>
+            <button class="btn">立即购买</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>演示二：三列布局中的列表组件</h2>
+  <span class="label">同一组件在不同宽度的列中展示不同的布局（窄列简单，宽列详细）</span>
+  <div class="multi-column-demo">
+    <div class="column">
+      <h3>窄列（简单模式）</h3>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">张</div>
+          <div class="name">张三</div>
+        </div>
+        <div class="detail">前端工程师 · 3年前端经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">李</div>
+          <div class="name">李四</div>
+        </div>
+        <div class="detail">UI设计师 · 5年设计经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">王</div>
+          <div class="name">王五</div>
+        </div>
+        <div class="detail">产品经理 · 4年产品经验</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h3>中列（详情模式）</h3>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">赵</div>
+          <div class="name">赵六</div>
+        </div>
+        <div class="detail">后端工程师 · 6年后端经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">钱</div>
+          <div class="name">钱七</div>
+        </div>
+        <div class="detail">运维工程师 · 4年运维经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">孙</div>
+          <div class="name">孙八</div>
+        </div>
+        <div class="detail">测试工程师 · 3年测试经验</div>
+      </div>
+    </div>
+
+    <div class="column">
+      <h3>窄列（简单模式）</h3>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">周</div>
+          <div class="name">周九</div>
+        </div>
+        <div class="detail">数据分析师 · 5年分析经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">吴</div>
+          <div class="name">吴十</div>
+        </div>
+        <div class="detail">算法工程师 · 7年算法经验</div>
+      </div>
+      <div class="list-item">
+        <div class="item-header">
+          <div class="avatar">郑</div>
+          <div class="name">郑十一</div>
+        </div>
+        <div class="detail">架构师 · 10年开发经验</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>演示三：容器查询单位 cqw</h2>
+  <span class="label">1cqw = 1%的容器宽度，元素尺寸相对于容器而非视口</span>
+  <div class="unit-demo">
+    <div class="unit-container">
+      <h3 style="font-size: 14px; margin-bottom: 8px;">小容器</h3>
+      <div class="unit-box">50cqw</div>
+      <p class="unit-note">宽度 = 容器宽度的50%</p>
+    </div>
+    <div class="unit-container">
+      <h3 style="font-size: 14px; margin-bottom: 8px;">中容器</h3>
+      <div class="unit-box">50cqw</div>
+      <p class="unit-note">宽度 = 容器宽度的50%</p>
+    </div>
+    <div class="unit-container">
+      <h3 style="font-size: 14px; margin-bottom: 8px;">大容器</h3>
+      <div class="unit-box">50cqw</div>
+      <p class="unit-note">宽度 = 容器宽度的50%</p>
+    </div>
+  </div>
+
+  <h2>Media Query vs Container Query</h2>
+  <div style="background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <thead>
+        <tr style="background: #f5f5f5;">
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #eee;">对比项</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #eee;">Media Query</th>
+          <th style="padding: 12px; text-align: left; border-bottom: 2px solid #eee;">Container Query</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: bold;">查询对象</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">视口（viewport）</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">父容器（container）</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: bold;">适用级别</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">页面级响应式</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">组件级响应式</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: bold;">灵活性</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">全局统一，适合页面布局</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">局部自适应，组件真正复用</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid #eee; font-weight: bold;">语法</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">@media (min-width: 768px)</td>
+          <td style="padding: 12px; border-bottom: 1px solid #eee;">@container (min-width: 400px)</td>
+        </tr>
+        <tr>
+          <td style="padding: 12px; font-weight: bold;">浏览器支持</td>
+          <td style="padding: 12px;">全支持</td>
+          <td style="padding: 12px;">Chrome 105+ / Safari 16+ / Firefox 110+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

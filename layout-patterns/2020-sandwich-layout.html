@@ -1,0 +1,241 @@
+﻿<!--
+  ============================================================
+  三明治布局（Header/Content/Footer）- 经典上中下三段式布局
+
+  布局方式：标准文档流 + margin/padding
+  布局思想：
+    1. 页面分为头部、内容区、底部三个垂直区域
+    2. 头部和底部高度固定，内容区自适应填充剩余空间
+    3. 是最基础、最常见的页面布局结构
+
+  适用场景：
+    - 企业官网首页
+    - 博客文章页面
+    - 产品详情页
+    - 任何上中下结构的网页
+    - 是其他复杂布局的基础框架
+
+  技术要点：
+    - header / main / footer 语义化标签
+    - 内容区 min-height 撑开页面
+    - 底部始终在页面底部（内容少时在视口底部，内容多时在最底部）
+    - 配合 Flex 可实现 Sticky Footer 效果
+    - 结构简单，易于理解和维护
+
+  可迁移性：
+    - 几乎所有网页都基于此结构
+    - 是最基础的页面布局框架
+    - 可在此基础上扩展多栏布局
+
+  wjs created by 2020-08-25
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>三明治布局（Header/Content/Footer）</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      background: #f5f5f5;
+    }
+
+    /* 基础三明治布局 */
+    .header {
+      height: 70px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .header .nav {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+    }
+    .header .nav a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .header .nav a:hover {
+      opacity: 1;
+    }
+
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: calc(100vh - 70px - 120px);
+    }
+    .main h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    .main .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .card .card-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    .card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .article {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .article h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    .article p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #444;
+      margin-bottom: 15px;
+    }
+
+    .footer {
+      height: 120px;
+      background: #2c3e50;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .footer .links {
+      display: flex;
+      gap: 25px;
+      list-style: none;
+    }
+    .footer .links a {
+      color: #aaa;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .footer .links a:hover {
+      color: #fff;
+    }
+    .footer .copyright {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .structure-label {
+      display: inline-block;
+      background: #e8f4fd;
+      color: #3498db;
+      padding: 3px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">🏠 三明治布局</div>
+    <ul class="nav">
+      <li><a href="#">首页</a></li>
+      <li><a href="#">产品</a></li>
+      <li><a href="#">服务</a></li>
+      <li><a href="#">关于我们</a></li>
+      <li><a href="#">联系我们</a></li>
+    </ul>
+  </header>
+
+  <main class="main">
+    <span class="structure-label">Header + Content + Footer 三段式结构</span>
+    <h1>经典上中下三段式布局</h1>
+    <p class="subtitle">三明治布局是最基础、最常见的页面布局结构，适用于绝大多数网页</p>
+
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-icon">📐</div>
+        <h3>结构清晰</h3>
+        <p>上中下三段式结构，逻辑清晰，易于理解和维护，是所有复杂布局的基础。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>适用性广</h3>
+        <p>几乎所有类型的网站都可以基于此结构，从博客到电商，从企业站到门户。</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>易于扩展</h3>
+        <p>内容区可以嵌套任意复杂的布局，如多栏布局、网格布局、卡片布局等。</p>
+      </div>
+    </div>
+
+    <div class="article">
+      <h2>布局说明</h2>
+      <p><strong>三明治布局</strong>，又称为 Header/Content/Footer 布局，是网页设计中最经典的布局模式之一。就像三明治一样，页面被清晰地分为三层：顶部的头部（Header）、中间的内容区（Content）和底部的页脚（Footer）。</p>
+      <p><strong>头部（Header）</strong>通常包含网站Logo、导航菜单、搜索框、用户入口等元素。它是用户进入网站后首先看到的区域，承担着品牌展示和导航指引的重要作用。</p>
+      <p><strong>内容区（Content）</strong>是页面的核心部分，承载着主要的信息和功能。这部分可以根据需要嵌套各种复杂的布局，比如两栏布局、三栏布局、网格布局、卡片瀑布流等等。</p>
+      <p><strong>页脚（Footer）</strong>通常包含版权信息、友情链接、联系方式、备案信息等。虽然不如头部和内容区引人注目，但也是页面不可或缺的一部分。</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <ul class="links">
+      <li><a href="#">关于我们</a></li>
+      <li><a href="#">产品服务</a></li>
+      <li><a href="#">新闻动态</a></li>
+      <li><a href="#">人才招聘</a></li>
+      <li><a href="#">联系方式</a></li>
+    </ul>
+    <div class="copyright">© 2020 三明治布局 Demo. All Rights Reserved.</div>
+  </footer>
+</body>
+</html>

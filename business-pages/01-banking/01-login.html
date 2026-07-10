@@ -1,0 +1,276 @@
+<!--
+  ============================================================
+  网银登录页 - 银行系统
+
+  页面功能：XX银行个人网上银行登录页面，提供账号密码登录入口
+  布局方式：居中卡片式布局，左右分栏结构
+  业务背景：
+    1. XX银行网上银行系统用户登录入口
+    2. 支持账号、手机号、用户名多种登录方式
+    3. 需满足金融级安全规范要求
+
+  设计思路：
+    1. 左侧品牌展示区，右侧登录表单区，视觉平衡
+    2. 登录表单突出显示，输入框聚焦效果明显
+    3. 安全提示信息醒目展示，增强用户信任感
+
+  技术要点：
+    - 使用float实现左右两栏布局
+    - 表单验证使用原生JavaScript
+    - 响应式设计适配不同屏幕尺寸
+
+  适用迁移场景：
+    - 金融类系统登录页
+    - 需要高安全性的后台登录
+    - 品牌展示型登录页面
+
+  wjs created by 2015-06-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XX银行 - 个人网上银行</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", "SimSun", sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .header {
+      background: #fff;
+      border-bottom: 3px solid #c81623;
+      padding: 15px 0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 28px;
+      font-weight: bold;
+      color: #c81623;
+      line-height: 50px;
+    }
+    .logo span {
+      color: #333;
+      font-size: 18px;
+      margin-left: 10px;
+      font-weight: normal;
+    }
+    .header-right {
+      float: right;
+      line-height: 50px;
+      color: #666;
+      font-size: 14px;
+    }
+    .main {
+      width: 1200px;
+      max-width: 100%;
+      margin: 50px auto;
+      overflow: hidden;
+      display: flex;
+    }
+    .banner {
+      flex: 1;
+      min-height: 450px;
+      background: linear-gradient(135deg, #c81623 0%, #8b0000 100%);
+      border-radius: 8px 0 0 8px;
+      color: #fff;
+      padding: 60px 50px;
+    }
+    .banner h2 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .banner p {
+      font-size: 16px;
+      line-height: 2;
+      margin-bottom: 40px;
+    }
+    .banner-features li {
+      list-style: none;
+      font-size: 15px;
+      line-height: 2.5;
+      padding-left: 25px;
+      position: relative;
+    }
+    .banner-features li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #ffd700;
+      font-weight: bold;
+    }
+    .login-box {
+      flex: 1;
+      min-height: 450px;
+      background: #fff;
+      border-radius: 0 8px 8px 0;
+      padding: 50px 40px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .login-title {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .login-tabs {
+      overflow: hidden;
+      margin-bottom: 25px;
+      border-bottom: 1px solid #eee;
+    }
+    .login-tabs span {
+      float: left;
+      width: 33.33%;
+      text-align: center;
+      padding: 10px 0;
+      cursor: pointer;
+      color: #666;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+    }
+    .login-tabs span.active {
+      color: #c81623;
+      border-bottom-color: #c81623;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .form-group input {
+      width: 100%;
+      height: 42px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0 15px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      border-color: #c81623;
+    }
+    .form-row {
+      overflow: hidden;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+    .form-row .remember {
+      float: left;
+      color: #666;
+    }
+    .form-row .forget {
+      float: right;
+      color: #c81623;
+      cursor: pointer;
+    }
+    .login-btn {
+      width: 100%;
+      height: 45px;
+      background: #c81623;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .login-btn:hover {
+      background: #a0111c;
+    }
+    .security-tips {
+      margin-top: 25px;
+      padding: 15px;
+      background: #fff8e1;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #8a6d3b;
+      line-height: 1.6;
+    }
+    .security-tips strong {
+      color: #c81623;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px 0;
+      color: #999;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX银行<span>个人网上银行</span></div>
+      <div class="header-right">客服热线：95XXX</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="banner">
+      <h2>欢迎使用XX银行</h2>
+      <p>安全、便捷、专业的金融服务</p>
+      <ul class="banner-features">
+        <li>账户查询与管理</li>
+        <li>转账汇款实时到账</li>
+        <li>理财产品在线购买</li>
+        <li>生活缴费一键搞定</li>
+      </ul>
+    </div>
+
+    <div class="login-box">
+      <h3 class="login-title">用户登录</h3>
+      <div class="login-tabs">
+        <span class="active">账号登录</span>
+        <span>手机号</span>
+        <span>用户名</span>
+      </div>
+      <form>
+        <div class="form-group">
+          <label>账号</label>
+          <input type="text" placeholder="请输入账号">
+        </div>
+        <div class="form-group">
+          <label>登录密码</label>
+          <input type="password" placeholder="请输入密码">
+        </div>
+        <div class="form-group">
+          <label>验证码</label>
+          <input type="text" placeholder="请输入验证码" style="width: 60%; float: left;">
+          <div style="float: right; width: 35%; height: 42px; background: #f0f2f5; border-radius: 4px; text-align: center; line-height: 42px; color: #c81623; font-weight: bold; letter-spacing: 3px;">X7K9</div>
+          <div style="clear: both;"></div>
+        </div>
+        <div class="form-row">
+          <label class="remember"><input type="checkbox"> 记住账号</label>
+          <span class="forget">忘记密码？</span>
+        </div>
+        <button type="button" class="login-btn">登 录</button>
+      </form>
+      <div class="security-tips">
+        <strong>安全提示：</strong>XX银行不会以任何理由要求您提供银行卡密码、短信验证码等信息，谨防诈骗！
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>XX银行股份有限公司 版权所有 © 2015</p>
+    <p style="margin-top: 8px;">金融许可证：XXXXXX | 备案号：京ICP备XXXXXXXX号</p>
+  </div>
+</body>
+</html>

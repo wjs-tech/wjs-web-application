@@ -1,0 +1,345 @@
+﻿<!--
+  ============================================================
+  手风琴折叠面板布局 - 可展开收起的手风琴菜单
+
+  布局方式：CSS transition + max-height 技巧 / details标签
+  布局思想：
+    1. 多个面板垂直排列，每次只展开一个（或可多个）
+    2. 点击面板标题切换展开/收起状态
+    3. 通过CSS过渡动画实现平滑的展开收起效果
+
+  适用场景：
+    - FAQ常见问题页面
+    - 侧边栏分类菜单
+    - 设置选项分组
+    - 移动端筛选器
+    - 内容较多的分类展示
+
+  技术要点：
+    - 使用 max-height + overflow: hidden 实现高度过渡
+    - CSS transition 实现平滑动画
+    - :checked 伪类 + 隐藏 radio/checkbox 实现纯CSS方案
+    - 也可使用 details/summary 原生标签（动画有限）
+    - JS方案更灵活，可控制同时展开数量
+
+  可迁移性：
+    - 可迁移到任何需要折叠展示内容的页面
+    - FAQ、菜单、设置页等都适用
+    - 纯CSS方案无需JS，使用方便
+
+  wjs created by 2021-09-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手风琴折叠面板布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      padding: 40px 20px;
+      background: #f5f7fa;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    h2 {
+      font-size: 18px;
+      margin: 30px 0 15px;
+      color: #34495e;
+    }
+    .label {
+      display: inline-block;
+      background: #e8f4fd;
+      color: #3498db;
+      padding: 3px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* 方案一：纯CSS手风琴（radio单选，每次只展开一个） */
+    .accordion-radio {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .accordion-radio .item {
+      border-bottom: 1px solid #eee;
+    }
+    .accordion-radio .item:last-child {
+      border-bottom: none;
+    }
+    .accordion-radio input[type="radio"] {
+      display: none;
+    }
+    .accordion-radio .item-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s;
+      user-select: none;
+    }
+    .accordion-radio .item-title:hover {
+      background: #f8f9fa;
+    }
+    .accordion-radio .item-title::after {
+      content: '+';
+      font-size: 20px;
+      color: #999;
+      transition: transform 0.3s;
+    }
+    .accordion-radio input[type="radio"]:checked + .item-title {
+      background: #667eea;
+      color: #fff;
+    }
+    .accordion-radio input[type="radio"]:checked + .item-title::after {
+      content: '−';
+      color: #fff;
+    }
+    .accordion-radio .item-content {
+      max-height: 0;
+      overflow: hidden;
+      background: #fff;
+      transition: max-height 0.4s ease-out, padding 0.3s;
+    }
+    .accordion-radio input[type="radio"]:checked + .item-title + .item-content {
+      max-height: 500px;
+      padding: 20px 24px;
+    }
+    .accordion-radio .item-content p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #666;
+    }
+
+    /* 方案二：纯CSS手风琴（checkbox多选，可展开多个） */
+    .accordion-checkbox {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .accordion-checkbox .item {
+      border-bottom: 1px solid #eee;
+    }
+    .accordion-checkbox .item:last-child {
+      border-bottom: none;
+    }
+    .accordion-checkbox input[type="checkbox"] {
+      display: none;
+    }
+    .accordion-checkbox .item-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background 0.3s;
+      user-select: none;
+    }
+    .accordion-checkbox .item-title:hover {
+      background: #f8f9fa;
+    }
+    .accordion-checkbox .item-title .arrow {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #666;
+      transition: all 0.3s;
+    }
+    .accordion-checkbox input[type="checkbox"]:checked + .item-title .arrow {
+      background: #2ecc71;
+      color: #fff;
+      transform: rotate(45deg);
+    }
+    .accordion-checkbox .item-content {
+      max-height: 0;
+      overflow: hidden;
+      background: #f8f9fa;
+      transition: max-height 0.4s ease-out, padding 0.3s;
+    }
+    .accordion-checkbox input[type="checkbox"]:checked + .item-title + .item-content {
+      max-height: 500px;
+      padding: 20px 24px;
+    }
+    .accordion-checkbox .item-content p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #666;
+    }
+
+    /* 方案三：原生 details/summary */
+    .accordion-native {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .accordion-native details {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .accordion-native summary {
+      padding: 16px 20px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .accordion-native summary::-webkit-details-marker {
+      display: none;
+    }
+    .accordion-native summary::after {
+      content: '▶';
+      font-size: 10px;
+      color: #999;
+      transition: transform 0.2s;
+    }
+    .accordion-native details[open] summary::after {
+      transform: rotate(90deg);
+    }
+    .accordion-native .details-content {
+      padding: 0 20px 16px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>手风琴折叠面板布局 Demo</h1>
+
+  <div class="container">
+    <h2>方案一：Radio单选手风琴（每次只展开一个）</h2>
+    <span class="label">纯CSS实现，radio单选，平滑过渡动画</span>
+    <div class="accordion-radio">
+      <div class="item">
+        <input type="radio" name="accordion1" id="radio1" checked>
+        <label for="radio1" class="item-title">什么是手风琴布局？</label>
+        <div class="item-content">
+          <p>手风琴布局（Accordion）是一种可折叠的面板布局，由多个垂直排列的面板组成。用户可以点击面板标题来展开或收起对应的内容区域。通常一次只展开一个面板，就像手风琴的风箱一样，因此得名。</p>
+        </div>
+      </div>
+      <div class="item">
+        <input type="radio" name="accordion1" id="radio2">
+        <label for="radio2" class="item-title">手风琴布局有什么优点？</label>
+        <div class="item-content">
+          <p>1. 节省空间：可以在有限的区域内展示更多分类内容<br>
+          2. 结构清晰：分类明确，用户可以快速找到自己需要的信息<br>
+          3. 交互友好：展开收起的动画效果提升用户体验<br>
+          4. 移动端友好：特别适合移动端屏幕空间有限的场景</p>
+        </div>
+      </div>
+      <div class="item">
+        <input type="radio" name="accordion1" id="radio3">
+        <label for="radio3" class="item-title">常见的应用场景有哪些？</label>
+        <div class="item-content">
+          <p>FAQ常见问题页面、侧边栏分类菜单、设置选项分组、移动端筛选器、商品参数详情、帮助文档目录等。凡是内容有明显分类且需要节省空间的场景，都适合使用手风琴布局。</p>
+        </div>
+      </div>
+      <div class="item">
+        <input type="radio" name="accordion1" id="radio4">
+        <label for="radio4" class="item-title">纯CSS和JS方案哪个好？</label>
+        <div class="item-content">
+          <p>纯CSS方案无需JavaScript，实现简单，性能好，但功能有限。JS方案更灵活，可以实现更复杂的交互逻辑，比如控制展开速度、添加回调函数、支持特殊的展开方式等。实际项目中根据需求选择。</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>方案二：Checkbox多选手风琴（可同时展开多个）</h2>
+    <span class="label">纯CSS实现，checkbox多选，支持同时展开多个</span>
+    <div class="accordion-checkbox">
+      <div class="item">
+        <input type="checkbox" id="check1" checked>
+        <label for="check1" class="item-title">
+          前端技术栈
+          <span class="arrow">+</span>
+        </label>
+        <div class="item-content">
+          <p>HTML / CSS / JavaScript<br>
+          React / Vue / Angular<br>
+          TypeScript / Webpack / Vite<br>
+          TailwindCSS / Sass / Less</p>
+        </div>
+      </div>
+      <div class="item">
+        <input type="checkbox" id="check2">
+        <label for="check2" class="item-title">
+          后端技术栈
+          <span class="arrow">+</span>
+        </label>
+        <div class="item-content">
+          <p>Node.js / Python / Java<br>
+          MySQL / MongoDB / Redis<br>
+          Docker / K8s / Nginx<br>
+          RESTful API / GraphQL</p>
+        </div>
+      </div>
+      <div class="item">
+        <input type="checkbox" id="check3">
+        <label for="check3" class="item-title">
+          移动端开发
+          <span class="arrow">+</span>
+        </label>
+        <div class="item-content">
+          <p>React Native / Flutter<br>
+          iOS Swift / Android Kotlin<br>
+          小程序开发 / Uni-app<br>
+          PWA / 响应式设计</p>
+        </div>
+      </div>
+    </div>
+
+    <h2>方案三：原生 details/summary 标签</h2>
+    <span class="label">HTML原生标签，无动画，无需CSS/JS</span>
+    <div class="accordion-native">
+      <details open>
+        <summary>什么是语义化标签？</summary>
+        <div class="details-content">
+          语义化标签是指使用具有明确含义的HTML标签来构建页面结构，比如header、nav、main、article、section、footer等。语义化标签让页面结构更清晰，有利于SEO和无障碍访问。
+        </div>
+      </details>
+      <details>
+        <summary>details标签的兼容性如何？</summary>
+        <div class="details-content">
+          details/summary标签在现代浏览器中支持良好，Chrome、Firefox、Safari、Edge都支持。但IE浏览器不支持。如果需要兼容旧浏览器，可能需要使用polyfill或其他方案。
+        </div>
+      </details>
+      <details>
+        <summary>可以自定义样式吗？</summary>
+        <div class="details-content">
+          可以。可以通过CSS自定义details和summary的样式，包括背景色、边框、间距等。但展开收起的动画效果比较有限，因为原生的open/close状态切换没有过渡动画。
+        </div>
+      </details>
+    </div>
+  </div>
+</body>
+</html>

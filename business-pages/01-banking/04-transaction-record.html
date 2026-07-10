@@ -1,0 +1,616 @@
+<!--
+  ============================================================
+  交易记录列表页 - 银行系统
+
+  页面功能：XX银行网银交易记录查询页面，支持筛选和分页浏览
+  布局方式：左侧菜单+右侧内容区，搜索筛选+表格列表布局
+  业务背景：
+    1. 用户查询历史交易明细的核心页面
+    2. 支持按时间、金额、交易类型等多维度筛选
+    3. 支持交易记录导出功能
+
+  设计思路：
+    1. 搜索筛选区紧凑排列，便于快速查询
+    2. 表格列信息完整，重要数据突出显示
+    3. 分页组件清晰，支持跳转到指定页
+
+  技术要点：
+    - 表格布局展示交易明细数据
+    - 筛选表单使用inline布局
+    - 分页控件支持多种跳转方式
+
+  适用迁移场景：
+    - 各类数据列表页
+    - 订单/记录管理页面
+    - 带筛选条件的数据查询页
+
+  wjs created by 2015-09-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交易记录 - XX银行个人网上银行</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-header {
+      height: 60px;
+      background: linear-gradient(90deg, #c81623, #8b0000);
+      color: #fff;
+    }
+    .header-inner {
+      height: 100%;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 60px;
+    }
+    .user-info {
+      float: right;
+      line-height: 60px;
+      font-size: 14px;
+    }
+    .user-info span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .main-container {
+      width: 100%;
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #2c3e50;
+      min-height: calc(100vh - 60px);
+      color: #fff;
+    }
+    .menu-title {
+      padding: 15px 20px;
+      font-size: 13px;
+      color: #95a5a6;
+      background: #1a252f;
+    }
+    .menu-list li {
+      list-style: none;
+      padding: 12px 20px 12px 40px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .menu-list li:hover {
+      background: #34495e;
+    }
+    .menu-list li.active {
+      background: #c81623;
+      border-left: 3px solid #ffd700;
+    }
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .search-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .search-form {
+      overflow: hidden;
+    }
+    .search-item {
+      float: left;
+      margin-right: 20px;
+      margin-bottom: 15px;
+    }
+    .search-item label {
+      display: inline-block;
+      font-size: 14px;
+      color: #666;
+      margin-right: 8px;
+      width: 70px;
+      text-align: right;
+    }
+    .search-item input,
+    .search-item select {
+      height: 34px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+      width: 160px;
+    }
+    .search-item input:focus,
+    .search-item select:focus {
+      border-color: #c81623;
+    }
+    .date-range input {
+      width: 130px;
+    }
+    .date-range span {
+      margin: 0 5px;
+      color: #999;
+    }
+    .search-actions {
+      float: right;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: #c81623;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #a0111c;
+    }
+    .btn-default {
+      background: #f0f0f0;
+      color: #666;
+      margin-left: 10px;
+    }
+    .btn-default:hover {
+      background: #e0e0e0;
+    }
+    .table-box {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .table-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .table-tools {
+      float: right;
+    }
+    .table-tools .btn {
+      padding: 6px 15px;
+      font-size: 13px;
+    }
+    .btn-outline {
+      background: #fff;
+      border: 1px solid #ddd;
+      color: #666;
+    }
+    .btn-outline:hover {
+      border-color: #c81623;
+      color: #c81623;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background: #f8f9fa;
+    }
+    th {
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    td {
+      padding: 12px 15px;
+      font-size: 14px;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+    .income {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+    .expense {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+    .status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .status-success {
+      background: #e8f5e9;
+      color: #2ecc71;
+    }
+    .status-pending {
+      background: #fff8e1;
+      color: #f39c12;
+    }
+    .status-failed {
+      background: #ffebee;
+      color: #e74c3c;
+    }
+    .type-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      background: #e3f2fd;
+      color: #2196f3;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .pagination {
+      padding: 20px 30px;
+      text-align: right;
+      overflow: hidden;
+    }
+    .page-info {
+      float: left;
+      line-height: 32px;
+      font-size: 13px;
+      color: #666;
+    }
+    .page-list {
+      display: inline-block;
+    }
+    .page-list span {
+      display: inline-block;
+      min-width: 32px;
+      height: 32px;
+      line-height: 30px;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 0 3px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #666;
+    }
+    .page-list span:hover {
+      border-color: #c81623;
+      color: #c81623;
+    }
+    .page-list span.active {
+      background: #c81623;
+      border-color: #c81623;
+      color: #fff;
+    }
+    .page-list span.disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+    .page-list span.disabled:hover {
+      border-color: #ddd;
+      color: #ccc;
+    }
+    .page-jump {
+      display: inline-block;
+      margin-left: 15px;
+      font-size: 13px;
+      color: #666;
+    }
+    .page-jump input {
+      width: 50px;
+      height: 32px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+      margin: 0 5px;
+    }
+    .summary-card {
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .summary-item {
+      float: left;
+      width: 25%;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-right: 1%;
+      width: 24%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .summary-label {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+    .summary-value {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .summary-value.income {
+      color: #2ecc71;
+    }
+    .summary-value.expense {
+      color: #e74c3c;
+    }
+    .summary-value.count {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-inner">
+      <div class="logo">XX银行 个人网上银行</div>
+      <div class="user-info">
+        <span>欢迎您，张女士</span>
+        <span>安全中心</span>
+        <span>退出登录</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="menu-title">账户管理</div>
+      <ul class="menu-list">
+        <li>账户总览</li>
+        <li>账户查询</li>
+        <li class="active">交易明细</li>
+        <li>账户设置</li>
+      </ul>
+      <div class="menu-title">转账汇款</div>
+      <ul class="menu-list">
+        <li>行内转账</li>
+        <li>跨行转账</li>
+        <li>批量转账</li>
+        <li>收款人名册</li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <div class="breadcrumb">首页 &gt; 账户管理 &gt; 交易明细</div>
+
+      <div class="summary-card">
+        <div class="summary-item">
+          <div class="summary-label">当前账户</div>
+          <div class="summary-value count">****6288</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">账户余额</div>
+          <div class="summary-value count">¥ 58,320.50</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">本月收入</div>
+          <div class="summary-value income">¥ 25,680.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">本月支出</div>
+          <div class="summary-value expense">¥ 18,350.00</div>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <div class="search-form">
+          <div class="search-item">
+            <label>交易类型</label>
+            <select>
+              <option>全部</option>
+              <option>转账汇款</option>
+              <option>消费</option>
+              <option>工资</option>
+              <option>理财</option>
+              <option>缴费</option>
+            </select>
+          </div>
+          <div class="search-item date-range">
+            <label>交易时间</label>
+            <input type="date" value="2015-09-01">
+            <span>至</span>
+            <input type="date" value="2015-09-20">
+          </div>
+          <div class="search-item">
+            <label>金额范围</label>
+            <input type="text" placeholder="最低" style="width: 80px;">
+            <span style="margin: 0 5px;">-</span>
+            <input type="text" placeholder="最高" style="width: 80px;">
+          </div>
+          <div class="search-item">
+            <label>交易状态</label>
+            <select>
+              <option>全部</option>
+              <option>交易成功</option>
+              <option>处理中</option>
+              <option>交易失败</option>
+            </select>
+          </div>
+          <div class="search-item">
+            <label>关键字</label>
+            <input type="text" placeholder="收款人/备注">
+          </div>
+          <div class="search-actions">
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">重置</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-box">
+        <div class="table-header">
+          <div class="table-title">交易记录列表</div>
+          <div class="table-tools">
+            <button class="btn btn-outline">导出Excel</button>
+          </div>
+        </div>
+        
+          <div style="overflow-x:auto;">
+<table>
+          <thead>
+            <tr>
+              <th width="150">交易时间</th>
+              <th width="100">交易类型</th>
+              <th>交易摘要</th>
+              <th width="120">对方账户</th>
+              <th width="120">收入/支出</th>
+              <th width="120">账户余额</th>
+              <th width="80">状态</th>
+              <th width="80">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2015-09-20 14:32:18</td>
+              <td><span class="type-tag">转账汇款</span></td>
+              <td>转账-给李先生</td>
+              <td>****6789</td>
+              <td class="expense">-5,000.00</td>
+              <td>58,320.50</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-19 09:15:42</td>
+              <td><span class="type-tag">工资</span></td>
+              <td>9月工资</td>
+              <td>****0001</td>
+              <td class="income">+15,000.00</td>
+              <td>63,320.50</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-18 20:45:33</td>
+              <td><span class="type-tag">消费</span></td>
+              <td>XX商城购物</td>
+              <td>****8888</td>
+              <td class="expense">-328.50</td>
+              <td>48,320.50</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-17 16:20:05</td>
+              <td><span class="type-tag">理财</span></td>
+              <td>购买XX理财A款</td>
+              <td>****2020</td>
+              <td class="expense">-30,000.00</td>
+              <td>48,649.00</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-16 11:08:27</td>
+              <td><span class="type-tag">缴费</span></td>
+              <td>手机话费充值</td>
+              <td>****10086</td>
+              <td class="expense">-100.00</td>
+              <td>78,649.00</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-15 10:30:00</td>
+              <td><span class="type-tag">转账汇款</span></td>
+              <td>跨行转账-王女士</td>
+              <td>****2345</td>
+              <td class="expense">-2,000.00</td>
+              <td>78,749.00</td>
+              <td><span class="status status-pending">处理中</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-14 19:22:15</td>
+              <td><span class="type-tag">消费</span></td>
+              <td>餐饮消费-XX餐厅</td>
+              <td>****6666</td>
+              <td class="expense">-256.00</td>
+              <td>80,749.00</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-13 14:05:48</td>
+              <td><span class="type-tag">转账汇款</span></td>
+              <td>转账-赵先生</td>
+              <td>****0123</td>
+              <td class="expense">-1,500.00</td>
+              <td>81,005.00</td>
+              <td><span class="status status-failed">失败</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-12 08:50:30</td>
+              <td><span class="type-tag">消费</span></td>
+              <td>超市购物</td>
+              <td>****7777</td>
+              <td class="expense">-189.50</td>
+              <td>82,505.00</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+            <tr>
+              <td>2015-09-10 15:40:22</td>
+              <td><span class="type-tag">工资</span></td>
+              <td>奖金</td>
+              <td>****0001</td>
+              <td class="income">+5,000.00</td>
+              <td>82,694.50</td>
+              <td><span class="status status-success">成功</span></td>
+              <td><a href="javascript:;" style="color: #c81623;">详情</a></td>
+            </tr>
+          </tbody>
+        </table>
+          </div>
+        <div class="pagination">
+          <div class="page-info">共 156 条记录，第 1 / 16 页</div>
+          <div class="page-list">
+            <span class="disabled">首页</span>
+            <span class="disabled">上一页</span>
+            <span class="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>...</span>
+            <span>16</span>
+            <span>下一页</span>
+            <span>末页</span>
+          </div>
+          <div class="page-jump">
+            跳转到
+            <input type="text" value="1">
+            页
+            <button class="btn btn-primary" style="padding: 5px 12px; font-size: 12px;">GO</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

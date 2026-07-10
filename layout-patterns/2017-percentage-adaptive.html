@@ -1,0 +1,164 @@
+﻿<!--
+  ============================================================
+  百分比自适应布局 - 全百分比宽度布局，响应式雏形
+
+  布局方式：百分比宽度 + float浮动
+  布局思想：
+    1. 所有宽度使用百分比而非固定像素，随父容器宽度自适应
+    2. 配合min-width/max-width防止过度拉伸或压缩
+    3. 是响应式布局的早期实现方式，兼容性好
+
+  适用场景：
+    - 早期响应式网页设计
+    - 需要适配不同宽度屏幕的简单页面
+    - 流体布局（Fluid Layout）
+    - 移动端适配的初级方案
+
+  技术要点：
+    - 宽度使用百分比 % 单位
+    - 配合 float 实现多列布局
+    - min-width / max-width 限制最小最大宽度
+    - 图片使用 max-width: 100% 自适应
+    - 是响应式布局的基础概念
+
+  可迁移性：
+    - 可迁移到任何需要流体宽度的页面
+    - 是响应式布局的基础，理解后容易进阶
+    - 兼容性极好，几乎所有浏览器都支持
+
+  wjs created by 2017-08-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>百分比自适应布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      min-width: 320px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2%;
+    }
+    .header {
+      width: 100%;
+      height: 60px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 60px;
+      text-align: center;
+      margin-bottom: 2%;
+    }
+    .container {
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 2%;
+    }
+    .sidebar {
+      float: left;
+      width: 25%;
+      background: #e74c3c;
+      color: #fff;
+      padding: 2%;
+      min-height: 400px;
+    }
+    .main {
+      float: left;
+      width: 73%;
+      margin-left: 2%;
+      background: #ecf0f1;
+      padding: 2%;
+      min-height: 400px;
+    }
+    .three-col {
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 2%;
+    }
+    .col {
+      float: left;
+      width: 32%;
+      margin-right: 2%;
+      background: #3498db;
+      color: #fff;
+      padding: 2%;
+      min-height: 200px;
+    }
+    .col:last-child {
+      margin-right: 0;
+    }
+    .footer {
+      clear: both;
+      width: 100%;
+      height: 50px;
+      background: #2c3e50;
+      color: #fff;
+      line-height: 50px;
+      text-align: center;
+    }
+    .percent-box {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .demo-img {
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">头部 - 百分比自适应布局 Demo (100%宽度)</div>
+
+  <div class="container">
+    <div class="sidebar">
+      <h3>侧边栏</h3>
+      <div class="percent-box">宽度: 25%</div>
+      <p style="margin-top: 15px;">左侧定宽百分比</p>
+      <p>随页面宽度变化</p>
+    </div>
+    <div class="main">
+      <h2>主内容区</h2>
+      <div class="percent-box">宽度: 73% + margin-left: 2%</div>
+      <p style="margin-top: 15px;">所有宽度使用百分比，页面宽度变化时自动调整。</p>
+      <div class="demo-img">图片 max-width: 100%</div>
+      <p>试试调整浏览器窗口大小，看看布局如何自适应。</p>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="col">
+      <h4>第一列</h4>
+      <div class="percent-box">32%</div>
+      <p style="margin-top: 10px;">三列等分布局</p>
+    </div>
+    <div class="col">
+      <h4>第二列</h4>
+      <div class="percent-box">32%</div>
+      <p style="margin-top: 10px;">间距 2%</p>
+    </div>
+    <div class="col">
+      <h4>第三列</h4>
+      <div class="percent-box">32%</div>
+      <p style="margin-top: 10px;">总计 100%</p>
+    </div>
+  </div>
+
+  <div class="footer">底部 (100%宽度)</div>
+</body>
+</html>

@@ -1,0 +1,747 @@
+<!--
+  ============================================================
+  交易记录页 - 金融理财平台
+
+  页面功能：XX金融理财平台交易记录页，展示交易流水和收益明细
+  布局方式：顶部导航+左侧菜单+右侧内容区的三栏布局
+  业务背景：
+    1. 用户查看历史交易记录
+    2. 收益明细和持仓变更查询
+    3. 交易筛选和导出功能
+
+  设计思路：
+    1. 左侧菜单分类导航
+    2. 多维度筛选交易记录
+    3. 数据表格清晰展示
+
+  技术要点：
+    - float三栏布局
+    - 标签页切换不同记录类型
+    - 高级筛选条件展开收起
+
+  适用迁移场景：
+    - 交易记录查询
+    - 资金流水管理
+    - 收益明细查看
+
+  wjs created by 2019-02-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>交易记录 - XX金融</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      color: #333;
+      background: #f5f5f5;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .top-bar {
+      background: #f5f5f5;
+      border-bottom: 1px solid #e8e8e8;
+      font-size: 12px;
+      color: #999;
+    }
+    .top-bar-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 8px 0;
+      overflow: hidden;
+    }
+    .top-left { float: left; }
+    .top-right { float: right; }
+    .top-right span { margin-left: 20px; cursor: pointer; }
+    .top-right span:hover { color: #c0392b; }
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 26px;
+      font-weight: bold;
+      color: #c0392b;
+      line-height: 42px;
+    }
+    .logo span { color: #333; font-weight: normal; font-size: 15px; margin-left: 8px; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 22px;
+      line-height: 42px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #c0392b; }
+    .nav-item.active {
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .header-right {
+      float: right;
+      line-height: 42px;
+    }
+    .btn {
+      padding: 7px 20px;
+      border: 1px solid #c0392b;
+      border-radius: 4px;
+      background: #fff;
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #c0392b;
+      color: #fff;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #999; text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { color: #c0392b; }
+    .container {
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .user-card {
+      padding: 25px 20px;
+      text-align: center;
+      border-bottom: 1px solid #f0f0f0;
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: #fff;
+      border-radius: 4px 4px 0 0;
+    }
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .user-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .user-level {
+      display: inline-block;
+      padding: 2px 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    .side-menu {
+      padding: 10px 0;
+    }
+    .menu-group {
+      margin-bottom: 5px;
+    }
+    .menu-title {
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #999;
+      font-weight: bold;
+    }
+    .menu-item {
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+    .menu-item:hover {
+      background: #fafafa;
+      color: #c0392b;
+    }
+    .menu-item.active {
+      background: #fdf2f1;
+      color: #c0392b;
+      font-weight: bold;
+      border-left-color: #c0392b;
+    }
+    .menu-item .icon {
+      margin-right: 8px;
+    }
+    .menu-item .badge {
+      float: right;
+      background: #f44336;
+      color: #fff;
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      margin-top: 2px;
+      font-weight: normal;
+    }
+    .content {
+      margin-left: 220px;
+    }
+    .content-card {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 0 20px;
+      border-bottom: 2px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .tabs-bar {
+      float: left;
+    }
+    .tab-item {
+      display: inline-block;
+      padding: 15px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      color: #c0392b;
+      border-bottom-color: #c0392b;
+      font-weight: bold;
+    }
+    .header-action {
+      float: right;
+      padding-top: 12px;
+    }
+    .export-btn {
+      display: inline-block;
+      padding: 6px 18px;
+      border: 1px solid #c0392b;
+      border-radius: 3px;
+      color: #c0392b;
+      cursor: pointer;
+      font-size: 13px;
+      background: #fff;
+    }
+    .filter-bar {
+      padding: 18px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+    .filter-row {
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .filter-row:last-child {
+      margin-bottom: 0;
+    }
+    .filter-label {
+      float: left;
+      width: 80px;
+      line-height: 32px;
+      font-size: 13px;
+      color: #666;
+    }
+    .filter-options {
+      margin-left: 80px;
+    }
+    .filter-option {
+      display: inline-block;
+      padding: 5px 14px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    .filter-option:hover { color: #c0392b; }
+    .filter-option.active {
+      background: #c0392b;
+      color: #fff;
+    }
+    .date-range {
+      display: inline-block;
+    }
+    .date-input {
+      width: 130px;
+      height: 32px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .date-input:focus {
+      border-color: #c0392b;
+    }
+    .date-sep {
+      margin: 0 8px;
+      color: #999;
+    }
+    .advanced-filter {
+      display: inline-block;
+      color: #c0392b;
+      font-size: 13px;
+      cursor: pointer;
+      margin-left: 20px;
+    }
+    .summary-bar {
+      padding: 15px 20px;
+      background: #fff9f8;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .summary-item {
+      float: left;
+      width: 25%;
+      text-align: center;
+      border-right: 1px solid #f0e6e5;
+    }
+    .summary-item:last-child { border-right: none; }
+    .summary-label {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    .summary-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #c0392b;
+    }
+    .summary-value.income { color: #c0392b; }
+    .summary-value.expense { color: #2e7d32; }
+    .transaction-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .transaction-table th {
+      background: #fafafa;
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .transaction-table td {
+      padding: 14px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .transaction-table tr:hover { background: #fafafa; }
+    .product-name {
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+    }
+    .product-name:hover { color: #c0392b; }
+    .product-type {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .amount {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .amount-plus { color: #c0392b; }
+    .amount-minus { color: #2e7d32; }
+    .status-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .status-success { background: #e8f5e9; color: #2e7d32; }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .status-failed { background: #ffebee; color: #c62828; }
+    .status-processing { background: #e3f2fd; color: #1565c0; }
+    .action-link {
+      color: #c0392b;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    .pagination {
+      padding: 20px 20px 35px;
+      text-align: center;
+      border-top: 1px solid #f0f0f0;
+    }
+    .page-info {
+      float: left;
+      font-size: 13px;
+      color: #999;
+      padding-top: 6px;
+    }
+    .page-controls {
+      float: right;
+    }
+    .page-item {
+      display: inline-block;
+      padding: 5px 12px;
+      margin: 0 2px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #666;
+    }
+    .page-item.active {
+      background: #c0392b;
+      color: #fff;
+      border-color: #c0392b;
+    }
+    .page-item:hover {
+      border-color: #c0392b;
+      color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-left">欢迎来到XX金融理财平台</div>
+      <div class="top-right">
+        <span>客服热线：400-XXX-XXXX</span>
+        <span>手机版</span>
+        <span>帮助中心</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX金融<span>专业理财平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item">基金理财</div>
+        <div class="nav-item">定期理财</div>
+        <div class="nav-item">活期理财</div>
+        <div class="nav-item">保险</div>
+        <div class="nav-item active">我的资产</div>
+      </div>
+      <div class="header-right">
+        <span style="font-size:14px;color:#666;margin-right:15px;">您好，张**</span>
+        <button class="btn btn-primary">安全退出</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>我的资产</a> / <span style="color:#333;">交易记录</span>
+    </div>
+
+    <div class="container">
+      <div class="sidebar">
+        <div class="user-card">
+          <div class="user-avatar">张</div>
+          <div class="user-name">张**</div>
+          <div class="user-level">VIP 黄金会员</div>
+        </div>
+        <div class="side-menu">
+          <div class="menu-group">
+            <div class="menu-title">资产总览</div>
+            <div class="menu-item"><span class="icon">📊</span> 我的资产</div>
+            <div class="menu-item"><span class="icon">💰</span> 持仓明细</div>
+            <div class="menu-item"><span class="icon">📈</span> 收益分析</div>
+          </div>
+          <div class="menu-group">
+            <div class="menu-title">交易管理</div>
+            <div class="menu-item active"><span class="icon">📋</span> 交易记录</div>
+            <div class="menu-item"><span class="icon">💳</span> 充值提现<span class="badge">2</span></div>
+            <div class="menu-item"><span class="icon">🔄</span> 基金转换</div>
+            <div class="menu-item"><span class="icon">📅</span> 定投管理</div>
+          </div>
+          <div class="menu-group">
+            <div class="menu-title">账户管理</div>
+            <div class="menu-item"><span class="icon">👤</span> 个人信息</div>
+            <div class="menu-item"><span class="icon">🏦</span> 银行卡管理</div>
+            <div class="menu-item"><span class="icon">🔒</span> 安全设置</div>
+            <div class="menu-item"><span class="icon">🎁</span> 我的卡券</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="content-card">
+          <div class="card-header">
+            <div class="tabs-bar">
+              <span class="tab-item active">全部交易</span>
+              <span class="tab-item">交易流水</span>
+              <span class="tab-item">收益明细</span>
+              <span class="tab-item">持仓变更</span>
+              <span class="tab-item">分红记录</span>
+            </div>
+            <div class="header-action">
+              <span class="export-btn">📥 导出对账单</span>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-row">
+              <div class="filter-label">交易类型：</div>
+              <div class="filter-options">
+                <span class="filter-option active">全部</span>
+                <span class="filter-option">申购</span>
+                <span class="filter-option">赎回</span>
+                <span class="filter-option">定投</span>
+                <span class="filter-option">分红</span>
+                <span class="filter-option">充值</span>
+                <span class="filter-option">提现</span>
+                <span class="filter-option">转换</span>
+              </div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-label">交易时间：</div>
+              <div class="filter-options">
+                <span class="filter-option active">近一个月</span>
+                <span class="filter-option">近三个月</span>
+                <span class="filter-option">近半年</span>
+                <span class="filter-option">近一年</span>
+                <div class="date-range">
+                  <input type="text" class="date-input" placeholder="开始日期">
+                  <span class="date-sep">至</span>
+                  <input type="text" class="date-input" placeholder="结束日期">
+                </div>
+                <span class="advanced-filter">高级筛选 ▼</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="summary-bar">
+            <div class="summary-item">
+              <div class="summary-label">买入金额</div>
+              <div class="summary-value expense">¥ 128,500.00</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">卖出金额</div>
+              <div class="summary-value income">¥ 45,200.00</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">累计收益</div>
+              <div class="summary-value income">+¥ 8,652.38</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">交易笔数</div>
+              <div class="summary-value">86 笔</div>
+            </div>
+          </div>
+
+          <table class="transaction-table">
+            <thead>
+              <tr>
+                <th style="width:25%;">产品名称</th>
+                <th style="width:12%;">交易类型</th>
+                <th style="width:15%;">交易金额</th>
+                <th style="width:12%;">份额</th>
+                <th style="width:13%;">交易时间</th>
+                <th style="width:10%;">状态</th>
+                <th style="width:13%;">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="product-name">XX新能源产业股票</div>
+                  <div class="product-type">股票型 · 00XXXX1</div>
+                </td>
+                <td>基金申购</td>
+                <td class="amount amount-minus">-10,000.00</td>
+                <td>3,501.23</td>
+                <td>2019-02-14 15:30</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX科技创新混合</div>
+                  <div class="product-type">混合型 · 00XXXX2</div>
+                </td>
+                <td>基金定投</td>
+                <td class="amount amount-minus">-2,000.00</td>
+                <td>584.56</td>
+                <td>2019-02-14 10:00</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX纯债债券A</div>
+                  <div class="product-type">债券型 · 00XXXX6</div>
+                </td>
+                <td>基金赎回</td>
+                <td class="amount amount-plus">+5,280.50</td>
+                <td>4,109.28</td>
+                <td>2019-02-13 14:25</td>
+                <td><span class="status-tag status-processing">处理中</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">撤销</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">账户充值</div>
+                  <div class="product-type">网银支付 · 工商银行</div>
+                </td>
+                <td>账户充值</td>
+                <td class="amount amount-plus">+20,000.00</td>
+                <td>-</td>
+                <td>2019-02-12 09:15</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX沪深300指数</div>
+                  <div class="product-type">指数型 · 00XXXX4</div>
+                </td>
+                <td>现金分红</td>
+                <td class="amount amount-plus">+186.50</td>
+                <td>-</td>
+                <td>2019-02-10 16:00</td>
+                <td><span class="status-tag status-success">已到账</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX消费精选股票</div>
+                  <div class="product-type">股票型 · 00XXXX5</div>
+                </td>
+                <td>基金转换</td>
+                <td class="amount">-</td>
+                <td>转出 2,000.00</td>
+                <td>2019-02-08 11:30</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">账户提现</div>
+                  <div class="product-type">到账银行卡 · 建设银行</div>
+                </td>
+                <td>账户提现</td>
+                <td class="amount amount-minus">-3,000.00</td>
+                <td>-</td>
+                <td>2019-02-06 16:45</td>
+                <td><span class="status-tag status-success">已到账</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX红利优选混合</div>
+                  <div class="product-type">混合型 · 00XXXX7</div>
+                </td>
+                <td>基金申购</td>
+                <td class="amount amount-minus">-5,000.00</td>
+                <td>2,637.12</td>
+                <td>2019-02-05 14:20</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX医药健康混合</div>
+                  <div class="product-type">混合型 · 00XXXX3</div>
+                </td>
+                <td>基金赎回</td>
+                <td class="amount amount-plus">+8,560.00</td>
+                <td>3,966.55</td>
+                <td>2019-02-03 10:45</td>
+                <td><span class="status-tag status-success">已到账</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="product-name">XX价值成长混合</div>
+                  <div class="product-type">混合型 · 00XXX10</div>
+                </td>
+                <td>基金定投</td>
+                <td class="amount amount-minus">-1,500.00</td>
+                <td>474.96</td>
+                <td>2019-02-01 10:00</td>
+                <td><span class="status-tag status-success">交易成功</span></td>
+                <td>
+                  <span class="action-link">详情</span>
+                  <span class="action-link">对账单</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pagination">
+            <div class="page-info">共 86 条记录，第 1/9 页</div>
+            <div class="page-controls">
+              <span class="page-item">« 上一页</span>
+              <span class="page-item active">1</span>
+              <span class="page-item">2</span>
+              <span class="page-item">3</span>
+              <span class="page-item">4</span>
+              <span class="page-item">5</span>
+              <span class="page-item">9</span>
+              <span class="page-item">下一页 »</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

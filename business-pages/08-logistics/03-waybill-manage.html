@@ -1,0 +1,647 @@
+<!--
+  ============================================================
+  运单管理列表页 - 物流管理系统
+
+  页面功能：XX物流运单管理列表，支持查询筛选和操作
+  布局方式：顶部筛选+表格列表的经典后台布局
+  业务背景：
+    1. 运单信息管理
+    2. 运单状态跟踪
+    3. 批量操作和导出
+
+  设计思路：
+    1. 筛选条件丰富
+    2. 表格信息完整
+    3. 操作便捷高效
+
+  技术要点：
+    - 数据表格布局
+    - 筛选表单样式
+    - 状态标签展示
+
+  适用迁移场景：
+    - 运单管理列表
+    - 订单管理后台
+    - 数据列表页面
+
+  wjs created by 2019-04-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>运单管理 - XX物流</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #fff;
+      height: 50px;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 25px;
+      overflow: hidden;
+      line-height: 50px;
+    }
+    .logo {
+      float: left;
+      font-size: 18px;
+      font-weight: bold;
+      color: #1890ff;
+    }
+    .user-info {
+      float: right;
+      font-size: 13px;
+      color: #666;
+    }
+    .container {
+      display: flex;
+      height: calc(100vh - 50px);
+    }
+    .sidebar {
+      width: 220px;
+      background: #001529;
+      padding-top: 15px;
+    }
+    .menu-item {
+      padding: 12px 25px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+    }
+    .menu-item.active {
+      color: #fff;
+      background: #1890ff;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .page-header {
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    .page-title {
+      float: left;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .page-breadcrumb {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .filter-panel {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .filter-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 20px;
+    }
+    .filter-item {
+      width: calc(33.333% - 14px);
+      display: flex;
+      align-items: center;
+    }
+    .filter-label {
+      flex-shrink: 0;
+      width: 80px;
+      text-align: right;
+      color: #666;
+      margin-right: 10px;
+      font-size: 13px;
+    }
+    .filter-input,
+    .filter-select {
+      flex: 1;
+      min-width: 0;
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-date-range {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .filter-date-range .filter-input {
+      flex: 1;
+      min-width: 0;
+    }
+    .filter-date-range .date-sep {
+      color: #999;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .filter-input:focus,
+    .filter-select:focus {
+      border-color: #1890ff;
+    }
+    .filter-actions {
+      width: 100%;
+      text-align: right;
+      padding-top: 4px;
+    }
+    .btn {
+      padding: 7px 18px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .btn-primary:hover { background: #40a9ff; }
+    .btn-danger {
+      background: #f5222d;
+      color: #fff;
+      border-color: #f5222d;
+    }
+    .btn-sm {
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+    .table-panel {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .table-toolbar {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .toolbar-left {
+      float: left;
+    }
+    .toolbar-right {
+      float: right;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table th {
+      background: #fafafa;
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+    }
+    .data-table td {
+      padding: 12px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .data-table tbody tr:hover {
+      background: #f0f7ff;
+    }
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+    }
+    .waybill-no {
+      color: #1890ff;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .waybill-no:hover { text-decoration: underline; }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .status-pending { background: #fff7e6; color: #fa8c16; }
+    .status-picked { background: #e6f7ff; color: #1890ff; }
+    .status-transit { background: #f0f5ff; color: #2f54eb; }
+    .status-delivering { background: #fff0f6; color: #eb2f96; }
+    .status-signed { background: #f6ffed; color: #52c41a; }
+    .status-failed { background: #fff1f0; color: #f5222d; }
+    .action-link {
+      color: #1890ff;
+      cursor: pointer;
+      margin-right: 10px;
+          display: inline-block;
+      line-height: 20px;
+}
+    .action-link:hover { text-decoration: underline; }
+    .action-link.danger { color: #f5222d; }
+    .pagination {
+      padding: 20px;
+      text-align: right;
+    }
+    .pagination-info {
+      float: left;
+      font-size: 13px;
+      color: #999;
+      line-height: 32px;
+    }
+    .pagination-pages {
+      display: inline-block;
+    }
+    .pagination-pages span {
+      display: inline-block;
+      min-width: 32px;
+      height: 32px;
+      line-height: 30px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      margin-left: -1px;
+      cursor: pointer;
+      padding: 0 10px;
+      font-size: 13px;
+      color: #666;
+      background: #fff;
+    }
+    .pagination-pages span:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    .pagination-pages span:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    .pagination-pages span.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .pagination-pages span:hover:not(.active) {
+      color: #1890ff;
+      border-color: #1890ff;
+    }
+    .pagination-pages select {
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      margin-left: 10px;
+      font-size: 13px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="logo">XX物流 · 运单管理系统</div>
+    <div class="user-info">
+      运营管理员：李主管 &nbsp;|&nbsp; 深圳运营中心 &nbsp;|&nbsp; 退出
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="menu-item">📊 数据概览</div>
+      <div class="menu-item">📦 仓库管理</div>
+      <div class="menu-item">📥 入库管理</div>
+      <div class="menu-item">📤 出库管理</div>
+      <div class="menu-item active">📋 运单管理</div>
+      <div class="menu-item">🚚 运输调度</div>
+      <div class="menu-item">📍 网点管理</div>
+      <div class="menu-item">👥 客户管理</div>
+      <div class="menu-item">⚙️ 系统设置</div>
+    </div>
+
+    <div class="main-content">
+      <div class="page-header">
+        <div class="page-title">运单管理</div>
+        <div class="page-breadcrumb">首页 / 运单管理 / 运单列表</div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="filter-form">
+            <div class="filter-item">
+              <span class="filter-label">运单号：</span>
+              <input type="text" class="filter-input" placeholder="请输入运单号">
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">订单号：</span>
+              <input type="text" class="filter-input" placeholder="请输入订单号">
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">运单状态：</span>
+              <select class="filter-select">
+                <option>全部状态</option>
+                <option>待揽收</option>
+                <option>已揽收</option>
+                <option>运输中</option>
+                <option>派送中</option>
+                <option>已签收</option>
+                <option>异常</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">运输方式：</span>
+              <select class="filter-select">
+                <option>全部方式</option>
+                <option>标准快递</option>
+                <option>特快专递</option>
+                <option>经济快递</option>
+                <option>同城配送</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">寄件人：</span>
+              <input type="text" class="filter-input" placeholder="寄件人姓名/电话">
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">收件人：</span>
+              <input type="text" class="filter-input" placeholder="收件人姓名/电话">
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">下单时间：</span>
+              <div class="filter-date-range">
+                <input type="text" class="filter-input" placeholder="开始日期">
+                <span class="date-sep">至</span>
+                <input type="text" class="filter-input" placeholder="结束日期">
+              </div>
+            </div>
+            <div class="filter-item">
+              <span class="filter-label">所属网点：</span>
+              <select class="filter-select">
+                <option>全部网点</option>
+                <option>深圳科技园营业部</option>
+                <option>深圳福田营业部</option>
+                <option>广州天河营业部</option>
+                <option>北京朝阳营业部</option>
+              </select>
+            </div>
+          <div class="filter-actions">
+            <button class="btn">重置</button>
+            <button class="btn btn-primary">🔍 查询</button>
+            <button class="btn">高级筛选</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <button class="btn btn-primary">+ 新建运单</button>
+            <button class="btn">批量导入</button>
+            <button class="btn">批量打印</button>
+            <button class="btn">导出Excel</button>
+          </div>
+          <div class="toolbar-right">
+            <input type="text" class="filter-input" placeholder="搜索运单号" style="width: 200px;">
+            <button class="btn btn-primary" style="margin-left: 5px;">搜索</button>
+          </div>
+        </div>
+
+        
+          <div style="overflow-x:auto;">
+<table class="data-table">
+          <thead>
+            <tr>
+              <th width="40"><input type="checkbox" class="checkbox"></th>
+              <th width="150">运单号</th>
+              <th width="100">运输方式</th>
+              <th>寄件人</th>
+              <th>收件人</th>
+              <th>目的地</th>
+              <th width="80">重量(kg)</th>
+              <th width="80">运费(元)</th>
+              <th width="90">状态</th>
+              <th width="120">下单时间</th>
+              <th width="160">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100001</span></td>
+              <td>特快专递</td>
+              <td>张** 138****8888</td>
+              <td>李** 139****6666</td>
+              <td>北京市朝阳区</td>
+              <td>2.5</td>
+              <td>25.00</td>
+              <td><span class="status-tag status-transit">运输中</span></td>
+              <td>2019-04-10 09:25</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100002</span></td>
+              <td>标准快递</td>
+              <td>王** 137****5555</td>
+              <td>赵** 136****7777</td>
+              <td>上海市浦东新区</td>
+              <td>1.2</td>
+              <td>18.00</td>
+              <td><span class="status-tag status-delivering">派送中</span></td>
+              <td>2019-04-09 14:30</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100003</span></td>
+              <td>经济快递</td>
+              <td>刘** 135****9999</td>
+              <td>陈** 134****3333</td>
+              <td>广州市天河区</td>
+              <td>5.8</td>
+              <td>32.00</td>
+              <td><span class="status-tag status-signed">已签收</span></td>
+              <td>2019-04-08 10:15</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100004</span></td>
+              <td>同城配送</td>
+              <td>孙** 133****2222</td>
+              <td>周** 132****4444</td>
+              <td>深圳市南山区</td>
+              <td>0.8</td>
+              <td>12.00</td>
+              <td><span class="status-tag status-pending">待揽收</span></td>
+              <td>2019-04-10 10:45</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">揽收</span>
+                <span class="action-link danger">取消</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100005</span></td>
+              <td>特快专递</td>
+              <td>吴** 131****1111</td>
+              <td>郑** 130****8888</td>
+              <td>杭州市西湖区</td>
+              <td>3.5</td>
+              <td>35.00</td>
+              <td><span class="status-tag status-picked">已揽收</span></td>
+              <td>2019-04-10 08:50</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100006</span></td>
+              <td>标准快递</td>
+              <td>钱** 158****6666</td>
+              <td>冯** 159****7777</td>
+              <td>成都市武侯区</td>
+              <td>8.2</td>
+              <td>48.00</td>
+              <td><span class="status-tag status-failed">异常</span></td>
+              <td>2019-04-07 16:20</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">处理</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100007</span></td>
+              <td>经济快递</td>
+              <td>褚** 157****8888</td>
+              <td>卫** 156****9999</td>
+              <td>武汉市洪山区</td>
+              <td>12.5</td>
+              <td>65.00</td>
+              <td><span class="status-tag status-transit">运输中</span></td>
+              <td>2019-04-09 11:30</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100008</span></td>
+              <td>特快专递</td>
+              <td>蒋** 155****0000</td>
+              <td>沈** 154****1111</td>
+              <td>南京市鼓楼区</td>
+              <td>0.5</td>
+              <td>22.00</td>
+              <td><span class="status-tag status-signed">已签收</span></td>
+              <td>2019-04-08 15:40</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100009</span></td>
+              <td>同城配送</td>
+              <td>韩** 153****2222</td>
+              <td>杨** 152****3333</td>
+              <td>深圳市福田区</td>
+              <td>2.0</td>
+              <td>15.00</td>
+              <td><span class="status-tag status-delivering">派送中</span></td>
+              <td>2019-04-10 09:10</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="checkbox"></td>
+              <td><span class="waybill-no">SF201904100010</span></td>
+              <td>标准快递</td>
+              <td>朱** 151****4444</td>
+              <td>秦** 150****5555</td>
+              <td>西安市雁塔区</td>
+              <td>4.6</td>
+              <td>28.00</td>
+              <td><span class="status-tag status-transit">运输中</span></td>
+              <td>2019-04-09 13:25</td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">轨迹</span>
+                <span class="action-link">打印</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+          </div>
+
+        <div class="pagination">
+          <div class="pagination-info">
+            共 2,568 条记录，当前第 1/257 页
+          </div>
+          <div class="pagination-pages">
+            <span>首页</span>
+            <span>上一页</span>
+            <span class="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>...</span>
+            <span>下一页</span>
+            <span>末页</span>
+            <select>
+              <option>10条/页</option>
+              <option>20条/页</option>
+              <option>50条/页</option>
+              <option>100条/页</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!--
+  ============================================================
+  用户管理列表页 - 企业管理系统
+
+  页面功能：XX企业管理系统用户管理页面，支持用户增删改查
+  布局方式：搜索筛选区+数据表格+分页的经典列表页布局
+  业务背景：
+    1. 系统用户信息管理功能
+    2. 支持用户信息的增删改查
+    3. 支持按部门、状态等条件筛选
+
+  设计思路：
+    1. 搜索区紧凑排列，操作便捷
+    2. 表格信息完整，关键数据突出
+    3. 操作按钮清晰，便于执行操作
+
+  技术要点：
+    - 表格布局展示用户数据
+    - 筛选表单inline排列
+    - 分页组件支持页码跳转
+
+  适用迁移场景：
+    - 各类数据列表管理页
+    - 用户/成员管理页面
+    - 带增删改查的管理页面
+
+  wjs created by 2017-03-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户管理 - XX企业管理系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #001529;
+      z-index: 1000;
+    }
+    .logo {
+      float: left;
+      width: 220px;
+      height: 100%;
+      line-height: 50px;
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      background: #002140;
+    }
+    .header-right {
+      float: right;
+      padding-right: 20px;
+      height: 50px;
+      line-height: 50px;
+      color: #fff;
+    }
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      background: #001529;
+      color: #fff;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .menu-title {
+      padding: 15px 20px 8px;
+      font-size: 12px;
+      color: #6b7a8f;
+    }
+    .menu-item-title {
+      padding: 12px 20px 12px 45px;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 14px;
+      position: relative;
+    }
+    .menu-item-title::before {
+      content: "▸";
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7a8f;
+    }
+    .menu-item.open .menu-item-title::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    .menu-item-title:hover {
+      color: #fff;
+      background: #1890ff20;
+    }
+    .sub-menu {
+      display: none;
+      background: #000c17;
+    }
+    .menu-item.open .sub-menu {
+      display: block;
+    }
+    .sub-menu li {
+      list-style: none;
+      padding: 10px 20px 10px 60px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .sub-menu li:hover {
+      color: #fff;
+    }
+    .sub-menu li.active {
+      color: #1890ff;
+      background: #1890ff10;
+    }
+    .main {
+      margin-left: 220px;
+      margin-top: 50px;
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a {
+      color: #666;
+      text-decoration: none;
+    }
+    .search-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .search-form {
+      overflow: hidden;
+    }
+    .search-item {
+      float: left;
+      margin-right: 20px;
+      margin-bottom: 15px;
+    }
+    .search-item label {
+      display: inline-block;
+      width: 70px;
+      text-align: right;
+      font-size: 13px;
+      color: #666;
+      margin-right: 8px;
+    }
+    .search-item input,
+    .search-item select {
+      width: 180px;
+      height: 32px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 10px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-item input:focus,
+    .search-item select:focus {
+      border-color: #1890ff;
+    }
+    .search-actions {
+      float: right;
+    }
+    .btn {
+      display: inline-block;
+      padding: 6px 18px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #fff;
+      color: #333;
+    }
+    .btn-primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .btn-primary:hover {
+      background: #40a9ff;
+      border-color: #40a9ff;
+    }
+    .btn-danger {
+      background: #f5222d;
+      color: #fff;
+      border-color: #f5222d;
+    }
+    .btn-sm {
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+    .btn + .btn {
+      margin-left: 8px;
+    }
+    .table-box {
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .toolbar-left {
+      float: left;
+    }
+    .toolbar-right {
+      float: right;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background: #fafafa;
+    }
+    th {
+      padding: 12px 15px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    td {
+      padding: 12px 15px;
+      font-size: 13px;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    tbody tr:hover {
+      background: #fafafa;
+    }
+    .user-avatar {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #1890ff;
+      color: #fff;
+      text-align: center;
+      line-height: 32px;
+      font-size: 13px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .status-normal {
+      background: #f6ffed;
+      color: #52c41a;
+      border: 1px solid #b7eb8f;
+    }
+    .status-disabled {
+      background: #f5f5f5;
+      color: #999;
+      border: 1px solid #d9d9d9;
+    }
+    .status-locked {
+      background: #fff1f0;
+      color: #f5222d;
+      border: 1px solid #ffa39e;
+    }
+    .role-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e6f7ff;
+      color: #1890ff;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+    .action-link {
+      color: #1890ff;
+      cursor: pointer;
+      margin-right: 10px;
+          display: inline-block;
+      line-height: 20px;
+}
+    .action-link:hover {
+      text-decoration: underline;
+    }
+    .action-link.danger {
+      color: #f5222d;
+    }
+    .pagination {
+      padding: 15px 30px;
+      text-align: right;
+      border-top: 1px solid #f0f0f0;
+    }
+    .pagination span {
+      display: inline-block;
+      min-width: 30px;
+      height: 30px;
+      line-height: 28px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      margin: 0 3px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #333;
+    }
+    .pagination span:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .pagination span.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .pagination span.disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+    .pagination span.disabled:hover {
+      border-color: #d9d9d9;
+      color: #ccc;
+    }
+    .pagination .total {
+      float: left;
+      color: #666;
+      font-size: 13px;
+      line-height: 30px;
+      border: none;
+      cursor: default;
+    }
+    .pagination .total:hover {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX企业管理</div>
+    <div class="header-right">
+      <span style="margin-right: 20px;">管理员</span>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="menu-title">系统管理</div>
+    <div class="menu-item open">
+      <div class="menu-item-title">用户管理</div>
+      <ul class="sub-menu">
+        <li class="active">用户列表</li>
+        <li>用户新增</li>
+        <li>用户导入</li>
+      </ul>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-title">角色权限</div>
+      <ul class="sub-menu">
+        <li>角色管理</li>
+        <li>权限配置</li>
+      </ul>
+    </div>
+    <div class="menu-item">
+      <div class="menu-item-title">组织架构</div>
+      <ul class="sub-menu">
+        <li>部门管理</li>
+        <li>岗位管理</li>
+      </ul>
+    </div>
+    <div class="menu-title">业务管理</div>
+    <div class="menu-item">
+      <div class="menu-item-title">客户管理</div>
+      <ul class="sub-menu">
+        <li>客户列表</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a href="#">首页</a> / <a href="#">系统管理</a> / <a href="#">用户管理</a> / <span>用户列表</span>
+    </div>
+
+    <div class="search-box">
+      <div class="search-form">
+        <div class="search-item">
+          <label>用户名：</label>
+          <input type="text" placeholder="请输入用户名">
+        </div>
+        <div class="search-item">
+          <label>姓名：</label>
+          <input type="text" placeholder="请输入姓名">
+        </div>
+        <div class="search-item">
+          <label>手机号：</label>
+          <input type="text" placeholder="请输入手机号">
+        </div>
+        <div class="search-item">
+          <label>部门：</label>
+          <select>
+            <option>全部</option>
+            <option>技术部</option>
+            <option>产品部</option>
+            <option>市场部</option>
+            <option>人事部</option>
+          </select>
+        </div>
+        <div class="search-item">
+          <label>状态：</label>
+          <select>
+            <option>全部</option>
+            <option>正常</option>
+            <option>禁用</option>
+            <option>锁定</option>
+          </select>
+        </div>
+        <div class="search-actions">
+          <button class="btn btn-primary">查询</button>
+          <button class="btn">重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-box">
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-primary">+ 新增用户</button>
+          <button class="btn">批量导入</button>
+          <button class="btn">批量导出</button>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn">刷新</button>
+        </div>
+      </div>
+      
+        <div style="overflow-x:auto;">
+<table>
+        <thead>
+          <tr>
+            <th width="40"><input type="checkbox"></th>
+            <th width="60">ID</th>
+            <th>用户信息</th>
+            <th width="100">用户名</th>
+            <th width="120">部门</th>
+            <th width="130">角色</th>
+            <th width="130">手机号</th>
+            <th width="80">状态</th>
+            <th width="130">创建时间</th>
+            <th width="160">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1001</td>
+            <td>
+              <span class="user-avatar">张</span>
+              张管理员
+            </td>
+            <td>admin</td>
+            <td>技术部</td>
+            <td><span class="role-tag">超级管理员</span></td>
+            <td>138****8888</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-01-15 09:30</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1002</td>
+            <td>
+              <span class="user-avatar" style="background: #52c41a;">李</span>
+              李明
+            </td>
+            <td>liming</td>
+            <td>技术部</td>
+            <td><span class="role-tag">部门管理员</span></td>
+            <td>139****6666</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-03-20 14:20</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1003</td>
+            <td>
+              <span class="user-avatar" style="background: #f5222d;">王</span>
+              王小红
+            </td>
+            <td>wangxh</td>
+            <td>产品部</td>
+            <td><span class="role-tag">产品经理</span></td>
+            <td>137****5555</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-05-10 10:15</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1004</td>
+            <td>
+              <span class="user-avatar" style="background: #faad14;">赵</span>
+              赵设计
+            </td>
+            <td>zhaosj</td>
+            <td>设计部</td>
+            <td><span class="role-tag">普通用户</span></td>
+            <td>136****7777</td>
+            <td><span class="status-tag status-disabled">禁用</span></td>
+            <td>2016-06-25 16:40</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1005</td>
+            <td>
+              <span class="user-avatar" style="background: #722ed1;">陈</span>
+              陈开发
+            </td>
+            <td>chenkf</td>
+            <td>技术部</td>
+            <td><span class="role-tag">普通用户</span></td>
+            <td>135****9999</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-07-12 11:30</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1006</td>
+            <td>
+              <span class="user-avatar" style="background: #13c2c2;">刘</span>
+              小丽
+            </td>
+            <td>liuxl</td>
+            <td>市场部</td>
+            <td><span class="role-tag">普通用户</span></td>
+            <td>134****3333</td>
+            <td><span class="status-tag status-locked">锁定</span></td>
+            <td>2016-08-05 09:00</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1007</td>
+            <td>
+              <span class="user-avatar" style="background: #eb2f96;">孙</span>
+              孙人事
+            </td>
+            <td>sunrs</td>
+            <td>人事部</td>
+            <td><span class="role-tag">人事专员</span></td>
+            <td>133****2222</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-09-18 15:25</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+          <tr>
+            <td><input type="checkbox"></td>
+            <td>1008</td>
+            <td>
+              <span class="user-avatar" style="background: #fa8c16;">周</span>
+              周财务
+            </td>
+            <td>zhoucw</td>
+            <td>财务部</td>
+            <td><span class="role-tag">财务</span></td>
+            <td>132****1111</td>
+            <td><span class="status-tag status-normal">正常</span></td>
+            <td>2016-10-22 13:50</td>
+            <td>
+              <span class="action-link">查看</span>
+              <span class="action-link">编辑</span>
+              <span class="action-link danger">删除</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+        </div>
+      <div class="pagination">
+        <span class="total">共 86 条记录</span>
+        <span class="disabled">上一页</span>
+        <span class="active">1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+        <span>...</span>
+        <span>9</span>
+        <span>下一页</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

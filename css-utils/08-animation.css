@@ -1,0 +1,303 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  08-animation.css - 动画工具类
+
+  功能说明：
+    1. 过渡：默认过渡、全部过渡、无过渡
+    2. 动画：淡入、淡出、上滑、下滑、脉冲、弹跳、旋转
+    3. 变换：旋转、缩放、位移
+    4. 悬停效果：悬停缩放、悬停上移、悬停阴影
+
+  适用场景：
+    - 元素进入/退出动画
+    - 按钮、卡片悬停交互效果
+    - 加载动画、状态指示动画
+    - 页面切换过渡效果
+
+  技术要点：
+    - 使用 @keyframes 定义关键帧动画
+    - 使用 transition 实现过渡效果
+    - 使用 transform 实现变换效果
+    - 动画性能优化，优先使用GPU加速属性
+
+  wjs created by 2018-11-20
+  ============================================================
+*/
+
+/* ========== 过渡 ========== */
+
+/* 默认过渡（0.3秒） */
+.transition {
+  transition: all 0.3s ease;
+}
+
+/* 全部属性过渡 */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: ease;
+  transition-duration: 0.3s;
+}
+
+/* 无过渡 */
+.transition-none {
+  transition: none;
+}
+
+/* ========== 动画关键帧 ========== */
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 淡出动画 */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 上滑进入动画 */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 下滑进入动画 */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 弹跳动画 */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-30px);
+  }
+  60% {
+    transform: translateY(-15px);
+  }
+}
+
+/* 旋转动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== 动画类 ========== */
+
+/* 淡入 */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* 淡出 */
+.animate-fadeOut {
+  animation: fadeOut 0.5s ease forwards;
+}
+
+/* 上滑进入 */
+.animate-slideUp {
+  animation: slideUp 0.5s ease forwards;
+}
+
+/* 下滑进入 */
+.animate-slideDown {
+  animation: slideDown 0.5s ease forwards;
+}
+
+/* 脉冲 */
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 弹跳 */
+.animate-bounce {
+  animation: bounce 1s ease infinite;
+}
+
+/* 旋转 */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ========== 变换 ========== */
+
+/* 旋转45度 */
+.rotate-45 {
+  transform: rotate(45deg);
+}
+
+/* 旋转90度 */
+.rotate-90 {
+  transform: rotate(90deg);
+}
+
+/* 旋转180度 */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* 旋转270度 */
+.rotate-270 {
+  transform: rotate(270deg);
+}
+
+/* 缩放50% */
+.scale-50 {
+  transform: scale(0.5);
+}
+
+/* 缩放75% */
+.scale-75 {
+  transform: scale(0.75);
+}
+
+/* 缩放90% */
+.scale-90 {
+  transform: scale(0.9);
+}
+
+/* 缩放100%（默认） */
+.scale-100 {
+  transform: scale(1);
+}
+
+/* 缩放110% */
+.scale-110 {
+  transform: scale(1.1);
+}
+
+/* 缩放125% */
+.scale-125 {
+  transform: scale(1.25);
+}
+
+/* 缩放150% */
+.scale-150 {
+  transform: scale(1.5);
+}
+
+/* 位移（左移） */
+.translate-x-0 {
+  transform: translateX(0);
+}
+.translate-x-1 {
+  transform: translateX(0.25rem);
+}
+.translate-x-2 {
+  transform: translateX(0.5rem);
+}
+.translate-x-3 {
+  transform: translateX(1rem);
+}
+.translate-x-4 {
+  transform: translateX(1.5rem);
+}
+.translate-x-5 {
+  transform: translateX(2rem);
+}
+.-translate-x-1 {
+  transform: translateX(-0.25rem);
+}
+.-translate-x-2 {
+  transform: translateX(-0.5rem);
+}
+.-translate-x-3 {
+  transform: translateX(-1rem);
+}
+
+/* 位移（上移） */
+.translate-y-0 {
+  transform: translateY(0);
+}
+.translate-y-1 {
+  transform: translateY(0.25rem);
+}
+.translate-y-2 {
+  transform: translateY(0.5rem);
+}
+.translate-y-3 {
+  transform: translateY(1rem);
+}
+.translate-y-4 {
+  transform: translateY(1.5rem);
+}
+.translate-y-5 {
+  transform: translateY(2rem);
+}
+.-translate-y-1 {
+  transform: translateY(-0.25rem);
+}
+.-translate-y-2 {
+  transform: translateY(-0.5rem);
+}
+.-translate-y-3 {
+  transform: translateY(-1rem);
+}
+
+/* ========== 悬停效果 ========== */
+
+/* 悬停放大 */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+/* 悬停上移 */
+.hover-up {
+  transition: transform 0.3s ease;
+}
+.hover-up:hover {
+  transform: translateY(-3px);
+}
+
+/* 悬停阴影 */
+.hover-shadow {
+  transition: box-shadow 0.3s ease;
+}
+.hover-shadow:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}

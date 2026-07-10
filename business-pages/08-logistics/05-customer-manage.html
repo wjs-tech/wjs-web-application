@@ -1,0 +1,773 @@
+<!--
+  ============================================================
+  客户管理页 - 物流管理系统
+
+  页面功能：XX物流客户管理页面，管理客户列表、客户详情和合作记录
+  布局方式：顶部导航+左侧客户列表+右侧详情的两栏布局
+  业务背景：
+    1. 物流企业客户关系管理
+    2. 客户信息维护和分级管理
+    3. 合作记录和业务数据分析
+
+  设计思路：
+    1. 左侧客户列表快速检索
+    2. 右侧客户详情多标签展示
+    3. 客户分级和标签管理
+
+  技术要点：
+    - float两栏布局
+    - 标签页切换不同信息模块
+    - 客户列表搜索筛选
+
+  适用迁移场景：
+    - 客户关系管理系统
+    - 客户信息管理平台
+    - 销售管理系统
+
+  wjs created by 2019-11-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户管理 - XX物流</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      padding: 15px 0;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 26px;
+      font-weight: bold;
+      color: #1890ff;
+      line-height: 40px;
+    }
+    .logo span { color: #666; font-weight: normal; font-size: 14px; margin-left: 10px; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 40px;
+      font-size: 15px;
+      color: #555;
+      cursor: pointer;
+    }
+    .nav-item:hover { color: #1890ff; }
+    .nav-item.active { color: #1890ff; font-weight: bold; }
+    .header-right {
+      float: right;
+      line-height: 40px;
+    }
+    .user-name {
+      font-size: 14px;
+      color: #666;
+      margin-right: 15px;
+    }
+    .main {
+      width: 1200px;
+      margin: 20px auto;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #999; text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { color: #1890ff; }
+    .stats-row {
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .stat-card {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+    }
+    .stat-card:first-child { padding-left: 0; }
+    .stat-card:last-child { padding-right: 0; }
+    .stat-inner {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .stat-icon {
+      float: left;
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1890ff, #40a9ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+    }
+    .stat-icon.warning { background: linear-gradient(135deg, #fa8c16, #ffa940); }
+    .stat-icon.success { background: linear-gradient(135deg, #52c41a, #73d13d); }
+    .stat-icon.purple { background: linear-gradient(135deg, #722ed1, #9254de); }
+    .stat-info {
+      margin-left: 65px;
+      padding-top: 5px;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+    .stat-label {
+      font-size: 13px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .customer-sidebar {
+      float: left;
+      width: 360px;
+      border-right: 1px solid #f0f0f0;
+    }
+    .sidebar-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .sidebar-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .add-btn {
+      float: right;
+      padding: 6px 16px;
+      background: #1890ff;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .search-section {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .search-input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #1890ff;
+    }
+    .filter-tabs {
+      padding: 0 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .filter-tab {
+      float: left;
+      padding: 12px 18px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -1px;
+      border-bottom: 2px solid transparent;
+    }
+    .filter-tab.active {
+      color: #1890ff;
+      border-bottom-color: #1890ff;
+      font-weight: bold;
+    }
+    .customer-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .customer-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .customer-item:hover { background: #fafafa; }
+    .customer-item.active {
+      background: #e6f7ff;
+      border-left: 3px solid #1890ff;
+      padding-left: 17px;
+    }
+    .customer-top {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .customer-name {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    .customer-level {
+      float: right;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .level-v1 { background: #e6f7ff; color: #1890ff; }
+    .level-v2 { background: #fff7e6; color: #fa8c16; }
+    .level-v3 { background: #f9f0ff; color: #722ed1; }
+    .level-v4 { background: #fff1f0; color: #f5222d; }
+    .customer-info {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.6;
+    }
+    .customer-info .contact { color: #666; }
+    .customer-tags {
+      margin-top: 8px;
+    }
+    .customer-tag {
+      display: inline-block;
+      padding: 1px 6px;
+      background: #f0f0f0;
+      color: #999;
+      border-radius: 2px;
+      font-size: 11px;
+      margin-right: 5px;
+    }
+    .customer-main {
+      margin-left: 360px;
+    }
+    .customer-detail-header {
+      padding: 25px 30px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+      background: #fafafa;
+    }
+    .detail-avatar {
+      float: left;
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1890ff, #40a9ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #fff;
+      margin-right: 20px;
+    }
+    .detail-info {
+      overflow: hidden;
+      padding-top: 8px;
+    }
+    .detail-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .detail-name .level-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      background: #fff1f0;
+      color: #f5222d;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-left: 10px;
+      vertical-align: middle;
+      font-weight: normal;
+    }
+    .detail-meta {
+      font-size: 13px;
+      color: #666;
+    }
+    .detail-meta span {
+      margin-right: 25px;
+    }
+    .detail-actions {
+      float: right;
+      padding-top: 18px;
+    }
+    .action-btn {
+      display: inline-block;
+      padding: 7px 18px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+      color: #666;
+      background: #fff;
+    }
+    .action-btn.primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .detail-tabs {
+      border-bottom: 2px solid #f0f0f0;
+      padding: 0 30px;
+    }
+    .detail-tab {
+      display: inline-block;
+      padding: 15px 25px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .detail-tab.active {
+      color: #1890ff;
+      border-bottom-color: #1890ff;
+      font-weight: bold;
+    }
+    .detail-content {
+      padding: 25px 30px;
+    }
+    .info-section {
+      margin-bottom: 25px;
+    }
+    .info-section:last-child { margin-bottom: 0; }
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .info-grid {
+      display: table;
+      width: 100%;
+    }
+    .info-row {
+      display: table-row;
+    }
+    .info-cell {
+      display: table-cell;
+      padding: 10px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #fafafa;
+    }
+    .info-cell.label {
+      color: #999;
+      width: 120px;
+      background: #fafafa;
+    }
+    .info-cell.value {
+      color: #333;
+    }
+    .cooperation-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .cooperation-table th {
+      background: #fafafa;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .cooperation-table td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .cooperation-table tr:hover { background: #fafafa; }
+    .amount-text {
+      font-weight: bold;
+      color: #1890ff;
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .status-success { background: #f6ffed; color: #52c41a; }
+    .status-pending { background: #fff7e6; color: #fa8c16; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX物流<span>智慧物流管理平台</span></div>
+      <div class="nav-menu">
+        <div class="nav-item">首页</div>
+        <div class="nav-item">运单管理</div>
+        <div class="nav-item">仓储管理</div>
+        <div class="nav-item">调度中心</div>
+        <div class="nav-item active">客户管理</div>
+        <div class="nav-item">财务中心</div>
+      </div>
+      <div class="header-right">
+        <span class="user-name">您好，李经理</span>
+        <span style="color:#999;cursor:pointer;">退出</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>客户管理</a> / <span style="color:#333;">客户列表</span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-info">
+            <div class="stat-value">1,286</div>
+            <div class="stat-label">客户总数</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon success">⭐</div>
+          <div class="stat-info">
+            <div class="stat-value">328</div>
+            <div class="stat-label">VIP客户</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon warning">📦</div>
+          <div class="stat-info">
+            <div class="stat-value">86,420</div>
+            <div class="stat-label">本月运单</div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon purple">💰</div>
+          <div class="stat-info">
+            <div class="stat-value">¥ 2,856万</div>
+            <div class="stat-label">本月营收</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="overflow:hidden;">
+      <div class="customer-sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">客户列表</span>
+          <span class="add-btn">+ 新增客户</span>
+        </div>
+        <div class="search-section">
+          <input type="text" class="search-input" placeholder="搜索客户名称/联系人/电话">
+        </div>
+        <div class="filter-tabs">
+          <span class="filter-tab active">全部客户</span>
+          <span class="filter-tab">VIP客户</span>
+          <span class="filter-tab">潜在客户</span>
+          <span class="filter-tab">流失客户</span>
+        </div>
+        <div class="customer-list">
+          <div class="customer-item active">
+            <div class="customer-top">
+              <span class="customer-name">XX电子科技有限公司</span>
+              <span class="customer-level level-v4">VIP4</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：王经理 &nbsp; 138****5678</div>
+              <div>合作时间：2017-03-15</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">电商客户</span>
+              <span class="customer-tag">月结</span>
+              <span class="customer-tag">华东区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX贸易有限公司</span>
+              <span class="customer-level level-v3">VIP3</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：李总 &nbsp; 139****1234</div>
+              <div>合作时间：2018-06-20</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">商贸客户</span>
+              <span class="customer-tag">大客户</span>
+              <span class="customer-tag">华南区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX制造业集团</span>
+              <span class="customer-level level-v4">VIP4</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：张总监 &nbsp; 137****8899</div>
+              <div>合作时间：2016-08-10</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">制造企业</span>
+              <span class="customer-tag">整车运输</span>
+              <span class="customer-tag">华北区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX服装品牌公司</span>
+              <span class="customer-level level-v2">VIP2</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：刘经理 &nbsp; 186****3344</div>
+              <div>合作时间：2019-02-28</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">服装行业</span>
+              <span class="customer-tag">仓配一体</span>
+              <span class="customer-tag">华东区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX食品有限公司</span>
+              <span class="customer-level level-v2">VIP2</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：陈经理 &nbsp; 135****6677</div>
+              <div>合作时间：2019-05-12</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">食品冷链</span>
+              <span class="customer-tag">冷链运输</span>
+              <span class="customer-tag">华中区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX医药股份公司</span>
+              <span class="customer-level level-v3">VIP3</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：赵总 &nbsp; 133****9988</div>
+              <div>合作时间：2018-11-05</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">医药行业</span>
+              <span class="customer-tag">GSP认证</span>
+              <span class="customer-tag">华东区域</span>
+            </div>
+          </div>
+          <div class="customer-item">
+            <div class="customer-top">
+              <span class="customer-name">XX汽车零部件公司</span>
+              <span class="customer-level level-v3">VIP3</span>
+            </div>
+            <div class="customer-info">
+              <div class="contact">联系人：孙经理 &nbsp; 131****2233</div>
+              <div>合作时间：2017-09-18</div>
+            </div>
+            <div class="customer-tags">
+              <span class="customer-tag">汽车配件</span>
+              <span class="customer-tag">JIT配送</span>
+              <span class="customer-tag">东北区域</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="customer-main">
+        <div class="customer-detail-header">
+          <div class="detail-avatar">XX</div>
+          <div class="detail-info" style="float:left;">
+            <div class="detail-name">
+              XX电子科技有限公司
+              <span class="level-badge">VIP4 钻石客户</span>
+            </div>
+            <div class="detail-meta">
+              <span>客户编号：KH201703XXXX</span>
+              <span>所属行业：电子/电商</span>
+              <span>合作日期：2017-03-15</span>
+              <span>客户经理：王经理</span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <span class="action-btn">编辑信息</span>
+            <span class="action-btn">联系记录</span>
+            <span class="action-btn primary">新建运单</span>
+          </div>
+        </div>
+
+        <div class="detail-tabs">
+          <span class="detail-tab active">基本信息</span>
+          <span class="detail-tab">联系人</span>
+          <span class="detail-tab">合作记录</span>
+          <span class="detail-tab">账务信息</span>
+          <span class="detail-tab">合同管理</span>
+          <span class="detail-tab">服务记录</span>
+        </div>
+
+        <div class="detail-content">
+          <div class="info-section">
+            <div class="section-title">企业基本信息</div>
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell label">公司名称</div>
+                <div class="info-cell value">XX电子科技有限公司</div>
+                <div class="info-cell label">公司类型</div>
+                <div class="info-cell value">有限责任公司</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">统一社会信用代码</div>
+                <div class="info-cell value">91310000MA1GXXXXXX</div>
+                <div class="info-cell label">注册资本</div>
+                <div class="info-cell value">5,000万元人民币</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">成立日期</div>
+                <div class="info-cell value">2014-08-20</div>
+                <div class="info-cell label">所属行业</div>
+                <div class="info-cell value">电子商务 / 电子产品</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">注册地址</div>
+                <div class="info-cell value" colspan="3">上海市浦东新区张江高科技园区XX路XX号XX大厦</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">经营范围</div>
+                <div class="info-cell value" colspan="3">电子产品、计算机软硬件研发销售；电子商务；货物及技术的进出口业务</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-title">物流服务信息</div>
+            <div class="info-grid">
+              <div class="info-row">
+                <div class="info-cell label">客户等级</div>
+                <div class="info-cell value">VIP4 钻石客户</div>
+                <div class="info-cell label">结算方式</div>
+                <div class="info-cell value">月结（次月15日对账）</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">服务类型</div>
+                <div class="info-cell value">快递、零担、整车、仓配一体</div>
+                <div class="info-cell label">配送范围</div>
+                <div class="info-cell value">全国</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">合作仓库</div>
+                <div class="info-cell value">上海青浦仓、广州花都仓</div>
+                <div class="info-cell label">日均单量</div>
+                <div class="info-cell value">约 1,500 单/天</div>
+              </div>
+              <div class="info-row">
+                <div class="info-cell label">合同有效期</div>
+                <div class="info-cell value">2019-01-01 至 2020-12-31</div>
+                <div class="info-cell label">信用额度</div>
+                <div class="info-cell value">¥ 200万元</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-title">近期合作记录</div>
+            <table class="cooperation-table">
+              <thead>
+                <tr>
+                  <th>运单号</th>
+                  <th>运输类型</th>
+                  <th>起止地</th>
+                  <th>件数</th>
+                  <th>重量(kg)</th>
+                  <th>运费(元)</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="color:#1890ff;cursor:pointer;">YD201911100001</td>
+                  <td>快递</td>
+                  <td>上海 → 北京</td>
+                  <td>256</td>
+                  <td>1,280</td>
+                  <td class="amount-text">3,680.00</td>
+                  <td><span class="status-tag status-success">已签收</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#1890ff;cursor:pointer;">YD201911090023</td>
+                  <td>零担</td>
+                  <td>上海 → 广州</td>
+                  <td>128</td>
+                  <td>3,560</td>
+                  <td class="amount-text">5,860.00</td>
+                  <td><span class="status-tag status-success">已签收</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#1890ff;cursor:pointer;">YD201911080156</td>
+                  <td>整车</td>
+                  <td>上海 → 成都</td>
+                  <td>860</td>
+                  <td>18,500</td>
+                  <td class="amount-text">12,800.00</td>
+                  <td><span class="status-tag status-pending">运输中</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#1890ff;cursor:pointer;">YD201911070089</td>
+                  <td>快递</td>
+                  <td>上海 → 深圳</td>
+                  <td>358</td>
+                  <td>2,180</td>
+                  <td class="amount-text">4,580.00</td>
+                  <td><span class="status-tag status-success">已签收</span></td>
+                </tr>
+                <tr>
+                  <td style="color:#1890ff;cursor:pointer;">YD201911060234</td>
+                  <td>仓配一体</td>
+                  <td>广州仓 → 全国</td>
+                  <td>1,250</td>
+                  <td>6,800</td>
+                  <td class="amount-text">15,600.00</td>
+                  <td><span class="status-tag status-success">已完成</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

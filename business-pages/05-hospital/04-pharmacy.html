@@ -1,0 +1,622 @@
+<!--
+  ============================================================
+  药房发药页 - 医院管理系统
+
+  页面功能：XX医院药房发药系统，处理处方发药和药品管理
+  布局方式：左侧处方队列+右侧发药详情的两栏布局
+  业务背景：
+    1. 医院药房药品发放管理
+    2. 处方审核和发药操作
+    3. 药品库存实时管理
+
+  设计思路：
+    1. 待发处方列表醒目展示
+    2. 发药详情清晰展示药品清单
+    3. 操作按钮明确，流程清晰
+
+  技术要点：
+    - 左右两栏float布局
+    - 表格展示药品明细
+    - 状态标签区分发药进度
+
+  适用迁移场景：
+    - 药房管理系统
+    - 库存出库管理
+    - 订单发货处理
+
+  wjs created by 2017-09-05
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>药房发药 - XX医院</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .header {
+      background: #007d65;
+      color: #fff;
+      padding: 12px 30px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 36px;
+    }
+    .logo span { color: #ffd700; }
+    .user-info {
+      float: right;
+      line-height: 36px;
+      font-size: 14px;
+    }
+    .main {
+      padding: 15px;
+      height: calc(100vh - 60px);
+    }
+    .container {
+      height: 100%;
+      overflow: hidden;
+    }
+    .prescription-panel {
+      float: left;
+      width: 340px;
+      height: 100%;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+    .panel-header {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .panel-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .panel-count {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .panel-count strong {
+      color: #f44336;
+      font-size: 16px;
+    }
+    .prescription-tabs {
+      padding: 0 15px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .tab-item {
+      float: left;
+      padding: 12px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: #666;
+    }
+    .tab-item.active {
+      color: #007d65;
+      border-bottom-color: #007d65;
+      font-weight: bold;
+    }
+    .prescription-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    .prescription-card {
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      overflow: hidden;
+    }
+    .prescription-card:hover {
+      border-color: #007d65;
+      box-shadow: 0 2px 8px rgba(0,125,101,0.15);
+    }
+    .prescription-card.active {
+      border-color: #007d65;
+      background: #f0f9f7;
+    }
+    .prescription-card-header {
+      padding: 10px 12px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .prescription-card.active .prescription-card-header {
+      background: #e8f5e9;
+    }
+    .prescription-no {
+      float: left;
+      font-weight: bold;
+      color: #333;
+    }
+    .prescription-status {
+      float: right;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .status-pending {
+      background: #fff3e0;
+      color: #f57c00;
+    }
+    .status-dispensing {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+    .status-done {
+      background: #e8f5e9;
+      color: #388e3c;
+    }
+    .prescription-card-body {
+      padding: 12px;
+}
+    .patient-info {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .patient-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .patient-detail {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .drug-summary {
+      font-size: 13px;
+      color: #666;
+    }
+    .drug-summary strong {
+      color: #007d65;
+    }
+    .prescription-time {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #f0f0f0;
+    }
+    .dispense-panel {
+      margin-left: 355px;
+      height: 100%;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+    .dispense-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .dispense-title {
+      float: left;
+      font-size: 16px;
+      font-weight: bold;
+      padding-left: 10px;
+      border-left: 4px solid #007d65;
+    }
+    .dispense-actions {
+      float: right;
+    }
+    .btn {
+      padding: 8px 20px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #007d65;
+      color: #fff;
+      border-color: #007d65;
+    }
+    .btn-primary:hover {
+      background: #00695c;
+    }
+    .btn-warning {
+      background: #f57c00;
+      color: #fff;
+      border-color: #f57c00;
+    }
+    .patient-summary {
+      padding: 15px 20px;
+      background: #f9f9f9;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .summary-item {
+      float: left;
+      margin-right: 40px;
+      font-size: 14px;
+    }
+    .summary-item .label {
+      color: #999;
+      margin-right: 6px;
+    }
+    .summary-item .value {
+      color: #333;
+      font-weight: 600;
+    }
+    .dispense-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    .section-title::before {
+      content: "•";
+      color: #007d65;
+      margin-right: 6px;
+    }
+    .drug-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    .drug-table th {
+      background: #f5f5f5;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .drug-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .drug-table tr:hover {
+      background: #fafafa;
+    }
+    .drug-name {
+      font-weight: 600;
+      color: #333;
+    }
+    .drug-spec {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .stock-ok {
+      color: #388e3c;
+    }
+    .stock-low {
+      color: #f57c00;
+    }
+    .stock-no {
+      color: #f44336;
+    }
+    .usage-info {
+      background: #f0f9f7;
+      border: 1px solid #b2dfdb;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .usage-title {
+      font-weight: bold;
+      color: #007d65;
+      margin-bottom: 10px;
+    }
+    .usage-item {
+      font-size: 13px;
+      line-height: 1.8;
+      color: #555;
+    }
+    .dispense-footer {
+      padding: 15px 20px;
+      border-top: 1px solid #f0f0f0;
+      background: #fafafa;
+      overflow: hidden;
+    }
+    .footer-left {
+      float: left;
+      font-size: 14px;
+      color: #666;
+      line-height: 36px;
+    }
+    .footer-left strong {
+      font-size: 20px;
+      color: #f44336;
+    }
+    .footer-right {
+      float: right;
+    }
+    .scan-input {
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      width: 250px;
+      margin-right: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX<span>医院</span> 药房发药系统</div>
+    <div class="user-info">
+      <span>发药药师：李药师</span>
+      <span style="margin-left: 20px;">门诊药房</span>
+      <span style="margin-left: 20px;">退出</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="container">
+      <div class="prescription-panel">
+        <div class="panel-header">
+          <div class="panel-title">待发处方</div>
+          <div class="panel-count">待发药 <strong>12</strong> 张</div>
+        </div>
+        <div class="prescription-tabs">
+          <div class="tab-item active">全部 (12)</div>
+          <div class="tab-item">普通 (8)</div>
+          <div class="tab-item">急诊 (4)</div>
+        </div>
+        <div class="prescription-list">
+          <div class="prescription-card active">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CF201709050023</span>
+              <span class="prescription-status status-dispensing">发药中</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">张**  男  52岁</div>
+                <div class="patient-detail">内科门诊 · 王建国主任</div>
+              </div>
+              <div class="drug-summary">共 <strong>4</strong> 种药品</div>
+              <div class="prescription-time">09:15:32 提交</div>
+            </div>
+          </div>
+
+          <div class="prescription-card">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CF201709050022</span>
+              <span class="prescription-status status-pending">待发药</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">李**  女  35岁</div>
+                <div class="patient-detail">儿科门诊 · 张医生</div>
+              </div>
+              <div class="drug-summary">共 <strong>3</strong> 种药品</div>
+              <div class="prescription-time">09:12:18 提交</div>
+            </div>
+          </div>
+
+          <div class="prescription-card">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CF201709050021</span>
+              <span class="prescription-status status-pending">待发药</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">王**  男  28岁</div>
+                <div class="patient-detail">外科门诊 · 李主任</div>
+              </div>
+              <div class="drug-summary">共 <strong>2</strong> 种药品</div>
+              <div class="prescription-time">09:08:45 提交</div>
+            </div>
+          </div>
+
+          <div class="prescription-card">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CJ201709050012</span>
+              <span class="prescription-status status-pending">待发药</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">赵**  男  45岁</div>
+                <div class="patient-detail">急诊 · 刘医生</div>
+              </div>
+              <div class="drug-summary">共 <strong>5</strong> 种药品</div>
+              <div class="prescription-time">09:05:20 提交</div>
+            </div>
+          </div>
+
+          <div class="prescription-card">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CF201709050020</span>
+              <span class="prescription-status status-pending">待发药</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">刘**  女  60岁</div>
+                <div class="patient-detail">心内科 · 陈主任</div>
+              </div>
+              <div class="drug-summary">共 <strong>6</strong> 种药品</div>
+              <div class="prescription-time">09:02:10 提交</div>
+            </div>
+          </div>
+
+          <div class="prescription-card">
+            <div class="prescription-card-header">
+              <span class="prescription-no">CF201709050019</span>
+              <span class="prescription-status status-done">已发药</span>
+            </div>
+            <div class="prescription-card-body">
+              <div class="patient-info">
+                <div class="patient-name">孙**  男  50岁</div>
+                <div class="patient-detail">骨科 · 孙主任</div>
+              </div>
+              <div class="drug-summary">共 <strong>3</strong> 种药品</div>
+              <div class="prescription-time">08:55:00 已发</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dispense-panel">
+        <div class="dispense-header">
+          <div class="dispense-title">处方详情 - CF201709050023</div>
+          <div class="dispense-actions">
+            <button class="btn">打印处方</button>
+            <button class="btn">重新调配</button>
+          </div>
+        </div>
+
+        <div class="patient-summary">
+          <div class="summary-item">
+            <span class="label">患者：</span>
+            <span class="value">张**  男  52岁</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">科室：</span>
+            <span class="value">心血管内科</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">医生：</span>
+            <span class="value">王建国 主任医师</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">诊断：</span>
+            <span class="value">高血压、冠心病</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">处方类型：</span>
+            <span class="value">普通处方</span>
+          </div>
+        </div>
+
+        <div class="dispense-content">
+          <div class="section-title">药品明细</div>
+          
+            <div style="overflow-x:auto;">
+<table class="drug-table">
+            <thead>
+              <tr>
+                <th width="35%">药品名称</th>
+                <th width="15%">规格</th>
+                <th width="10%">数量</th>
+                <th width="10%">单位</th>
+                <th width="15%">库存</th>
+                <th width="15%">货架号</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="drug-name">XX降压片</div>
+                  <div class="drug-spec">国药准字 HXXXXXXX</div>
+                </td>
+                <td>10mg*30片</td>
+                <td>2盒</td>
+                <td>盒</td>
+                <td class="stock-ok">充足 (156)</td>
+                <td>A-03-12</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="drug-name">XX他汀钙片</div>
+                  <div class="drug-spec">国药准字 HXXXXXXX</div>
+                </td>
+                <td>20mg*7片</td>
+                <td>4盒</td>
+                <td>盒</td>
+                <td class="stock-ok">充足 (89)</td>
+                <td>A-05-08</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="drug-name">XX降糖胶囊</div>
+                  <div class="drug-spec">国药准字 ZXXXXXXX</div>
+                </td>
+                <td>0.5g*60粒</td>
+                <td>2盒</td>
+                <td>盒</td>
+                <td class="stock-low">紧张 (12)</td>
+                <td>B-02-15</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="drug-name">XX阿司匹林肠溶片</div>
+                  <div class="drug-spec">国药准字 HXXXXXXX</div>
+                </td>
+                <td>100mg*30片</td>
+                <td>1盒</td>
+                <td>盒</td>
+                <td class="stock-ok">充足 (245)</td>
+                <td>A-01-06</td>
+              </tr>
+            </tbody>
+          </table>
+            </div>
+
+          <div class="section-title">用法用量</div>
+          <div class="usage-info">
+            <div class="usage-title">请按以下说明服用：</div>
+            <div class="usage-item">
+              1. XX降压片：每日1次，每次1片，晨起口服<br>
+              2. XX他汀钙片：每晚1次，每次1片，睡前服<br>
+              3. XX降糖胶囊：每日3次，每次2粒，饭前服<br>
+              4. XX阿司匹林肠溶片：每日1次，每次1片，饭后服
+            </div>
+          </div>
+
+          <div class="section-title">注意事项</div>
+          <div class="usage-info">
+            <div class="usage-title">温馨提示：</div>
+            <div class="usage-item">
+              • 请严格按医嘱服药，不可自行增减剂量<br>
+              • XX降压片可能引起头晕，服药后避免剧烈运动<br>
+              • XX他汀钙片需定期复查肝功能<br>
+              • 糖尿病患者注意监测血糖<br>
+              • 阿司匹林可能引起胃肠道不适，饭后服用可减轻<br>
+              • 如有严重不适，请及时就医
+            </div>
+          </div>
+        </div>
+
+        <div class="dispense-footer">
+          <div class="footer-left">
+            药品金额：<strong>¥ 326.50</strong>
+          </div>
+          <div class="footer-right">
+            <input type="text" class="scan-input" placeholder="扫描药品条码或手动输入">
+            <button class="btn btn-warning">重新核对</button>
+            <button class="btn btn-primary">确认发药</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

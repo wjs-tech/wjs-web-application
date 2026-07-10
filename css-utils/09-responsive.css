@@ -1,0 +1,318 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  09-responsive.css - 响应式工具类
+
+  功能说明：
+    1. 显示隐藏断点：sm/md/lg/xl 断点下隐藏
+    2. 显示断点：sm/md/lg/xl 断点下显示为块级
+    3. 栅格系统：12列栅格 .col-1 ~ .col-12，.row，.col
+    4. 容器：固定宽度容器、流体容器
+
+  适用场景：
+    - 移动端与PC端响应式布局
+    - 不同屏幕尺寸下的元素显示/隐藏
+    - 栅格化页面布局
+    - 容器宽度自适应
+
+  技术要点：
+    - 采用移动优先（mobile-first）策略
+    - 断点尺寸：sm(576px) / md(768px) / lg(992px) / xl(1200px)
+    - 12列栅格系统，百分比宽度
+    - 使用媒体查询实现响应式适配
+
+  wjs created by 2019-07-10
+  ============================================================
+*/
+
+/* ========== 显示隐藏断点 ========== */
+/* 说明：移动优先，默认显示，在对应断点及以上隐藏 */
+
+/* sm断点及以上隐藏（576px+） */
+@media (min-width: 576px) {
+  .hidden-sm {
+    display: none !important;
+  }
+}
+
+/* md断点及以上隐藏（768px+） */
+@media (min-width: 768px) {
+  .hidden-md {
+    display: none !important;
+  }
+}
+
+/* lg断点及以上隐藏（992px+） */
+@media (min-width: 992px) {
+  .hidden-lg {
+    display: none !important;
+  }
+}
+
+/* xl断点及以上隐藏（1200px+） */
+@media (min-width: 1200px) {
+  .hidden-xl {
+    display: none !important;
+  }
+}
+
+/* ========== 显示断点 ========== */
+/* 说明：移动优先，默认隐藏，在对应断点及以上显示为块级 */
+
+/* sm断点及以上显示（576px+） */
+.hidden-sm {
+  display: none;
+}
+@media (min-width: 576px) {
+  .block-sm {
+    display: block !important;
+  }
+}
+
+/* md断点及以上显示（768px+） */
+.hidden-md {
+  display: none;
+}
+@media (min-width: 768px) {
+  .block-md {
+    display: block !important;
+  }
+}
+
+/* lg断点及以上显示（992px+） */
+.hidden-lg {
+  display: none;
+}
+@media (min-width: 992px) {
+  .block-lg {
+    display: block !important;
+  }
+}
+
+/* xl断点及以上显示（1200px+） */
+.hidden-xl {
+  display: none;
+}
+@media (min-width: 1200px) {
+  .block-xl {
+    display: block !important;
+  }
+}
+
+/* ========== 栅格系统 ========== */
+
+/* 行容器 */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+/* 列基础样式 */
+.col,
+.col-1,
+.col-2,
+.col-3,
+.col-4,
+.col-5,
+.col-6,
+.col-7,
+.col-8,
+.col-9,
+.col-10,
+.col-11,
+.col-12 {
+  position: relative;
+  width: 100%;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* 弹性列（自动填充） */
+.col {
+  flex-basis: 0;
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+/* 1列 */
+.col-1 {
+  flex: 0 0 8.333333%;
+  max-width: 8.333333%;
+}
+
+/* 2列 */
+.col-2 {
+  flex: 0 0 16.666667%;
+  max-width: 16.666667%;
+}
+
+/* 3列 */
+.col-3 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+/* 4列 */
+.col-4 {
+  flex: 0 0 33.333333%;
+  max-width: 33.333333%;
+}
+
+/* 5列 */
+.col-5 {
+  flex: 0 0 41.666667%;
+  max-width: 41.666667%;
+}
+
+/* 6列 */
+.col-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+/* 7列 */
+.col-7 {
+  flex: 0 0 58.333333%;
+  max-width: 58.333333%;
+}
+
+/* 8列 */
+.col-8 {
+  flex: 0 0 66.666667%;
+  max-width: 66.666667%;
+}
+
+/* 9列 */
+.col-9 {
+  flex: 0 0 75%;
+  max-width: 75%;
+}
+
+/* 10列 */
+.col-10 {
+  flex: 0 0 83.333333%;
+  max-width: 83.333333%;
+}
+
+/* 11列 */
+.col-11 {
+  flex: 0 0 91.666667%;
+  max-width: 91.666667%;
+}
+
+/* 12列 */
+.col-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+/* ========== 响应式栅格（sm断点及以上） ========== */
+@media (min-width: 576px) {
+  .col-sm-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-sm-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-sm-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-sm-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-sm-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-sm-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-sm-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-sm-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-sm-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-sm-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-sm-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-sm-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ========== 响应式栅格（md断点及以上） ========== */
+@media (min-width: 768px) {
+  .col-md-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-md-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-md-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-md-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-md-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ========== 响应式栅格（lg断点及以上） ========== */
+@media (min-width: 992px) {
+  .col-lg-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-lg-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-lg-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-lg-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-lg-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-lg-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-lg-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-lg-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-lg-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ========== 响应式栅格（xl断点及以上） ========== */
+@media (min-width: 1200px) {
+  .col-xl-1 { flex: 0 0 8.333333%; max-width: 8.333333%; }
+  .col-xl-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-xl-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-xl-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+  .col-xl-5 { flex: 0 0 41.666667%; max-width: 41.666667%; }
+  .col-xl-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-xl-7 { flex: 0 0 58.333333%; max-width: 58.333333%; }
+  .col-xl-8 { flex: 0 0 66.666667%; max-width: 66.666667%; }
+  .col-xl-9 { flex: 0 0 75%; max-width: 75%; }
+  .col-xl-10 { flex: 0 0 83.333333%; max-width: 83.333333%; }
+  .col-xl-11 { flex: 0 0 91.666667%; max-width: 91.666667%; }
+  .col-xl-12 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* ========== 容器 ========== */
+
+/* 固定宽度容器 */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+}
+
+/* 流体容器（100%宽度） */
+.container-fluid {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}

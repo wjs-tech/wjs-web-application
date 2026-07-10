@@ -1,0 +1,737 @@
+<!--
+  ============================================================
+  数据仪表盘页 - 企业管理系统
+
+  页面功能：XX企业管理系统数据仪表盘，展示关键业务指标和数据趋势
+  布局方式：卡片式网格布局，数据卡片+图表区域组合
+  业务背景：
+    1. 管理层数据决策支持页面
+    2. 展示销售、用户、订单等关键指标
+    3. 支持数据趋势分析和对比
+
+  设计思路：
+    1. 顶部数据卡片醒目展示关键指标
+    2. 图表区域展示数据趋势和分布
+    3. 多维度数据展示，信息层次清晰
+
+  技术要点：
+    - CSS绘制柱状图和折线图效果
+    - 卡片网格布局展示数据
+    - 饼图使用conic-gradient实现
+
+  适用迁移场景：
+    - 数据仪表盘/驾驶舱
+    - 运营数据分析页面
+    - 各类数据统计展示页
+
+  wjs created by 2017-05-25
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据仪表盘 - XX企业管理系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #001529;
+      z-index: 1000;
+    }
+    .logo {
+      float: left;
+      width: 220px;
+      height: 100%;
+      line-height: 50px;
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      background: #002140;
+    }
+    .header-right {
+      float: right;
+      padding-right: 20px;
+      height: 50px;
+      line-height: 50px;
+      color: #fff;
+    }
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      background: #001529;
+      color: #fff;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .menu-title {
+      padding: 15px 20px 8px;
+      font-size: 12px;
+      color: #6b7a8f;
+    }
+    .menu-item-title {
+      padding: 12px 20px 12px 45px;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 14px;
+      position: relative;
+    }
+    .menu-item-title::before {
+      content: "▸";
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7a8f;
+    }
+    .menu-item.open .menu-item-title::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    .sub-menu {
+      display: none;
+      background: #000c17;
+    }
+    .menu-item.open .sub-menu { display: block; }
+    .sub-menu li {
+      list-style: none;
+      padding: 10px 20px 10px 60px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .sub-menu li:hover { color: #fff; }
+    .sub-menu li.active {
+      color: #1890ff;
+      background: #1890ff10;
+    }
+    .main {
+      margin-left: 220px;
+      margin-top: 50px;
+      padding: 20px;
+    }
+    .page-header {
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .page-title {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .page-subtitle {
+      float: left;
+      margin-left: 15px;
+      padding-top: 8px;
+      font-size: 13px;
+      color: #999;
+    }
+    .date-selector {
+      float: right;
+    }
+    .date-selector span {
+      display: inline-block;
+      padding: 6px 15px;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      margin-left: -1px;
+    }
+    .date-selector span:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+    .date-selector span:last-child {
+      border-radius: 0 4px 4px 0;
+    }
+    .date-selector span.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .stats-cards {
+      overflow: hidden;
+      margin: 0 -10px 20px;
+    }
+    .stat-card {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+    }
+    .stat-inner {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      opacity: 0.8;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .stat-trend {
+      font-size: 12px;
+      color: #999;
+    }
+    .stat-trend .up { color: #52c41a; }
+    .stat-trend .down { color: #f5222d; }
+    .icon-blue { background: #e6f7ff; color: #1890ff; }
+    .icon-green { background: #f6ffed; color: #52c41a; }
+    .icon-orange { background: #fff7e6; color: #fa8c16; }
+    .icon-purple { background: #f9f0ff; color: #722ed1; }
+    .chart-row {
+      overflow: hidden;
+      margin: 0 -10px 20px;
+    }
+    .chart-col {
+      float: left;
+      padding: 0 10px;
+    }
+    .chart-col-8 { width: 66.66%; }
+    .chart-col-4 { width: 33.34%; }
+    .chart-col-6 { width: 50%; }
+    .chart-card {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .chart-header {
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .chart-title {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .chart-actions {
+      float: right;
+      font-size: 12px;
+      color: #999;
+    }
+    .chart-actions span {
+      margin-left: 15px;
+      cursor: pointer;
+    }
+    .chart-actions span.active {
+      color: #1890ff;
+    }
+    .bar-chart {
+      height: 250px;
+      position: relative;
+    }
+    .chart-y-axis {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 30px;
+      width: 40px;
+    }
+    .chart-y-axis div {
+      height: 20%;
+      text-align: right;
+      padding-right: 8px;
+      font-size: 11px;
+      color: #999;
+    }
+    .chart-area {
+      margin-left: 50px;
+      height: 220px;
+      position: relative;
+      border-left: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .chart-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    .chart-grid div {
+      height: 20%;
+      border-bottom: 1px dashed #f5f5f5;
+    }
+    .chart-bars {
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+    }
+    .bar-group {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      height: 100%;
+      position: relative;
+    }
+    .bar {
+      width: 30px;
+      margin: 0 3px;
+      border-radius: 3px 3px 0 0;
+    }
+    .bar-blue { background: linear-gradient(180deg, #40a9ff, #1890ff); }
+    .bar-green { background: linear-gradient(180deg, #73d13d, #52c41a); }
+    .bar-label {
+      position: absolute;
+      bottom: -25px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+    }
+    .chart-legend {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    .chart-legend span {
+      display: inline-block;
+      margin: 0 10px;
+    }
+    .chart-legend i {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-right: 5px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+    .pie-chart-box {
+      text-align: center;
+    }
+    .pie-chart {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      margin: 20px auto;
+      position: relative;
+      background: conic-gradient(
+        #1890ff 0deg 120deg,
+        #52c41a 120deg 200deg,
+        #faad14 200deg 260deg,
+        #722ed1 260deg 320deg,
+        #f5222d 320deg 360deg
+      );
+    }
+    .pie-chart::after {
+      content: "";
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      right: 30px;
+      bottom: 30px;
+      background: #fff;
+      border-radius: 50%;
+    }
+    .pie-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      text-align: center;
+    }
+    .pie-center .value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+    .pie-center .label {
+      font-size: 12px;
+      color: #999;
+    }
+    .pie-legend {
+      text-align: left;
+      padding: 0 20px;
+    }
+    .pie-legend-item {
+      overflow: hidden;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #666;
+    }
+    .pie-legend-item i {
+      float: left;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      margin-right: 10px;
+    }
+    .pie-legend-item .name {
+      float: left;
+    }
+    .pie-legend-item .value {
+      float: right;
+      color: #333;
+      font-weight: bold;
+    }
+    .line-chart {
+      height: 250px;
+      position: relative;
+    }
+    .line-chart-area {
+      margin-left: 50px;
+      height: 220px;
+      position: relative;
+      border-left: 1px solid #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .line-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    .rank-list {
+      list-style: none;
+    }
+    .rank-item {
+      overflow: hidden;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .rank-num {
+      float: left;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 12px;
+      margin-top: 8px;
+    }
+    .rank-1 { background: #f5222d; color: #fff; }
+    .rank-2 { background: #fa8c16; color: #fff; }
+    .rank-3 { background: #faad14; color: #fff; }
+    .rank-other { background: #f0f0f0; color: #999; }
+    .rank-name {
+      float: left;
+      line-height: 40px;
+      font-size: 14px;
+    }
+    .rank-value {
+      float: right;
+      line-height: 40px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #1890ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX企业管理</div>
+    <div class="header-right">
+      <span style="margin-right: 20px;">管理员</span>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="menu-title">工作台</div>
+    <div class="menu-item open">
+      <div class="menu-item-title">仪表盘</div>
+      <ul class="sub-menu">
+        <li class="active">综合看板</li>
+        <li>销售分析</li>
+      </ul>
+    </div>
+    <div class="menu-title">系统管理</div>
+    <div class="menu-item">
+      <div class="menu-item-title">用户管理</div>
+      <ul class="sub-menu">
+        <li>用户列表</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">综合数据看板</div>
+      <div class="page-subtitle">实时更新 · 数据截至 2017-05-25 14:30</div>
+      <div class="date-selector">
+        <span>今日</span>
+        <span class="active">本周</span>
+        <span>本月</span>
+        <span>本季度</span>
+        <span>本年</span>
+      </div>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon icon-blue">💰</div>
+          <div class="stat-label">总销售额</div>
+          <div class="stat-value">¥ 1,258,680</div>
+          <div class="stat-trend"><span class="up">↑ 12.5%</span> 较上周</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon icon-green">📦</div>
+          <div class="stat-label">订单总数</div>
+          <div class="stat-value">3,568</div>
+          <div class="stat-trend"><span class="up">↑ 8.3%</span> 较上周</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon icon-orange">👥</div>
+          <div class="stat-label">新增用户</div>
+          <div class="stat-value">1,286</div>
+          <div class="stat-trend"><span class="up">↑ 15.2%</span> 较上周</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-inner">
+          <div class="stat-icon icon-purple">📈</div>
+          <div class="stat-label">转化率</div>
+          <div class="stat-value">23.6%</div>
+          <div class="stat-trend"><span class="down">↓ 2.1%</span> 较上周</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-col chart-col-8">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">销售趋势分析</div>
+            <div class="chart-actions">
+              <span class="active">周</span>
+              <span>月</span>
+              <span>季度</span>
+            </div>
+          </div>
+          <div class="bar-chart">
+            <div class="chart-y-axis">
+              <div>100k</div>
+              <div>80k</div>
+              <div>60k</div>
+              <div>40k</div>
+              <div>20k</div>
+            </div>
+            <div class="chart-area">
+              <div class="chart-grid">
+                <div></div><div></div><div></div><div></div><div></div>
+              </div>
+              <div class="chart-bars">
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 55%;"></div>
+                  <div class="bar bar-green" style="height: 45%;"></div>
+                  <div class="bar-label">周一</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 65%;"></div>
+                  <div class="bar bar-green" style="height: 50%;"></div>
+                  <div class="bar-label">周二</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 45%;"></div>
+                  <div class="bar bar-green" style="height: 40%;"></div>
+                  <div class="bar-label">周三</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 75%;"></div>
+                  <div class="bar bar-green" style="height: 60%;"></div>
+                  <div class="bar-label">周四</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 85%;"></div>
+                  <div class="bar bar-green" style="height: 70%;"></div>
+                  <div class="bar-label">周五</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 90%;"></div>
+                  <div class="bar bar-green" style="height: 80%;"></div>
+                  <div class="bar-label">周六</div>
+                </div>
+                <div class="bar-group">
+                  <div class="bar bar-blue" style="height: 70%;"></div>
+                  <div class="bar bar-green" style="height: 65%;"></div>
+                  <div class="bar-label">周日</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <span><i style="background: #1890ff;"></i>销售额</span>
+            <span><i style="background: #52c41a;"></i>订单量</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-col chart-col-4">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">销售渠道分布</div>
+          </div>
+          <div class="pie-chart-box">
+            <div class="pie-chart">
+              <div class="pie-center">
+                <div class="value">3,568</div>
+                <div class="label">订单总数</div>
+              </div>
+            </div>
+            <div class="pie-legend">
+              <div class="pie-legend-item">
+                <i style="background: #1890ff;"></i>
+                <span class="name">官方网站</span>
+                <span class="value">33.3%</span>
+              </div>
+              <div class="pie-legend-item">
+                <i style="background: #52c41a;"></i>
+                <span class="name">移动端APP</span>
+                <span class="value">22.2%</span>
+              </div>
+              <div class="pie-legend-item">
+                <i style="background: #faad14;"></i>
+                <span class="name">第三方平台</span>
+                <span class="value">16.7%</span>
+              </div>
+              <div class="pie-legend-item">
+                <i style="background: #722ed1;"></i>
+                <span class="name">线下门店</span>
+                <span class="value">16.7%</span>
+              </div>
+              <div class="pie-legend-item">
+                <i style="background: #f5222d;"></i>
+                <span class="name">其他渠道</span>
+                <span class="value">11.1%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-col chart-col-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">用户增长趋势</div>
+          </div>
+          <div class="line-chart">
+            <div class="chart-y-axis">
+              <div>500</div>
+              <div>400</div>
+              <div>300</div>
+              <div>200</div>
+              <div>100</div>
+            </div>
+            <div class="line-chart-area">
+              <div class="chart-grid">
+                <div></div><div></div><div></div><div></div><div></div>
+              </div>
+              <svg class="line-svg" viewBox="0 0 500 200" preserveAspectRatio="none">
+                <polyline points="20,150 90,120 160,130 230,90 300,70 370,50 440,60 480,40"
+                  fill="none" stroke="#1890ff" stroke-width="2" />
+                <polyline points="20,170 90,160 160,145 230,130 300,110 370,95 440,80 480,70"
+                  fill="none" stroke="#52c41a" stroke-width="2" stroke-dasharray="5,5" />
+              </svg>
+              <div style="position: absolute; bottom: -25px; left: 0; right: 0; display: flex; justify-content: space-around; font-size: 11px; color: #999;">
+                <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span><span>7月</span><span>8月</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-legend" style="margin-top: 30px;">
+            <span><i style="background: #1890ff;"></i>新增用户</span>
+            <span><i style="background: #52c41a;"></i>活跃用户</span>
+          </div>
+        </div>
+      </div>
+      <div class="chart-col chart-col-6">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div class="chart-title">商品销量排行</div>
+          </div>
+          <ul class="rank-list">
+            <li class="rank-item">
+              <div class="rank-num rank-1">1</div>
+              <div class="rank-name">XX产品A系列 - 旗舰版</div>
+              <div class="rank-value">1,256件</div>
+            </li>
+            <li class="rank-item">
+              <div class="rank-num rank-2">2</div>
+              <div class="rank-name">XX产品B系列 - 标准版</div>
+              <div class="rank-value">986件</div>
+            </li>
+            <li class="rank-item">
+              <div class="rank-num rank-3">3</div>
+              <div class="rank-name">XX产品C系列 - 入门款</div>
+              <div class="rank-value">752件</div>
+            </li>
+            <li class="rank-item">
+              <div class="rank-num rank-other">4</div>
+              <div class="rank-name">XX产品D系列 - 专业版</div>
+              <div class="rank-value">523件</div>
+            </li>
+            <li class="rank-item">
+              <div class="rank-num rank-other">5</div>
+              <div class="rank-name">XX产品E系列 - 企业版</div>
+              <div class="rank-value">398件</div>
+            </li>
+            <li class="rank-item">
+              <div class="rank-num rank-other">6</div>
+              <div class="rank-name">XX周边配件套装</div>
+              <div class="rank-value">256件</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

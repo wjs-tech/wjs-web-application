@@ -1,0 +1,244 @@
+﻿@charset "UTF-8";
+
+/*
+  ============================================================
+  07-flexbox.css - Flexbox工具类
+
+  功能说明：
+    1. 容器：flex容器、inline-flex容器
+    2. 方向：行、行反转、列、列反转
+    3. 换行：不换行、换行、换行反转
+    4. 主轴对齐：起始、居中、末尾、两端、环绕、均匀
+    5. 交叉轴对齐：起始、居中、末尾、拉伸、基线
+    6. 内容对齐：起始、居中、末尾、两端、环绕
+    7. 子项：弹性1、自动、无弹性、扩展、不收缩
+    8. 排序：最前、最后、第1、第2、第3
+    9. 自身对齐：起始、居中、末尾、拉伸
+
+  适用场景：
+    - 水平垂直居中布局
+    - 导航栏、工具栏等横向布局
+    - 卡片列表、栅格系统
+    - 响应式弹性布局
+
+  技术要点：
+    - 基于CSS3 Flexbox布局
+    - 容器属性与子项属性分离
+    - 支持多种对齐方式组合使用
+
+  wjs created by 2018-04-15
+  ============================================================
+*/
+
+/* ========== 容器 ========== */
+
+/* Flex容器 */
+.flex {
+  display: flex;
+}
+
+/* 行内Flex容器 */
+.inline-flex {
+  display: inline-flex;
+}
+
+/* ========== 方向 ========== */
+
+/* 行方向（默认） */
+.flex-row {
+  flex-direction: row;
+}
+
+/* 行反转方向 */
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+/* 列方向 */
+.flex-col {
+  flex-direction: column;
+}
+
+/* 列反转方向 */
+.flex-col-reverse {
+  flex-direction: column-reverse;
+}
+
+/* ========== 换行 ========== */
+
+/* 不换行 */
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+/* 换行 */
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* 换行反转 */
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+/* ========== 主轴对齐 ========== */
+
+/* 主轴起始对齐 */
+.justify-start {
+  justify-content: flex-start;
+}
+
+/* 主轴居中对齐 */
+.justify-center {
+  justify-content: center;
+}
+
+/* 主轴末尾对齐 */
+.justify-end {
+  justify-content: flex-end;
+}
+
+/* 主轴两端对齐 */
+.justify-between {
+  justify-content: space-between;
+}
+
+/* 主轴环绕对齐 */
+.justify-around {
+  justify-content: space-around;
+}
+
+/* 主轴均匀对齐 */
+.justify-evenly {
+  justify-content: space-evenly;
+}
+
+/* ========== 交叉轴对齐 ========== */
+
+/* 交叉轴起始对齐 */
+.items-start {
+  align-items: flex-start;
+}
+
+/* 交叉轴居中对齐 */
+.items-center {
+  align-items: center;
+}
+
+/* 交叉轴末尾对齐 */
+.items-end {
+  align-items: flex-end;
+}
+
+/* 交叉轴拉伸对齐 */
+.items-stretch {
+  align-items: stretch;
+}
+
+/* 交叉轴基线对齐 */
+.items-baseline {
+  align-items: baseline;
+}
+
+/* ========== 内容对齐 ========== */
+
+/* 内容起始对齐 */
+.content-start {
+  align-content: flex-start;
+}
+
+/* 内容居中对齐 */
+.content-center {
+  align-content: center;
+}
+
+/* 内容末尾对齐 */
+.content-end {
+  align-content: flex-end;
+}
+
+/* 内容两端对齐 */
+.content-between {
+  align-content: space-between;
+}
+
+/* 内容环绕对齐 */
+.content-around {
+  align-content: space-around;
+}
+
+/* ========== 子项 ========== */
+
+/* 弹性比例1 */
+.flex-1 {
+  flex: 1;
+}
+
+/* 弹性自动 */
+.flex-auto {
+  flex: auto;
+}
+
+/* 无弹性 */
+.flex-none {
+  flex: none;
+}
+
+/* 允许扩展 */
+.flex-grow {
+  flex-grow: 1;
+}
+
+/* 不收缩 */
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* ========== 排序 ========== */
+
+/* 最前 */
+.order-first {
+  order: -9999;
+}
+
+/* 最后 */
+.order-last {
+  order: 9999;
+}
+
+/* 第1个 */
+.order-1 {
+  order: 1;
+}
+
+/* 第2个 */
+.order-2 {
+  order: 2;
+}
+
+/* 第3个 */
+.order-3 {
+  order: 3;
+}
+
+/* ========== 自身对齐 ========== */
+
+/* 自身起始对齐 */
+.self-start {
+  align-self: flex-start;
+}
+
+/* 自身居中对齐 */
+.self-center {
+  align-self: center;
+}
+
+/* 自身末尾对齐 */
+.self-end {
+  align-self: flex-end;
+}
+
+/* 自身拉伸对齐 */
+.self-stretch {
+  align-self: stretch;
+}

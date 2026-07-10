@@ -1,0 +1,489 @@
+<!--
+  ============================================================
+  后台管理布局 - 企业管理系统
+
+  页面功能：XX企业管理系统后台布局框架，包含顶部导航、左侧菜单和主内容区
+  布局方式：经典后台管理三栏布局（顶部导航+左侧菜单+右侧内容）
+  业务背景：
+    1. 企业内部管理系统的通用后台框架
+    2. 集成权限管理、系统设置等基础功能
+    3. 各业务模块的统一入口
+
+  设计思路：
+    1. 左侧折叠式菜单，节省空间
+    2. 顶部导航展示用户信息和快捷入口
+    3. 主内容区支持标签页多窗口浏览
+
+  技术要点：
+    - 使用position:fixed固定顶部和左侧
+    - 主内容区自适应剩余空间
+    - 面包屑导航展示当前位置
+
+  适用迁移场景：
+    - 各类后台管理系统
+    - CMS内容管理系统
+    - ERP/CRM企业管理系统
+
+  wjs created by 2017-02-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XX企业管理系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #001529;
+      z-index: 1000;
+    }
+    .header-inner {
+      height: 100%;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      width: 220px;
+      height: 100%;
+      line-height: 50px;
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      background: #002140;
+    }
+    .header-nav {
+      float: left;
+      margin-left: 20px;
+    }
+    .header-nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 50px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .header-nav-item:hover {
+      background: #1890ff;
+    }
+    .header-nav-item.active {
+      background: #1890ff;
+    }
+    .header-right {
+      float: right;
+      padding-right: 20px;
+    }
+    .header-right .icon {
+      float: left;
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      position: relative;
+    }
+    .header-right .icon:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 8px;
+      min-width: 16px;
+      height: 16px;
+      background: #f5222d;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 10px;
+      line-height: 16px;
+      padding: 0 4px;
+    }
+    .user-info {
+      float: left;
+      height: 50px;
+      line-height: 50px;
+      color: #fff;
+      padding: 0 15px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .user-info:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .user-avatar {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1890ff;
+      text-align: center;
+      line-height: 28px;
+      margin-right: 8px;
+      vertical-align: middle;
+      font-size: 13px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      background: #001529;
+      color: #fff;
+      overflow-y: auto;
+      z-index: 999;
+    }
+    .menu-title {
+      padding: 15px 20px 8px;
+      font-size: 12px;
+      color: #6b7a8f;
+    }
+    .menu-list {
+      list-style: none;
+    }
+    .menu-item {
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .menu-item-title {
+      padding: 12px 20px 12px 45px;
+      color: #ccc;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .menu-item-title::before {
+      content: "▸";
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7a8f;
+      transition: transform 0.2s;
+    }
+    .menu-item.open .menu-item-title::before {
+      transform: translateY(-50%) rotate(90deg);
+    }
+    .menu-item-title:hover {
+      color: #fff;
+      background: #1890ff20;
+    }
+    .menu-item.active > .menu-item-title {
+      color: #fff;
+      background: #1890ff;
+    }
+    .sub-menu {
+      display: none;
+      background: #000c17;
+    }
+    .menu-item.open .sub-menu {
+      display: block;
+    }
+    .sub-menu li {
+      padding: 10px 20px 10px 60px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sub-menu li:hover {
+      color: #fff;
+    }
+    .sub-menu li.active {
+      color: #1890ff;
+      background: #1890ff10;
+    }
+    .main {
+      margin-left: 220px;
+      margin-top: 50px;
+      padding: 0;
+    }
+    .tabs-bar {
+      height: 40px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 15px;
+      overflow: hidden;
+    }
+    .tab-item {
+      float: left;
+      padding: 0 15px;
+      height: 40px;
+      line-height: 40px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      border-right: 1px solid #f0f0f0;
+      position: relative;
+    }
+    .tab-item.active {
+      color: #1890ff;
+      background: #e6f7ff;
+    }
+    .tab-item .close {
+      margin-left: 8px;
+      color: #ccc;
+      font-size: 12px;
+    }
+    .content-area {
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .breadcrumb a {
+      color: #666;
+      text-decoration: none;
+    }
+    .breadcrumb .current {
+      color: #333;
+    }
+    .content-card {
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .stats-row {
+      overflow: hidden;
+      margin: 0 0 20px;
+    }
+    .stat-card {
+      float: left;
+      width: 25%;
+      padding: 0 10px;
+    }
+    .stat-inner {
+      background: #fff;
+      border-radius: 4px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .stat-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .stat-trend {
+      font-size: 12px;
+      color: #999;
+    }
+    .stat-trend .up {
+      color: #52c41a;
+    }
+    .stat-trend .down {
+      color: #f5222d;
+    }
+    .welcome-banner {
+      background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+      color: #fff;
+      padding: 30px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    .welcome-title {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .welcome-desc {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX企业管理</div>
+      <div class="header-nav">
+        <div class="header-nav-item active">工作台</div>
+        <div class="header-nav-item">系统管理</div>
+        <div class="header-nav-item">业务管理</div>
+        <div class="header-nav-item">报表中心</div>
+      </div>
+      <div class="header-right">
+        <div class="icon">🔔<span class="badge">5</span></div>
+        <div class="icon">📧<span class="badge">12</span></div>
+        <div class="user-info">
+          <span class="user-avatar">管</span>
+          管理员
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="menu-title">系统管理</div>
+    <ul class="menu-list">
+      <li class="menu-item open">
+        <div class="menu-item-title">用户管理</div>
+        <ul class="sub-menu">
+          <li class="active">用户列表</li>
+          <li>用户新增</li>
+          <li>用户导入</li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <div class="menu-item-title">角色权限</div>
+        <ul class="sub-menu">
+          <li>角色管理</li>
+          <li>权限配置</li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <div class="menu-item-title">组织架构</div>
+        <ul class="sub-menu">
+          <li>部门管理</li>
+          <li>岗位管理</li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <div class="menu-item-title">系统设置</div>
+        <ul class="sub-menu">
+          <li>参数配置</li>
+          <li>日志管理</li>
+          <li>数据字典</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="menu-title">业务管理</div>
+    <ul class="menu-list">
+      <li class="menu-item">
+        <div class="menu-item-title">客户管理</div>
+        <ul class="sub-menu">
+          <li>客户列表</li>
+          <li>客户跟进</li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <div class="menu-item-title">订单管理</div>
+        <ul class="sub-menu">
+          <li>订单列表</li>
+          <li>订单统计</li>
+        </ul>
+      </li>
+      <li class="menu-item">
+        <div class="menu-item-title">商品管理</div>
+        <ul class="sub-menu">
+          <li>商品列表</li>
+          <li>分类管理</li>
+        </ul>
+      </li>
+    </ul>
+    <div class="menu-title">报表中心</div>
+    <ul class="menu-list">
+      <li class="menu-item">
+        <div class="menu-item-title">数据报表</div>
+        <ul class="sub-menu">
+          <li>销售报表</li>
+          <li>财务报表</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="main">
+    <div class="tabs-bar">
+      <div class="tab-item active">工作台 ✕</div>
+      <div class="tab-item">用户列表 ✕</div>
+      <div class="tab-item">+</div>
+    </div>
+
+    <div class="content-area">
+      <div class="breadcrumb">
+        <a href="#">首页</a> / <a href="#">工作台</a> / <span class="current">首页</span>
+      </div>
+
+      <div class="welcome-banner">
+        <div class="welcome-title">欢迎回来，管理员！</div>
+        <div class="welcome-desc">今天是 2017年2月15日 星期三，祝您工作愉快。系统运行正常。</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-title">总用户数</div>
+            <div class="stat-value">1,286</div>
+            <div class="stat-trend"><span class="up">↑ 12.5%</span> 较上月</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-title">今日订单</div>
+            <div class="stat-value">358</div>
+            <div class="stat-trend"><span class="up">↑ 8.3%</span> 较昨日</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-title">销售额</div>
+            <div class="stat-value">¥ 125,680</div>
+            <div class="stat-trend"><span class="up">↑ 15.2%</span> 较上月</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-inner">
+            <div class="stat-title">待办事项</div>
+            <div class="stat-value">12</div>
+            <div class="stat-trend"><span class="down">↓ 3</span> 较昨日</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <h3 style="font-size: 16px; margin-bottom: 15px;">快捷入口</h3>
+        <div style="overflow: hidden;">
+          <div style="float: left; width: 120px; text-align: center; padding: 15px; cursor: pointer;">
+            <div style="width: 50px; height: 50px; background: #e6f7ff; border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">👥</div>
+            <div style="font-size: 13px; color: #666;">用户管理</div>
+          </div>
+          <div style="float: left; width: 120px; text-align: center; padding: 15px; cursor: pointer;">
+            <div style="width: 50px; height: 50px; background: #f6ffed; border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">📋</div>
+            <div style="font-size: 13px; color: #666;">订单管理</div>
+          </div>
+          <div style="float: left; width: 120px; text-align: center; padding: 15px; cursor: pointer;">
+            <div style="width: 50px; height: 50px; background: #fff7e6; border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">📦</div>
+            <div style="font-size: 13px; color: #666;">商品管理</div>
+          </div>
+          <div style="float: left; width: 120px; text-align: center; padding: 15px; cursor: pointer;">
+            <div style="width: 50px; height: 50px; background: #f9f0ff; border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">📊</div>
+            <div style="font-size: 13px; color: #666;">数据报表</div>
+          </div>
+          <div style="float: left; width: 120px; text-align: center; padding: 15px; cursor: pointer;">
+            <div style="width: 50px; height: 50px; background: #fff1f0; border-radius: 8px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 24px;">⚙️</div>
+            <div style="font-size: 13px; color: #666;">系统设置</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

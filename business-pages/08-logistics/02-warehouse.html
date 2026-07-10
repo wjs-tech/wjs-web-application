@@ -1,0 +1,629 @@
+<!--
+  ============================================================
+  仓库管理页 - 物流管理系统
+
+  页面功能：XX物流仓库管理系统，管理库存和库位
+  布局方式：顶部统计+左侧仓库列表+右侧库存详情的布局
+  业务背景：
+    1. 仓库库存管理
+    2. 库位和货品管理
+    3. 出入库记录统计
+
+  设计思路：
+    1. 库存数据一目了然
+    2. 仓库切换便捷
+    3. 库位分布可视化
+
+  技术要点：
+    - float多栏布局
+    - 网格库位展示
+    - 数据统计卡片
+
+  适用迁移场景：
+    - 仓库管理系统
+    - 库存管理页面
+    - 仓储监控系统
+
+  wjs created by 2019-03-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>仓库管理 - XX物流</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .top-bar {
+      background: #fff;
+      height: 50px;
+      border-bottom: 1px solid #e8e8e8;
+      padding: 0 25px;
+      overflow: hidden;
+      line-height: 50px;
+    }
+    .logo {
+      float: left;
+      font-size: 18px;
+      font-weight: bold;
+      color: #1890ff;
+    }
+    .user-info {
+      float: right;
+      font-size: 13px;
+      color: #666;
+    }
+    .container {
+      display: flex;
+      height: calc(100vh - 50px);
+    }
+    .sidebar {
+      width: 220px;
+      background: #001529;
+      padding-top: 15px;
+    }
+    .menu-item {
+      padding: 12px 25px;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .menu-item:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+    }
+    .menu-item.active {
+      color: #fff;
+      background: #1890ff;
+    }
+    .menu-item i {
+      margin-right: 10px;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .stats-row {
+      display: flex;
+      margin: 0 -10px 20px;
+    }
+    .stat-card {
+      flex: 1;
+      margin: 0 10px;
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .stat-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+    }
+    .stat-value.blue { color: #1890ff; }
+    .stat-value.green { color: #52c41a; }
+    .stat-value.orange { color: #fa8c16; }
+    .stat-value.red { color: #f5222d; }
+    .stat-desc {
+      font-size: 12px;
+      color: #bbb;
+      margin-top: 5px;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .panel-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .panel-title {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .panel-actions {
+      float: right;
+    }
+    .btn {
+      padding: 6px 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .btn-primary:hover { background: #40a9ff; }
+    .content-row {
+      display: flex;
+      margin: 0 -10px;
+    }
+    .col-left {
+      width: 280px;
+      margin: 0 10px;
+    }
+    .col-right {
+      flex: 1;
+      margin: 0 10px;
+    }
+    .warehouse-list {
+      padding: 10px 0;
+    }
+    .warehouse-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .warehouse-item:hover {
+      background: #f0f7ff;
+    }
+    .warehouse-item.active {
+      background: #e6f7ff;
+      border-left-color: #1890ff;
+    }
+    .wh-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .wh-info {
+      font-size: 12px;
+      color: #999;
+    }
+    .wh-capacity {
+      margin-top: 8px;
+    }
+    .capacity-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .capacity-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: #52c41a;
+    }
+    .capacity-fill.warning { background: #fa8c16; }
+    .capacity-fill.danger { background: #f5222d; }
+    .capacity-text {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+    .zone-tabs {
+      padding: 0 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .zone-tab {
+      display: inline-block;
+      padding: 12px 20px;
+      font-size: 14px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -1px;
+      border-bottom: 2px solid transparent;
+    }
+    .zone-tab.active {
+      color: #1890ff;
+      border-bottom-color: #1890ff;
+      font-weight: bold;
+    }
+    .shelf-container {
+      padding: 35px 20px 20px;
+    }
+    .shelf-row {
+      display: flex;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+    .shelf-label {
+      width: 60px;
+      font-size: 13px;
+      color: #999;
+      text-align: right;
+      padding-right: 15px;
+    }
+    .shelf-slots {
+      display: flex;
+      flex: 1;
+      gap: 6px;
+    }
+    .slot {
+      flex: 1;
+      height: 45px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #999;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      background: #fff;
+    }
+    .slot:hover {
+      border-color: #1890ff;
+      color: #1890ff;
+    }
+    .slot.full {
+      background: #f6ffed;
+      border-color: #b7eb8f;
+      color: #52c41a;
+    }
+    .slot.partial {
+      background: #fffbe6;
+      border-color: #ffe58f;
+      color: #fa8c16;
+    }
+    .slot.empty {
+      background: #fafafa;
+      border-color: #e8e8e8;
+      color: #bbb;
+    }
+    .slot.selected {
+      background: #e6f7ff;
+      border-color: #1890ff;
+      color: #1890ff;
+      font-weight: bold;
+    }
+    .slot .slot-tip {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      white-space: nowrap;
+      display: none;
+    }
+    .slot:hover .slot-tip {
+      display: block;
+    }
+    .warehouse-legend {
+      padding: 15px 20px;
+      display: flex;
+      gap: 20px;
+      font-size: 12px;
+      color: #666;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      margin-right: 6px;
+      border: 1px solid;
+    }
+    .dot-full { background: #f6ffed; border-color: #b7eb8f; }
+    .dot-partial { background: #fffbe6; border-color: #ffe58f; }
+    .dot-empty { background: #fafafa; border-color: #e8e8e8; }
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .inventory-table th {
+      background: #fafafa;
+      padding: 10px 15px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .inventory-table td {
+      padding: 12px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+    }
+    .inventory-table tr:hover { background: #fafafa; }
+    .goods-name {
+      font-weight: 500;
+      color: #333;
+    }
+    .goods-code {
+      font-size: 12px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .stock-ok { color: #52c41a; font-weight: bold; }
+    .stock-low { color: #fa8c16; font-weight: bold; }
+    .stock-out { color: #f5222d; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="logo">XX物流 · 仓库管理系统</div>
+    <div class="user-info">
+      仓库管理员：张主管 &nbsp;|&nbsp; 深圳中心仓 &nbsp;|&nbsp; 退出
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="menu-item">📊 数据概览</div>
+      <div class="menu-item active">📦 仓库管理</div>
+      <div class="menu-item">📥 入库管理</div>
+      <div class="menu-item">📤 出库管理</div>
+      <div class="menu-item">📋 库存盘点</div>
+      <div class="menu-item">🔧 库位管理</div>
+      <div class="menu-item">📑 单据管理</div>
+      <div class="menu-item">⚙️ 系统设置</div>
+    </div>
+
+    <div class="main-content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-title">仓库总数</div>
+          <div class="stat-value blue">8</div>
+          <div class="stat-desc">较上月 +1 个</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">总库存数量</div>
+          <div class="stat-value green">128,560</div>
+          <div class="stat-desc">件 · 较昨日 +2,350</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">今日入库</div>
+          <div class="stat-value orange">3,680</div>
+          <div class="stat-desc">件 · 125单</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">今日出库</div>
+          <div class="stat-value red">2,890</div>
+          <div class="stat-desc">件 · 356单</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">库存预警</div>
+          <div class="stat-value red">15</div>
+          <div class="stat-desc">SKU低于安全库存</div>
+        </div>
+      </div>
+
+      <div class="content-row">
+        <div class="col-left">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">仓库列表</div>
+            </div>
+            <div class="warehouse-list">
+              <div class="warehouse-item active">
+                <div class="wh-name">深圳中心仓</div>
+                <div class="wh-info">总面积 5,000㎡ · 库位 1,200个</div>
+                <div class="wh-capacity">
+                  <div class="capacity-bar">
+                    <div class="capacity-fill" style="width: 72%"></div>
+                  </div>
+                  <div class="capacity-text">容量使用 72% · 库存 45,680件</div>
+                </div>
+              </div>
+              <div class="warehouse-item">
+                <div class="wh-name">广州分仓</div>
+                <div class="wh-info">总面积 3,000㎡ · 库位 800个</div>
+                <div class="wh-capacity">
+                  <div class="capacity-bar">
+                    <div class="capacity-fill warning" style="width: 85%"></div>
+                  </div>
+                  <div class="capacity-text">容量使用 85% · 库存 28,560件</div>
+                </div>
+              </div>
+              <div class="warehouse-item">
+                <div class="wh-name">北京分仓</div>
+                <div class="wh-info">总面积 3,500㎡ · 库位 900个</div>
+                <div class="wh-capacity">
+                  <div class="capacity-bar">
+                    <div class="capacity-fill" style="width: 58%"></div>
+                  </div>
+                  <div class="capacity-text">容量使用 58% · 库存 22,350件</div>
+                </div>
+              </div>
+              <div class="warehouse-item">
+                <div class="wh-name">上海分仓</div>
+                <div class="wh-info">总面积 4,000㎡ · 库位 1,000个</div>
+                <div class="wh-capacity">
+                  <div class="capacity-bar">
+                    <div class="capacity-fill" style="width: 65%"></div>
+                  </div>
+                  <div class="capacity-text">容量使用 65% · 库存 25,890件</div>
+                </div>
+              </div>
+              <div class="warehouse-item">
+                <div class="wh-name">成都分仓</div>
+                <div class="wh-info">总面积 2,000㎡ · 库位 500个</div>
+                <div class="wh-capacity">
+                  <div class="capacity-bar">
+                    <div class="capacity-fill danger" style="width: 92%"></div>
+                  </div>
+                  <div class="capacity-text">容量使用 92% · 库存 12,680件</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-right">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">库位分布 - A区货架</div>
+              <div class="panel-actions">
+                <button class="btn">库位查询</button>
+                <button class="btn btn-primary">新增库位</button>
+              </div>
+            </div>
+            <div class="zone-tabs">
+              <span class="zone-tab active">A区</span>
+              <span class="zone-tab">B区</span>
+              <span class="zone-tab">C区</span>
+              <span class="zone-tab">D区</span>
+              <span class="zone-tab">E区</span>
+            </div>
+            <div class="warehouse-legend">
+              <div class="legend-item"><span class="legend-dot dot-full"></span>满仓</div>
+              <div class="legend-item"><span class="legend-dot dot-partial"></span>部分占用</div>
+              <div class="legend-item"><span class="legend-dot dot-empty"></span>空库位</div>
+            </div>
+            <div class="shelf-container">
+              <div class="shelf-row">
+                <span class="shelf-label">A-01排</span>
+                <div class="shelf-slots">
+                  <div class="slot full">A-01-01<span class="slot-tip">手机配件 · 258件</span></div>
+                  <div class="slot full">A-01-02<span class="slot-tip">充电器 · 320件</span></div>
+                  <div class="slot partial">A-01-03<span class="slot-tip">数据线 · 86件</span></div>
+                  <div class="slot full">A-01-04<span class="slot-tip">耳机 · 412件</span></div>
+                  <div class="slot empty">A-01-05<span class="slot-tip">空库位</span></div>
+                  <div class="slot partial">A-01-06<span class="slot-tip">手机壳 · 128件</span></div>
+                  <div class="slot full">A-01-07<span class="slot-tip">钢化膜 · 560件</span></div>
+                  <div class="slot empty">A-01-08<span class="slot-tip">空库位</span></div>
+                </div>
+              </div>
+              <div class="shelf-row">
+                <span class="shelf-label">A-02排</span>
+                <div class="shelf-slots">
+                  <div class="slot full">A-02-01<span class="slot-tip">平板电脑 · 85件</span></div>
+                  <div class="slot full">A-02-02<span class="slot-tip">笔记本电脑 · 62件</span></div>
+                  <div class="slot partial">A-02-03<span class="slot-tip">智能手表 · 95件</span></div>
+                  <div class="slot full">A-02-04<span class="slot-tip">蓝牙音箱 · 210件</span></div>
+                  <div class="slot full">A-02-05<span class="slot-tip">移动电源 · 325件</span></div>
+                  <div class="slot empty">A-02-06<span class="slot-tip">空库位</span></div>
+                  <div class="slot partial">A-02-07<span class="slot-tip">键盘 · 78件</span></div>
+                  <div class="slot full">A-02-08<span class="slot-tip">鼠标 · 186件</span></div>
+                </div>
+              </div>
+              <div class="shelf-row">
+                <span class="shelf-label">A-03排</span>
+                <div class="shelf-slots">
+                  <div class="slot partial selected">A-03-01<span class="slot-tip">显示器 · 45件</span></div>
+                  <div class="slot full">A-03-02<span class="slot-tip">硬盘 · 320件</span></div>
+                  <div class="slot full">A-03-03<span class="slot-tip">内存条 · 450件</span></div>
+                  <div class="slot empty">A-03-04<span class="slot-tip">空库位</span></div>
+                  <div class="slot full">A-03-05<span class="slot-tip">主板 · 89件</span></div>
+                  <div class="slot partial">A-03-06<span class="slot-tip">显卡 · 52件</span></div>
+                  <div class="slot full">A-03-07<span class="slot-tip">机箱 · 120件</span></div>
+                  <div class="slot full">A-03-08<span class="slot-tip">电源 · 210件</span></div>
+                </div>
+              </div>
+              <div class="shelf-row">
+                <span class="shelf-label">A-04排</span>
+                <div class="shelf-slots">
+                  <div class="slot full">A-04-01<span class="slot-tip">路由器 · 180件</span></div>
+                  <div class="slot full">A-04-02<span class="slot-tip">交换机 · 95件</span></div>
+                  <div class="slot empty">A-04-03<span class="slot-tip">空库位</span></div>
+                  <div class="slot full">A-04-04<span class="slot-tip">摄像头 · 256件</span></div>
+                  <div class="slot partial">A-04-05<span class="slot-tip">打印机 · 38件</span></div>
+                  <div class="slot full">A-04-06<span class="slot-tip">投影仪 · 62件</span></div>
+                  <div class="slot empty">A-04-07<span class="slot-tip">空库位</span></div>
+                  <div class="slot partial">A-04-08<span class="slot-tip">扫描仪 · 42件</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">库存预警</div>
+              <div class="panel-actions">
+                <button class="btn btn-primary">查看全部</button>
+              </div>
+            </div>
+            
+              <div style="overflow-x:auto;">
+<table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>商品名称</th>
+                  <th>库位</th>
+                  <th>当前库存</th>
+                  <th>安全库存</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div class="goods-name">智能手环 Pro</div>
+                    <div class="goods-code">SP-00235</div>
+                  </td>
+                  <td>A-03-01</td>
+                  <td class="stock-low">45件</td>
+                  <td>100件</td>
+                  <td><span style="color: #fa8c16;">⚠️ 库存偏低</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="goods-name">无线充电器</div>
+                    <div class="goods-code">CH-00128</div>
+                  </td>
+                  <td>B-02-05</td>
+                  <td class="stock-out">0件</td>
+                  <td>50件</td>
+                  <td><span style="color: #f5222d;">❌ 已断货</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="goods-name">蓝牙适配器</div>
+                    <div class="goods-code">AD-00086</div>
+                  </td>
+                  <td>C-01-03</td>
+                  <td class="stock-low">28件</td>
+                  <td>80件</td>
+                  <td><span style="color: #fa8c16;">⚠️ 库存偏低</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="goods-name">USB集线器</div>
+                    <div class="goods-code">UB-00156</div>
+                  </td>
+                  <td>A-01-03</td>
+                  <td class="stock-low">86件</td>
+                  <td>150件</td>
+                  <td><span style="color: #fa8c16;">⚠️ 库存偏低</span></td>
+                </tr>
+              </tbody>
+            </table>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

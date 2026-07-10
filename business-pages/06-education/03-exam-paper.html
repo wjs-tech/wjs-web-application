@@ -1,0 +1,603 @@
+<!--
+  ============================================================
+  在线考试答题页 - 教育学习平台
+
+  页面功能：XX教育平台在线考试系统，支持多种题型答题
+  布局方式：顶部考试信息+左侧题目导航+右侧答题区的三栏布局
+  业务背景：
+    1. 在线考试和测验系统
+    2. 支持单选、多选、判断、填空等题型
+    3. 考试计时和自动交卷
+
+  设计思路：
+    1. 题目导航快速定位
+    2. 答题区域清晰简洁
+    3. 倒计时醒目展示
+
+  技术要点：
+    - position固定顶部和左侧
+    - 题目状态颜色区分
+    - 答题卡网格布局
+
+  适用迁移场景：
+    - 在线考试系统
+    - 在线测验答题
+    - 知识竞赛页面
+
+  wjs created by 2018-05-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线考试 - XX教育</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .exam-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+    .header-inner {
+      width: 100%;
+      height: 100%;
+      padding: 0 30px;
+      overflow: hidden;
+    }
+    .exam-title {
+      float: left;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 60px;
+      color: #333;
+    }
+    .exam-title::before {
+      content: "📝";
+      margin-right: 8px;
+    }
+    .exam-timer {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    .timer-label {
+      font-size: 12px;
+      color: #999;
+    }
+    .timer-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #f5222d;
+      font-family: Arial;
+    }
+    .timer-value.warning {
+      color: #fa8c16;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.4; }
+    }
+    .header-actions {
+      float: right;
+      line-height: 60px;
+    }
+    .btn {
+      padding: 8px 20px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    .btn-primary {
+      background: #673ab7;
+      color: #fff;
+      border-color: #673ab7;
+    }
+    .btn-primary:hover { background: #5e35b1; }
+    .btn-danger {
+      background: #f5222d;
+      color: #fff;
+      border-color: #f5222d;
+    }
+    .btn-danger:hover { background: #cf1322; }
+    .main {
+      padding-top: 60px;
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      overflow-y: auto;
+    }
+    .answer-card {
+      padding: 15px 20px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #673ab7;
+    }
+    .card-legend {
+      margin-bottom: 15px;
+      font-size: 12px;
+      overflow: hidden;
+    }
+    .legend-item {
+      float: left;
+      margin-right: 15px;
+      line-height: 20px;
+      color: #666;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: 5px;
+      text-align: center;
+      line-height: 16px;
+      font-size: 11px;
+    }
+    .dot-done { background: #52c41a; color: #fff; }
+    .dot-current { background: #673ab7; color: #fff; }
+    .dot-undone { background: #fff; border: 1px solid #d9d9d9; color: #999; }
+    .dot-mark { background: #faad14; color: #fff; }
+    .type-section {
+      margin-bottom: 18px;
+    }
+    .type-title {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 10px;
+    }
+    .type-title strong {
+      color: #333;
+      font-size: 14px;
+    }
+    .question-grid {
+      overflow: hidden;
+    }
+    .question-num {
+      float: left;
+      width: 32px;
+      height: 32px;
+      margin: 0 8px 8px 0;
+      text-align: center;
+      line-height: 30px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .question-num:hover {
+      border-color: #673ab7;
+      color: #673ab7;
+    }
+    .question-num.done {
+      background: #f6ffed;
+      border-color: #b7eb8f;
+      color: #52c41a;
+    }
+    .question-num.current {
+      background: #673ab7;
+      border-color: #673ab7;
+      color: #fff;
+    }
+    .question-num.marked::after {
+      content: "";
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 10px;
+      height: 10px;
+      background: #faad14;
+      border-radius: 50%;
+    }
+    .card-summary {
+      padding: 15px 20px;
+      border-top: 1px solid #f0f0f0;
+      font-size: 13px;
+      color: #666;
+    }
+    .summary-item {
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .summary-label {
+      float: left;
+      color: #999;
+    }
+    .summary-value {
+      float: right;
+      font-weight: bold;
+      color: #333;
+    }
+    .summary-value strong {
+      color: #673ab7;
+      font-size: 16px;
+    }
+    .content {
+      margin-left: 280px;
+      padding: 25px 40px;
+    }
+    .question-paper {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px 40px;
+      min-height: 500px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .question-type-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
+    }
+    .question-type-title .score-tip {
+      font-size: 13px;
+      color: #999;
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .question-item {
+      margin-bottom: 30px;
+      padding-bottom: 25px;
+      border-bottom: 1px dashed #f0f0f0;
+    }
+    .question-item:last-child {
+      border-bottom: none;
+    }
+    .question-header {
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .question-number {
+      float: left;
+      background: #673ab7;
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .question-score {
+      float: right;
+      color: #f5222d;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .question-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: #333;
+      margin-bottom: 15px;
+    }
+    .question-options {
+      padding-left: 10px;
+    }
+    .option-item {
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      overflow: hidden;
+    }
+    .option-item:hover {
+      border-color: #673ab7;
+      background: #faf5ff;
+    }
+    .option-item.selected {
+      border-color: #673ab7;
+      background: #f6f0ff;
+    }
+    .option-label {
+      float: left;
+      width: 28px;
+      height: 28px;
+      line-height: 26px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      border-radius: 50%;
+      font-size: 14px;
+      margin-right: 12px;
+      font-weight: bold;
+      color: #999;
+    }
+    .option-item.selected .option-label {
+      background: #673ab7;
+      border-color: #673ab7;
+      color: #fff;
+    }
+    .option-text {
+      overflow: hidden;
+      line-height: 28px;
+      font-size: 14px;
+      color: #444;
+    }
+    .textarea-answer {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px 15px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+    }
+    .textarea-answer:focus {
+      border-color: #673ab7;
+    }
+    .input-blank {
+      width: 200px;
+      padding: 8px 12px;
+      border: none;
+      border-bottom: 2px solid #673ab7;
+      font-size: 14px;
+      outline: none;
+      background: #faf5ff;
+      margin: 0 5px;
+    }
+    .question-actions {
+      margin-top: 15px;
+      overflow: hidden;
+    }
+    .mark-btn {
+      float: left;
+      font-size: 13px;
+      color: #673ab7;
+      cursor: pointer;
+    }
+    .mark-btn::before {
+      content: "★";
+      margin-right: 4px;
+    }
+    .question-nav {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .prev-btn {
+      float: left;
+    }
+    .next-btn {
+      float: right;
+    }
+    .submit-section {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 2px solid #f0f0f0;
+    }
+    .submit-tip {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+    .submit-btn {
+      padding: 12px 50px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="exam-header">
+    <div class="header-inner">
+      <div class="exam-title">前端开发工程师认证考试（初级）</div>
+      <div class="exam-timer">
+        <div class="timer-label">剩余时间</div>
+        <div class="timer-value warning">00:35:42</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn">考试须知</button>
+        <button class="btn btn-danger">交卷</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="answer-card">
+        <div class="card-title">答题卡</div>
+        <div class="card-legend">
+          <span class="legend-item"><span class="legend-dot dot-done"></span>已答</span>
+          <span class="legend-item"><span class="legend-dot dot-current"></span>当前</span>
+          <span class="legend-item"><span class="legend-dot dot-undone"></span>未答</span>
+          <span class="legend-item"><span class="legend-dot dot-mark"></span>标记</span>
+        </div>
+
+        <div class="type-section">
+          <div class="type-title"><strong>单选题</strong>（共20题，20分）</div>
+          <div class="question-grid">
+            <div class="question-num done">1</div>
+            <div class="question-num done">2</div>
+            <div class="question-num done">3</div>
+            <div class="question-num done">4</div>
+            <div class="question-num done">5</div>
+            <div class="question-num done">6</div>
+            <div class="question-num current">7</div>
+            <div class="question-num marked">8</div>
+            <div class="question-num">9</div>
+            <div class="question-num done">10</div>
+            <div class="question-num done">11</div>
+            <div class="question-num done">12</div>
+            <div class="question-num marked">13</div>
+            <div class="question-num done">14</div>
+            <div class="question-num">15</div>
+            <div class="question-num done">16</div>
+            <div class="question-num done">17</div>
+            <div class="question-num">18</div>
+            <div class="question-num done">19</div>
+            <div class="question-num done">20</div>
+          </div>
+        </div>
+
+        <div class="type-section">
+          <div class="type-title"><strong>多选题</strong>（共10题，20分）</div>
+          <div class="question-grid">
+            <div class="question-num done">21</div>
+            <div class="question-num done">22</div>
+            <div class="question-num">23</div>
+            <div class="question-num done">24</div>
+            <div class="question-num">25</div>
+            <div class="question-num done">26</div>
+            <div class="question-num">27</div>
+            <div class="question-num done">28</div>
+            <div class="question-num">29</div>
+            <div class="question-num">30</div>
+          </div>
+        </div>
+
+        <div class="type-section">
+          <div class="type-title"><strong>判断题</strong>（共10题，10分）</div>
+          <div class="question-grid">
+            <div class="question-num done">31</div>
+            <div class="question-num done">32</div>
+            <div class="question-num done">33</div>
+            <div class="question-num done">34</div>
+            <div class="question-num done">35</div>
+            <div class="question-num done">36</div>
+            <div class="question-num done">37</div>
+            <div class="question-num done">38</div>
+            <div class="question-num done">39</div>
+            <div class="question-num done">40</div>
+          </div>
+        </div>
+
+        <div class="type-section">
+          <div class="type-title"><strong>填空题</strong>（共10题，20分）</div>
+          <div class="question-grid">
+            <div class="question-num">41</div>
+            <div class="question-num">42</div>
+            <div class="question-num">43</div>
+            <div class="question-num">44</div>
+            <div class="question-num">45</div>
+            <div class="question-num">46</div>
+            <div class="question-num">47</div>
+            <div class="question-num">48</div>
+            <div class="question-num">49</div>
+            <div class="question-num">50</div>
+          </div>
+        </div>
+
+        <div class="type-section">
+          <div class="type-title"><strong>简答题</strong>（共3题，30分）</div>
+          <div class="question-grid">
+            <div class="question-num">51</div>
+            <div class="question-num">52</div>
+            <div class="question-num">53</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-summary">
+        <div class="summary-item">
+          <span class="summary-label">已答题目</span>
+          <span class="summary-value"><strong>30</strong> / 53</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">未答题目</span>
+          <span class="summary-value">23 题</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">标记题目</span>
+          <span class="summary-value">3 题</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">当前得分</span>
+          <span class="summary-value">约 48 分</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="question-paper">
+        <div class="question-type-title">
+          一、单选题
+          <span class="score-tip">（每题1分，共20题，共20分）</span>
+        </div>
+
+        <div class="question-item">
+          <div class="question-header">
+            <span class="question-number">第 7 题</span>
+            <span class="question-score">（1分）</span>
+          </div>
+          <div class="question-text">
+            在Vue.js中，以下哪个生命周期钩子函数在实例被创建后立即调用，此时数据观测和事件配置已完成，但DOM还未挂载？
+          </div>
+          <div class="question-options">
+            <div class="option-item">
+              <span class="option-label">A</span>
+              <div class="option-text">beforeCreate</div>
+            </div>
+            <div class="option-item selected">
+              <span class="option-label">B</span>
+              <div class="option-text">created</div>
+            </div>
+            <div class="option-item">
+              <span class="option-label">C</span>
+              <div class="option-text">beforeMount</div>
+            </div>
+            <div class="option-item">
+              <span class="option-label">D</span>
+              <div class="option-text">mounted</div>
+            </div>
+          </div>
+          <div class="question-actions">
+            <span class="mark-btn">标记本题</span>
+          </div>
+        </div>
+
+        <div class="question-nav">
+          <button class="btn prev-btn">上一题</button>
+          <button class="btn btn-primary next-btn">下一题</button>
+        </div>
+
+        <div class="submit-section">
+          <div class="submit-tip">请确认所有题目都已作答后再交卷</div>
+          <button class="btn btn-danger submit-btn">交 卷</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

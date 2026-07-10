@@ -1,0 +1,631 @@
+﻿<!--
+  ============================================================
+  电子病历页 - 医院管理系统
+
+  页面功能：XX医院电子病历系统页面，展示病历详情、检查报告和处方记录
+  布局方式：左侧患者列表+右侧病历详情的两栏布局
+  业务背景：
+    1. 医院电子病历系统核心工作页面
+    2. 医生查看和管理患者病历信息
+    3. 集成检查报告、处方、病历等多个模块
+
+  设计思路：
+    1. 左侧患者列表快速切换
+    2. 右侧标签页展示不同病历模块
+    3. 检查报告和处方独立展示
+
+  技术要点：
+    - 左右两栏float布局
+    - 标签页切换不同病历模块
+    - 医疗行业专业布局
+
+  适用迁移场景：
+    - 电子病历系统
+    - 医生工作站
+    - 病历管理系统
+
+  wjs created by 2017-10-15
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子病历系统 - XX医院</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .header {
+      background: #007d65;
+      color: #fff;
+      padding: 15px 30px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 40px;
+    }
+    .logo span { color: #ffd700; }
+    .nav-menu {
+      float: left;
+      margin-left: 50px;
+    }
+    .nav-item {
+      float: left;
+      padding: 0 20px;
+      line-height: 40px;
+      font-size: 15px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.8);
+    }
+    .nav-item:hover { color: #fff; }
+    .nav-item.active {
+      color: #fff;
+      font-weight: bold;
+      background: rgba(255,255,255,0.15);
+    }
+    .user-info {
+      float: right;
+      line-height: 40px;
+      font-size: 14px;
+    }
+    .user-info span { margin-left: 20px; cursor: pointer; }
+    .main {
+      padding: 20px 30px;
+      overflow: hidden;
+    }
+    .breadcrumb {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .breadcrumb a { color: #666; text-decoration: none; cursor: pointer; }
+    .breadcrumb a:hover { color: #007d65; }
+    .container {
+      overflow: hidden;
+    }
+    .patient-sidebar {
+      float: left;
+      width: 300px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 15px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .sidebar-title {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .sidebar-count {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .search-box {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .search-input {
+      width: 100%;
+      height: 34px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0 35px 0 12px;
+      font-size: 13px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #007d65;
+    }
+    .patient-list {
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+    }
+    .patient-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f5f5f5;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .patient-item:hover { background: #fafafa; }
+    .patient-item.active {
+      background: #e8f5e9;
+      border-left: 3px solid #007d65;
+      padding-left: 17px;
+    }
+    .patient-top {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .patient-name {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    .patient-sex-age {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .patient-info {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.6;
+    }
+    .patient-info .diagnosis {
+      color: #666;
+      margin-top: 5px;
+    }
+    .patient-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e8f5e9;
+      color: #007d65;
+      border-radius: 10px;
+      font-size: 11px;
+      margin-right: 5px;
+    }
+    .patient-tag.urgent {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .record-main {
+      margin-left: 320px;
+    }
+    .patient-summary {
+      background: #fff;
+      border-radius: 6px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .summary-left {
+      float: left;
+      overflow: hidden;
+    }
+    .avatar {
+      float: left;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #00b894, #007d65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: #fff;
+      margin-right: 20px;
+    }
+    .summary-info {
+      overflow: hidden;
+      padding-top: 8px;
+    }
+    .summary-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .summary-detail {
+      font-size: 13px;
+      color: #666;
+    }
+    .summary-detail span {
+      margin-right: 20px;
+    }
+    .summary-right {
+      float: right;
+      text-align: right;
+      padding-top: 10px;
+    }
+    .summary-action {
+      display: inline-block;
+      padding: 8px 20px;
+      background: #007d65;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 10px;
+    }
+    .summary-action.outline {
+      background: #fff;
+      color: #007d65;
+      border: 1px solid #007d65;
+    }
+    .record-card {
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .tabs-bar {
+      border-bottom: 2px solid #f0f0f0;
+      padding: 0 20px;
+      background: #fafafa;
+    }
+    .tab-item {
+      display: inline-block;
+      padding: 15px 25px;
+      font-size: 15px;
+      color: #666;
+      cursor: pointer;
+      margin-bottom: -2px;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-item.active {
+      color: #007d65;
+      border-bottom-color: #007d65;
+      font-weight: bold;
+      background: #fff;
+    }
+    .tab-content {
+      padding: 25px;
+    }
+    .record-section {
+      margin-bottom: 25px;
+    }
+    .record-section:last-child {
+      margin-bottom: 0;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #007d65;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+    .info-grid {
+      display: table;
+      width: 100%;
+    }
+    .info-row {
+      display: table-row;
+    }
+    .info-cell {
+      display: table-cell;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #fafafa;
+    }
+    .info-cell.label {
+      color: #999;
+      width: 120px;
+      background: #fafafa;
+    }
+    .info-cell.value {
+      color: #333;
+    }
+    .exam-list {
+      list-style: none;
+    }
+    .exam-item {
+      padding: 15px;
+      border: 1px solid #f0f0f0;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .exam-item:hover {
+      border-color: #007d65;
+      background: #fafdfb;
+    }
+    .exam-header {
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .exam-name {
+      float: left;
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+    .exam-date {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .exam-info {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+    }
+    .exam-status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+    .status-done { background: #e8f5e9; color: #2e7d32; }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .prescription-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .prescription-table th {
+      background: #fafafa;
+      padding: 12px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .prescription-table td {
+      padding: 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .prescription-table tr:hover { background: #fafafa; }
+    .diagnosis-content {
+      line-height: 1.8;
+      color: #444;
+      background: #f9f9f9;
+      padding: 15px 20px;
+      border-radius: 4px;
+      border-left: 3px solid #007d65;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX<span>医院</span> 电子病历系统</div>
+    <div class="nav-menu">
+      <div class="nav-item">首页</div>
+      <div class="nav-item active">电子病历</div>
+      <div class="nav-item">处方管理</div>
+      <div class="nav-item">检查检验</div>
+      <div class="nav-item">住院管理</div>
+    </div>
+    <div class="user-info">
+      <span>当前医生：王主任</span>
+      <span>内科门诊</span>
+      <span>退出</span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb">
+      <a>首页</a> / <a>电子病历</a> / <a>病历管理</a> / <span style="color:#333;">病历详情</span>
+    </div>
+
+    <div class="container">
+      <div class="patient-sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title">今日就诊患者</span>
+          <span class="sidebar-count">共 28 人</span>
+        </div>
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="搜索患者姓名/病历号">
+        </div>
+        <div class="patient-list">
+          <div class="patient-item active">
+            <div class="patient-top">
+              <span class="patient-name">张**</span>
+              <span class="patient-sex-age">男 / 52岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX023</div>
+              <div class="diagnosis">
+                <span class="patient-tag urgent">复诊</span>
+                高血压、冠心病
+              </div>
+            </div>
+          </div>
+          <div class="patient-item">
+            <div class="patient-top">
+              <span class="patient-name">李**</span>
+              <span class="patient-sex-age">女 / 45岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX024</div>
+              <div class="diagnosis">
+                <span class="patient-tag">初诊</span>
+                糖尿病待查
+              </div>
+            </div>
+          </div>
+          <div class="patient-item">
+            <div class="patient-top">
+              <span class="patient-name">王**</span>
+              <span class="patient-sex-age">男 / 62岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX025</div>
+              <div class="diagnosis">
+                <span class="patient-tag urgent">急诊</span>
+                急性心梗
+              </div>
+            </div>
+          </div>
+          <div class="patient-item">
+            <div class="patient-top">
+              <span class="patient-name">赵**</span>
+              <span class="patient-sex-age">女 / 38岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX026</div>
+              <div class="diagnosis">
+                <span class="patient-tag">复诊</span>
+                高血压
+              </div>
+            </div>
+          </div>
+          <div class="patient-item">
+            <div class="patient-top">
+              <span class="patient-name">刘**</span>
+              <span class="patient-sex-age">男 / 55岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX027</div>
+              <div class="diagnosis">
+                <span class="patient-tag">初诊</span>
+                胸闷待查
+              </div>
+            </div>
+          </div>
+          <div class="patient-item">
+            <div class="patient-top">
+              <span class="patient-name">陈**</span>
+              <span class="patient-sex-age">女 / 28岁</span>
+            </div>
+            <div class="patient-info">
+              <div>病历号：BL2017XXXX028</div>
+              <div class="diagnosis">
+                <span class="patient-tag">初诊</span>
+                心悸待查
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="record-main">
+        <div class="patient-summary">
+          <div class="summary-left">
+            <div class="avatar">张</div>
+            <div class="summary-info">
+              <div class="summary-name">张** <span style="font-size:14px;color:#999;font-weight:normal;">（52岁 · 男）</span></div>
+              <div class="summary-detail">
+                <span>病历号：BL2017XXXX023</span>
+                <span>科室：心血管内科</span>
+                <span>主治医生：王建国</span>
+              </div>
+            </div>
+          </div>
+          <div class="summary-right">
+            <span class="summary-action outline">打印病历</span>
+            <span class="summary-action">编辑病历</span>
+          </div>
+        </div>
+
+        <div class="record-card">
+          <div class="tabs-bar">
+            <span class="tab-item active">病历详情</span>
+            <span class="tab-item">检查报告</span>
+            <span class="tab-item">处方记录</span>
+            <span class="tab-item">检验结果</span>
+            <span class="tab-item">影像资料</span>
+            <span class="tab-item">住院记录</span>
+          </div>
+
+          <div class="tab-content">
+            <div class="record-section">
+              <div class="section-title">基本信息</div>
+              <div class="info-grid">
+                <div class="info-row">
+                  <div class="info-cell label">就诊科室</div>
+                  <div class="info-cell value">心血管内科</div>
+                  <div class="info-cell label">主治医生</div>
+                  <div class="info-cell value">王建国 主任医师</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">就诊类型</div>
+                  <div class="info-cell value">复诊</div>
+                  <div class="info-cell label">病历类型</div>
+                  <div class="info-cell value">门诊病历</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">就诊时间</div>
+                  <div class="info-cell value">2017-10-15 上午 09:30</div>
+                  <div class="info-cell label">病历完成时间</div>
+                  <div class="info-cell value">2017-10-15 10:15</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">主诉</div>
+              <div class="diagnosis-content">
+                反复头晕、头痛3年，加重1周。患者3年前无明显诱因出现头晕、头痛，呈阵发性，测血压偏高，最高达180/110mmHg，诊断为"高血压病"，长期口服降压药物治疗。近1周来自觉头晕加重，伴胸闷、心悸，活动后明显，休息后可缓解，遂来我院就诊。
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">现病史</div>
+              <div class="diagnosis-content">
+                患者神志清，精神可，饮食睡眠可，大小便正常。近期体重无明显变化。既往有"糖尿病"史5年，口服降糖药物治疗，血糖控制尚可。否认"肝炎、结核"等传染病史，否认手术、外伤史，否认食物过敏史，青霉素过敏。吸烟史20年，每日约10支，偶有饮酒。家族史：父亲有高血压病史。
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">体格检查</div>
+              <div class="info-grid">
+                <div class="info-row">
+                  <div class="info-cell label">体温</div>
+                  <div class="info-cell value">36.5℃</div>
+                  <div class="info-cell label">脉搏</div>
+                  <div class="info-cell value">78次/分</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">呼吸</div>
+                  <div class="info-cell value">18次/分</div>
+                  <div class="info-cell label">血压</div>
+                  <div class="info-cell value" style="color:#c62828;font-weight:bold;">165/105mmHg</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">身高</div>
+                  <div class="info-cell value">175cm</div>
+                  <div class="info-cell label">体重</div>
+                  <div class="info-cell value">82kg</div>
+                </div>
+                <div class="info-row">
+                  <div class="info-cell label">BMI</div>
+                  <div class="info-cell value">26.8 kg/m²（超重）</div>
+                  <div class="info-cell label">心率</div>
+                  <div class="info-cell value">律齐，各瓣膜未闻及病理性杂音</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">诊断</div>
+              <div class="diagnosis-content">
+                1. 高血压病2级（很高危组）<br>
+                2. 冠状动脉粥样硬化性心脏病<br>
+                3. 2型糖尿病<br>
+                4. 高脂血症<br>
+                5. 超重
+              </div>
+            </div>
+
+            <div class="record-section">
+              <div class="section-title">医嘱</div>
+              <div class="diagnosis-content">
+                1. 低盐低脂糖尿病饮食，适量运动，控制体重，戒烟限酒<br>
+                2. 规律服药，不可自行停药或调整剂量<br>
+                3. 每日监测血压、血糖，定期复诊<br>
+                4. 1个月后复查血脂、肝肾功能、心电图<br>
+                5. 心内科、内分泌科随诊，不适及时就诊
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

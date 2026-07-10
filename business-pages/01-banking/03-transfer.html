@@ -1,0 +1,517 @@
+<!--
+  ============================================================
+  转账汇款页 - 银行系统
+
+  页面功能：XX银行网银转账汇款页面，支持行内和跨行转账
+  布局方式：左侧菜单+右侧表单，上下分步式表单布局
+  业务背景：
+    1. 网银核心功能之一，用户高频使用的转账功能
+    2. 支持行内转账、跨行转账、定时转账等多种模式
+    3. 需要严格的安全验证和信息确认流程
+
+  设计思路：
+    1. 分步式引导，降低用户操作复杂度
+    2. 表单区域清晰分组，重要信息突出显示
+    3. 收款人信息快速选择，提高操作效率
+
+  技术要点：
+    - 使用float实现表单两栏布局
+    - 分步指示器引导用户操作流程
+    - 表单验证和信息确认机制
+
+  适用迁移场景：
+    - 各类表单提交类页面
+    - 支付转账类业务页面
+    - 需要分步操作的业务流程
+
+  wjs created by 2015-08-05
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>转账汇款 - XX银行个人网上银行</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+          min-height: 100vh;
+}
+    .top-header {
+      height: 60px;
+      background: linear-gradient(90deg, #c81623, #8b0000);
+      color: #fff;
+    }
+    .header-inner {
+      height: 100%;
+      padding: 0 20px;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 60px;
+    }
+    .user-info {
+      float: right;
+      line-height: 60px;
+      font-size: 14px;
+    }
+    .user-info span {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .main-container {
+      width: 100%;
+      overflow: hidden;
+    }
+    .sidebar {
+      float: left;
+      width: 200px;
+      background: #2c3e50;
+      min-height: calc(100vh - 60px);
+      color: #fff;
+    }
+    .menu-title {
+      padding: 15px 20px;
+      font-size: 13px;
+      color: #95a5a6;
+      background: #1a252f;
+    }
+    .menu-list li {
+      list-style: none;
+      padding: 12px 20px 12px 40px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .menu-list li:hover {
+      background: #34495e;
+    }
+    .menu-list li.active {
+      background: #c81623;
+      border-left: 3px solid #ffd700;
+    }
+    .content {
+      margin-left: 200px;
+      padding: 20px;
+    }
+    .breadcrumb {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .step-indicator {
+      background: #fff;
+      border-radius: 8px;
+      padding: 25px 40px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .step-item {
+      float: left;
+      width: 25%;
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ddd;
+      color: #fff;
+      line-height: 36px;
+      margin: 0 auto 10px;
+      font-weight: bold;
+    }
+    .step-item.active .step-num {
+      background: #c81623;
+    }
+    .step-item.done .step-num {
+      background: #2ecc71;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #666;
+    }
+    .step-item.active .step-text {
+      color: #c81623;
+      font-weight: bold;
+    }
+    .step-item.done .step-text {
+      color: #2ecc71;
+    }
+    .step-line {
+      position: absolute;
+      top: 18px;
+      left: 60%;
+      right: -40%;
+      height: 2px;
+      background: #ddd;
+    }
+    .step-item.done .step-line {
+      background: #2ecc71;
+    }
+    .transfer-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .form-section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .form-row {
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .form-label {
+      float: left;
+      width: 120px;
+      text-align: right;
+      line-height: 40px;
+      font-size: 14px;
+      color: #333;
+      padding-right: 15px;
+    }
+    .form-label .required {
+      color: #c81623;
+      margin-right: 5px;
+    }
+    .form-control {
+      float: left;
+      width: 400px;
+    }
+    .form-control input,
+    .form-control select,
+    .form-control textarea {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .form-control input:focus,
+    .form-control select:focus,
+    .form-control textarea:focus {
+      border-color: #c81623;
+    }
+    .form-control textarea {
+      height: 80px;
+      padding: 10px 12px;
+      resize: vertical;
+    }
+    .form-tip {
+      font-size: 12px;
+      color: #999;
+      margin-top: 6px;
+    }
+    .amount-input {
+      position: relative;
+    }
+    .amount-input .unit {
+      position: absolute;
+      right: 12px;
+      top: 0;
+      line-height: 40px;
+      color: #999;
+      font-size: 14px;
+    }
+    .amount-input input {
+      padding-right: 38px;
+    }
+    .amount-big {
+      font-size: 13px;
+      color: #666;
+      margin-top: 8px;
+    }
+    .amount-big strong {
+      color: #c81623;
+    }
+    .recent-receiver {
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+    .recent-title {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .receiver-list {
+      overflow: hidden;
+    }
+    .receiver-item {
+      float: left;
+      padding: 8px 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-right: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .receiver-item:hover {
+      border-color: #c81623;
+      color: #c81623;
+    }
+    .fee-info {
+      background: #e8f5e9;
+      border: 1px solid #a5d6a7;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .fee-info .fee-item {
+      float: left;
+      width: 33.33%;
+      font-size: 14px;
+    }
+    .fee-info .fee-item span {
+      color: #666;
+    }
+    .fee-info .fee-item strong {
+      color: #c81623;
+      font-size: 16px;
+    }
+    .form-actions {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 40px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary {
+      background: #c81623;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #a0111c;
+    }
+    .btn-default {
+      background: #f0f0f0;
+      color: #666;
+      margin-right: 15px;
+    }
+    .btn-default:hover {
+      background: #e0e0e0;
+    }
+    .security-notice {
+      background: #fff8e1;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      margin-top: 25px;
+      font-size: 13px;
+      color: #8a6d3b;
+      line-height: 1.8;
+    }
+    .security-notice strong {
+      color: #c81623;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-inner">
+      <div class="logo">XX银行 个人网上银行</div>
+      <div class="user-info">
+        <span>欢迎您，张女士</span>
+        <span>安全中心</span>
+        <span>退出登录</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="menu-title">账户管理</div>
+      <ul class="menu-list">
+        <li>账户总览</li>
+        <li>账户查询</li>
+        <li>交易明细</li>
+        <li>账户设置</li>
+      </ul>
+      <div class="menu-title">转账汇款</div>
+      <ul class="menu-list">
+        <li class="active">行内转账</li>
+        <li>跨行转账</li>
+        <li>批量转账</li>
+        <li>收款人名册</li>
+      </ul>
+      <div class="menu-title">投资理财</div>
+      <ul class="menu-list">
+        <li>理财产品</li>
+        <li>基金投资</li>
+        <li>贵金属</li>
+        <li>我的资产</li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <div class="breadcrumb">首页 &gt; 转账汇款 &gt; 行内转账</div>
+
+      <div class="step-indicator">
+        <div class="step-item active">
+          <div class="step-num">1</div>
+          <div class="step-text">填写转账信息</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-text">确认转账信息</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-text">安全验证</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-text">转账完成</div>
+        </div>
+      </div>
+
+      <div class="transfer-box">
+        <div class="form-section">
+          <div class="section-title">付款账户</div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>付款账户</div>
+            <div class="form-control">
+              <select>
+                <option>储蓄卡 **** **** **** 6288 （可用余额 ¥ 58,320.50）</option>
+                <option>储蓄卡 **** **** **** 3356 （可用余额 ¥ 12,680.00）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">收款信息</div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>收款人姓名</div>
+            <div class="form-control">
+              <input type="text" placeholder="请输入收款人姓名">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>收款账号</div>
+            <div class="form-control">
+              <input type="text" placeholder="请输入收款账号">
+              <div class="recent-receiver">
+                <div class="recent-title">最近收款人：</div>
+                <div class="receiver-list">
+                  <div class="receiver-item">李先生 ****6789</div>
+                  <div class="receiver-item">王女士 ****2345</div>
+                  <div class="receiver-item">赵先生 ****0123</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">收款银行</div>
+            <div class="form-control">
+              <input type="text" value="XX银行" readonly style="background: #f5f5f5;">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">转账信息</div>
+          <div class="form-row">
+            <div class="form-label"><span class="required">*</span>转账金额</div>
+            <div class="form-control">
+              <div class="amount-input">
+                <input type="text" placeholder="请输入转账金额">
+                <span class="unit">元</span>
+              </div>
+              <div class="amount-big">大写金额：<strong>零元整</strong></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">转账用途</div>
+            <div class="form-control">
+              <select>
+                <option>请选择转账用途</option>
+                <option>日常消费</option>
+                <option>工资</option>
+                <option>生意往来</option>
+                <option>还款</option>
+                <option>其他</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">附言</div>
+            <div class="form-control">
+              <textarea placeholder="请输入附言（选填，最多50字）"></textarea>
+              <div class="form-tip">附言将显示在对方交易明细中</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-label">到账时间</div>
+            <div class="form-control">
+              <select>
+                <option>实时到账</option>
+                <option>普通到账（2小时后）</option>
+                <option>次日到账</option>
+              </select>
+              <div class="form-tip">根据监管要求，转账可在24小时内撤销</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fee-info">
+          <div class="fee-item"><span>转账金额：</span><strong>¥ 0.00</strong></div>
+          <div class="fee-item"><span>手续费：</span><strong>¥ 0.00</strong></div>
+          <div class="fee-item"><span>合计：</span><strong>¥ 0.00</strong></div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-default">上一步</button>
+          <button class="btn btn-primary">下一步</button>
+        </div>
+
+        <div class="security-notice">
+          <strong>温馨提示：</strong><br>
+          1. 为保障您的资金安全，请仔细核对收款人信息，谨防电信诈骗。<br>
+          2. 行内转账实时到账，跨行转账到账时间以对方银行为准。<br>
+          3. 单笔转账超过5万元需使用U盾验证。<br>
+          4. 如遇问题请拨打客服热线：95XXX
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

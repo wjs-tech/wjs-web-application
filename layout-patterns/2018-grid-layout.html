@@ -1,0 +1,205 @@
+﻿<!--
+  ============================================================
+  CSS Grid 网格布局 - grid 实现复杂网格布局，CSS3新特性
+
+  布局方式：CSS Grid 网格布局
+  布局思想：
+    1. 将容器划分为行和列，形成二维网格系统
+    2. 子元素可以放置在任意网格单元格中，可跨越多行多列
+    3. 通过 grid-template-columns/rows 定义网格轨道，灵活控制尺寸
+
+  适用场景：
+    - 复杂的页面整体布局
+    - 图片画廊/商品网格
+    - 仪表盘/数据看板
+    - 表单对齐布局
+    - 需要二维控制的任何布局
+
+  技术要点：
+    - display: grid / inline-grid 声明网格容器
+    - grid-template-columns 定义列轨道
+    - grid-template-rows 定义行轨道
+    - grid-gap / gap 定义网格间距
+    - grid-column / grid-row 控制子元素跨越
+    - fr 单位（fraction）按比例分配剩余空间
+    - repeat() 函数简化重复轨道定义
+
+  可迁移性：
+    - 现代浏览器广泛支持的二维布局方案
+    - 可迁移到任何需要复杂网格的页面
+    - 与 Flex 配合使用效果更佳
+
+  wjs created by 2018-02-10
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS Grid 网格布局</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; color: #333; padding: 20px; }
+    h2 { margin: 20px 0 10px; color: #2c3e50; }
+    .demo-box { margin-bottom: 30px; }
+
+    .grid-basic {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+    .grid-basic .item {
+      height: 80px;
+      background: #3498db;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .grid-span {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 80px);
+      gap: 10px;
+    }
+    .grid-span .item {
+      background: #2ecc71;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .grid-span .item-1 {
+      grid-column: 1 / 3;
+      background: #e74c3c;
+    }
+    .grid-span .item-2 {
+      grid-row: 1 / 3;
+      grid-column: 4 / 5;
+      background: #9b59b6;
+    }
+    .grid-span .item-6 {
+      grid-column: 2 / 4;
+      background: #f39c12;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr 150px;
+      grid-template-rows: 60px 1fr 50px;
+      gap: 10px;
+      height: 400px;
+    }
+    .grid-layout .header {
+      grid-column: 1 / -1;
+      background: #2c3e50;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .grid-layout .left {
+      background: #e67e22;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .grid-layout .main {
+      background: #ecf0f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .grid-layout .right {
+      background: #1abc9c;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+    .grid-layout .footer {
+      grid-column: 1 / -1;
+      background: #34495e;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+
+    .grid-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .grid-gallery .item {
+      aspect-ratio: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CSS Grid 网格布局 Demo</h1>
+
+  <h2>1. 基础网格 - 4列等分布局</h2>
+  <div class="demo-box grid-basic">
+    <div class="item">1</div>
+    <div class="item">2</div>
+    <div class="item">3</div>
+    <div class="item">4</div>
+    <div class="item">5</div>
+    <div class="item">6</div>
+    <div class="item">7</div>
+    <div class="item">8</div>
+  </div>
+
+  <h2>2. 跨行跨列布局</h2>
+  <div class="demo-box grid-span">
+    <div class="item item-1">跨两列</div>
+    <div class="item item-2">跨两行</div>
+    <div class="item item-3">3</div>
+    <div class="item item-4">4</div>
+    <div class="item item-5">5</div>
+    <div class="item item-6">跨两列</div>
+    <div class="item item-7">7</div>
+    <div class="item item-8">8</div>
+  </div>
+
+  <h2>3. 圣杯布局（Grid版本）</h2>
+  <div class="demo-box grid-layout">
+    <div class="header">头部（跨所有列）</div>
+    <div class="left">左侧栏</div>
+    <div class="main">主内容区</div>
+    <div class="right">右侧栏</div>
+    <div class="footer">底部（跨所有列）</div>
+  </div>
+
+  <h2>4. 自适应网格画廊</h2>
+  <div class="demo-box grid-gallery">
+    <div class="item">1</div>
+    <div class="item">2</div>
+    <div class="item">3</div>
+    <div class="item">4</div>
+    <div class="item">5</div>
+    <div class="item">6</div>
+    <div class="item">7</div>
+    <div class="item">8</div>
+    <div class="item">9</div>
+    <div class="item">10</div>
+  </div>
+</body>
+</html>

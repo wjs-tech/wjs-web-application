@@ -1,0 +1,641 @@
+<!--
+  ============================================================
+  公告通知页 - 政务服务系统
+
+  页面功能：XX市政务服务网公告通知列表页
+  布局方式：左侧分类+右侧列表的两栏布局
+  业务背景：
+    1. 政务公告通知发布
+    2. 政策文件公示
+    3. 办事通知公告
+
+  设计思路：
+    1. 分类导航清晰
+    2. 列表信息完整
+    3. 重要公告突出
+
+  技术要点：
+    - 左侧分类菜单
+    - 文章列表样式
+    - 分页组件
+
+  适用迁移场景：
+    - 政务公告通知页
+    - 新闻资讯列表页
+    - 政策公示页面
+
+  wjs created by 2019-09-05
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>公告通知 - XX市政务服务网</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #c8161d;
+      color: #fff;
+      padding: 15px 0;
+    }
+    .header-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .logo {
+      float: left;
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 40px;
+    }
+    .logo small {
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 10px;
+      opacity: 0.9;
+    }
+    .search-box {
+      float: right;
+      margin-top: 5px;
+      position: relative;
+    }
+    .search-input {
+      width: 350px;
+      height: 38px;
+      padding: 0 90px 0 15px;
+      border: none;
+      border-radius: 19px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-btn {
+      position: absolute;
+      right: 2px;
+      top: 2px;
+      width: 65px;
+      height: 34px;
+      background: #c8161d;
+      color: #fff;
+      border: none;
+      border-radius: 17px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .nav {
+      background: #a01015;
+    }
+    .nav-inner {
+      width: 1200px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .nav-item {
+      float: left;
+      padding: 12px 25px;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .nav-item:hover { background: #8a0d12; }
+    .nav-item.active { background: #8a0d12; font-weight: bold; }
+    .breadcrumb {
+      width: 1200px;
+      margin: 15px auto;
+      font-size: 13px;
+      color: #999;
+    }
+    .breadcrumb a {
+      color: #999;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { color: #c8161d; }
+    .main {
+      width: 1200px;
+      margin: 0 auto 30px;
+      overflow: hidden;
+    }
+    .left-col {
+      float: left;
+      width: 240px;
+    }
+    .notice-type {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+    .type-title {
+      padding: 15px 20px;
+      background: #c8161d;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .type-list li {
+      list-style: none;
+    }
+    .type-list li a {
+      display: block;
+      padding: 12px 20px;
+      color: #555;
+      text-decoration: none;
+      cursor: pointer;
+      border-bottom: 1px solid #f5f5f5;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+    .type-list li a:hover {
+      background: #fff5f5;
+      color: #c8161d;
+      padding-left: 25px;
+    }
+    .type-list li.active a {
+      background: #fff5f5;
+      color: #c8161d;
+      font-weight: bold;
+      border-left: 3px solid #c8161d;
+    }
+    .hot-notice {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .hot-title {
+      padding: 15px 20px;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .hot-list {
+      padding: 15px 20px;
+      list-style: none;
+    }
+    .hot-list li {
+      padding: 8px 0 8px 25px;
+      position: relative;
+      font-size: 13px;
+    }
+    .hot-list li::before {
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      text-align: center;
+      background: #ccc;
+      color: #fff;
+      font-size: 11px;
+      border-radius: 3px;
+    }
+    .hot-list li:nth-child(1)::before { content: "1"; background: #f5222d; }
+    .hot-list li:nth-child(2)::before { content: "2"; background: #fa8c16; }
+    .hot-list li:nth-child(3)::before { content: "3"; background: #fadb14; color: #666; }
+    .hot-list li:nth-child(4)::before { content: "4"; }
+    .hot-list li:nth-child(5)::before { content: "5"; }
+    .hot-list li a {
+      color: #555;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .hot-list li a:hover { color: #c8161d; }
+    .right-col {
+      margin-left: 260px;
+    }
+    .notice-panel {
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 18px 25px;
+      border-bottom: 2px solid #c8161d;
+      overflow: hidden;
+    }
+    .panel-title {
+      float: left;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+    .panel-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #c8161d;
+      margin-right: 10px;
+      vertical-align: middle;
+      margin-top: -2px;
+    }
+    .panel-tools {
+      float: right;
+      font-size: 13px;
+    }
+    .panel-tools select {
+      padding: 5px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+    .notice-list {
+      padding: 10px 25px;
+    }
+    .notice-item {
+      padding: 18px 0;
+      border-bottom: 1px dashed #f0f0f0;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .notice-item:last-child { border-bottom: none; }
+    .notice-item:hover .notice-title { color: #c8161d; }
+    .notice-icon {
+      float: left;
+      width: 45px;
+      height: 45px;
+      background: #fff0f0;
+      border-radius: 8px;
+      text-align: center;
+      line-height: 45px;
+      font-size: 20px;
+      margin-right: 18px;
+    }
+    .notice-content {
+      overflow: hidden;
+    }
+    .notice-top {
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .notice-title {
+      float: left;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      max-width: 600px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .notice-tags {
+      float: left;
+      margin-left: 15px;
+    }
+    .notice-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      border-radius: 3px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .tag-important {
+      background: #fff1f0;
+      color: #f5222d;
+      border: 1px solid #ffa39e;
+    }
+    .tag-new {
+      background: #f6ffed;
+      color: #52c41a;
+      border: 1px solid #b7eb8f;
+    }
+    .tag-policy {
+      background: #e6f7ff;
+      color: #1890ff;
+      border: 1px solid #91d5ff;
+    }
+    .notice-date {
+      float: right;
+      font-size: 13px;
+      color: #999;
+    }
+    .notice-desc {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .notice-meta {
+      font-size: 12px;
+      color: #bbb;
+    }
+    .notice-meta span {
+      margin-right: 20px;
+    }
+    .notice-meta .source {
+      color: #1890ff;
+    }
+    .pagination {
+      padding: 25px;
+      text-align: center;
+      border-top: 1px solid #f0f0f0;
+    }
+    .pagination span {
+      display: inline-block;
+      min-width: 36px;
+      height: 36px;
+      line-height: 34px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      margin: 0 4px;
+      cursor: pointer;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #666;
+      border-radius: 4px;
+    }
+    .pagination span.active {
+      background: #c8161d;
+      color: #fff;
+      border-color: #c8161d;
+    }
+    .pagination span:hover:not(.active) {
+      color: #c8161d;
+      border-color: #c8161d;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">XX市政务服务网<small>一网通办</small></div>
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="搜索公告、政策、办事指南...">
+        <button class="search-btn">搜索</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="nav-item">首页</div>
+      <div class="nav-item">个人办事</div>
+      <div class="nav-item">法人办事</div>
+      <div class="nav-item">部门服务</div>
+      <div class="nav-item">办事指南</div>
+      <div class="nav-item active">政务公开</div>
+      <div class="nav-item">互动交流</div>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a>首页</a> / <a>政务公开</a> / <span style="color: #333;">公告通知</span>
+  </div>
+
+  <div class="main">
+    <div class="left-col">
+      <div class="notice-type">
+        <div class="type-title">公告分类</div>
+        <ul class="type-list">
+          <li class="active"><a>全部公告</a></li>
+          <li><a>通知公告</a></li>
+          <li><a>政策文件</a></li>
+          <li><a>人事任免</a></li>
+          <li><a>规划计划</a></li>
+          <li><a>统计数据</a></li>
+          <li><a>财政信息</a></li>
+          <li><a>重大项目</a></li>
+          <li><a>应急管理</a></li>
+          <li><a>其他公告</a></li>
+        </ul>
+      </div>
+
+      <div class="hot-notice">
+        <div class="hot-title">热门公告</div>
+        <ul class="hot-list">
+          <li><a>关于优化营商环境的若干措施</a></li>
+          <li><a>2019年XX市政务服务工作要点</a></li>
+          <li><a>关于开展"一网通办"专项行动的通知</a></li>
+          <li><a>XX市政务服务中心搬迁公告</a></li>
+          <li><a>关于办理时间调整的通知</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div class="notice-panel">
+        <div class="panel-header">
+          <div class="panel-title">公告通知</div>
+          <div class="panel-tools">
+            <select>
+              <option>全部时间</option>
+              <option>近一周</option>
+              <option>近一月</option>
+              <option>近三月</option>
+              <option>近一年</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="notice-list">
+          <div class="notice-item">
+            <div class="notice-icon">📢</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于印发XX市优化营商环境条例实施细则的通知</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-important">重要</span>
+                  <span class="notice-tag tag-policy">政策</span>
+                </div>
+                <div class="notice-date">2019-09-05</div>
+              </div>
+              <div class="notice-desc">
+                各区人民政府，市政府各部门、各直属机构：《XX市优化营商环境条例实施细则》已经市政府同意，现印发给你们，请认真贯彻执行。
+                实施过程中遇到的问题，请径向市发展改革委反映。
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市发展改革委</span>
+                <span>文号：XX府〔2019〕25号</span>
+                <span>阅读：12,568次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">📋</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于2019年第三季度政务服务满意度调查结果的通报</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-new">最新</span>
+                </div>
+                <div class="notice-date">2019-09-03</div>
+              </div>
+              <div class="notice-desc">
+                各区人民政府，市政府各部门、各直属机构：为持续提升我市政务服务水平，市政务服务管理局组织开展了2019年第三季度政务服务满意度调查。
+                现将调查结果通报如下...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市政务服务管理局</span>
+                <span>文号：XX政务〔2019〕32号</span>
+                <span>阅读：8,956次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">🏛️</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于XX市政务服务中心周末延时服务的公告</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-important">重要</span>
+                </div>
+                <div class="notice-date">2019-08-28</div>
+              </div>
+              <div class="notice-desc">
+                为进一步方便企业群众办事，优化政务服务供给，市政务服务中心将于2019年9月1日起实行周末延时服务。
+                延时服务时间为周六、周日上午9:00-12:00，下午14:00-17:00...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市政务服务管理局</span>
+                <span>阅读：15,682次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">📑</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于公布市级政务服务事项"马上办、网上办、就近办、一次办"清单的通知</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-policy">政策</span>
+                </div>
+                <div class="notice-date">2019-08-20</div>
+              </div>
+              <div class="notice-desc">
+                各区人民政府，市政府各部门、各直属机构：为深入推进"放管服"改革，持续优化营商环境，
+                加快推进政务服务"马上办、网上办、就近办、一次办"，现将市级政务服务事项清单予以公布...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市政务服务管理局</span>
+                <span>文号：XX政务〔2019〕28号</span>
+                <span>阅读：9,856次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">📅</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于2019年中秋节放假安排的通知</div>
+                <div class="notice-date">2019-08-15</div>
+              </div>
+              <div class="notice-desc">
+                根据国务院办公厅通知精神，现将2019年中秋节放假安排通知如下：9月13日（星期五）放假，与周末连休。
+                节假日期间，各部门要妥善安排好值班和安全、保卫等工作...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市政府办公厅</span>
+                <span>阅读：6,523次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">🏗️</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于XX新区政务服务中心启用的公告</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-new">最新</span>
+                </div>
+                <div class="notice-date">2019-08-10</div>
+              </div>
+              <div class="notice-desc">
+                为进一步完善政务服务体系，提升新区政务服务水平，XX新区政务服务中心将于2019年8月15日正式启用。
+                中心地址：XX新区XX大道XX号。服务时间：工作日9:00-17:00...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：XX新区管委会</span>
+                <span>阅读：7,845次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">💼</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于2019年市级部门预算公开的通知</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-policy">政策</span>
+                </div>
+                <div class="notice-date">2019-08-05</div>
+              </div>
+              <div class="notice-desc">
+                各市级预算单位：根据《中华人民共和国预算法》和财政部关于预算公开的有关要求，
+                现就2019年市级部门预算公开工作有关事项通知如下...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市财政局</span>
+                <span>文号：XX财〔2019〕45号</span>
+                <span>阅读：5,623次</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="notice-item">
+            <div class="notice-icon">📢</div>
+            <div class="notice-content">
+              <div class="notice-top">
+                <div class="notice-title">关于开展"减证便民"专项行动的通知</div>
+                <div class="notice-tags">
+                  <span class="notice-tag tag-important">重要</span>
+                </div>
+                <div class="notice-date">2019-07-28</div>
+              </div>
+              <div class="notice-desc">
+                各区人民政府，市政府各部门、各直属机构：为深入贯彻落实党中央、国务院关于推进"放管服"改革的决策部署，
+                进一步开展"减证便民"工作，经市政府同意，决定在全市范围内开展"减证便民"专项行动...
+              </div>
+              <div class="notice-meta">
+                <span class="source">来源：市司法局</span>
+                <span>文号：XX司〔2019〕18号</span>
+                <span>阅读：11,236次</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pagination">
+          <span>首页</span>
+          <span>上一页</span>
+          <span class="active">1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+          <span>5</span>
+          <span>...</span>
+          <span>15</span>
+          <span>下一页</span>
+          <span>末页</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

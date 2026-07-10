@@ -1,0 +1,704 @@
+<!--
+  ============================================================
+  薪资管理页 - HR人力资源系统
+
+  页面功能：XX科技公司HR系统薪资管理页面
+  布局方式：顶部统计+薪资明细表格的布局
+  业务背景：
+    1. 员工薪资管理和发放
+    2. 薪资明细查询
+    3. 薪资统计报表
+
+  设计思路：
+    1. 薪资数据清晰展示
+    2. 工资条明细完整
+    3. 统计数据直观
+
+  技术要点：
+    - 数据表格展示明细
+    - 统计卡片布局
+    - 薪资构成展示
+
+  适用迁移场景：
+    - 薪资管理系统
+    - 工资发放页面
+    - 薪酬管理后台
+
+  wjs created by 2020-05-20
+  ============================================================
+-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>薪资管理 - XX科技HR系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      font-size: 14px;
+          min-height: 100vh;
+}
+    .header {
+      background: #fff;
+      height: 55px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1890ff;
+    }
+    .logo span {
+      color: #666;
+      font-size: 14px;
+      font-weight: normal;
+      margin-left: 10px;
+    }
+    .header-right {
+      font-size: 14px;
+      color: #666;
+    }
+    .container {
+      display: flex;
+      height: calc(100vh - 55px);
+    }
+    .sidebar {
+      width: 200px;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      padding: 15px 0;
+    }
+    .menu-item {
+      padding: 12px 25px;
+      cursor: pointer;
+      color: #555;
+    }
+    .menu-item:hover { background: #f5f5f5; }
+    .menu-item.active {
+      background: #e6f7ff;
+      color: #1890ff;
+      font-weight: bold;
+      border-right: 3px solid #1890ff;
+    }
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .stats-row {
+      display: flex;
+      margin: 0 -10px 20px;
+    }
+    .stat-card {
+      flex: 1;
+      margin: 0 10px;
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-right: 15px;
+    }
+    .icon-blue { background: #e6f7ff; }
+    .icon-green { background: #f6ffed; }
+    .icon-orange { background: #fff7e6; }
+    .icon-purple { background: #f9f0ff; }
+    .stat-info .num {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    .stat-info .num .unit {
+      font-size: 14px;
+      font-weight: normal;
+      color: #999;
+      margin-left: 3px;
+    }
+    .stat-info .label {
+      font-size: 13px;
+      color: #999;
+      margin-top: 3px;
+    }
+    .filter-panel {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+    .filter-row {
+      overflow: hidden;
+    }
+    .filter-item {
+      float: left;
+      margin-right: 25px;
+    }
+    .filter-label {
+      display: inline-block;
+      color: #666;
+      margin-right: 8px;
+    }
+    .filter-input,
+    .filter-select {
+      width: 160px;
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+    .filter-actions {
+      float: right;
+    }
+    .btn {
+      padding: 7px 18px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      margin-left: 8px;
+    }
+    .btn-primary {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .btn-primary:hover { background: #40a9ff; }
+    .table-panel {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      overflow: hidden;
+    }
+    .toolbar-left {
+      float: left;
+    }
+    .toolbar-right {
+      float: right;
+    }
+    .salary-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+    .salary-table th {
+      background: #fafafa;
+      padding: 12px 15px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+    }
+    .salary-table td {
+      padding: 12px 15px;
+      font-size: 13px;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .salary-table th:last-child,
+    .salary-table td:last-child {
+      position: sticky;
+      right: 0;
+      background: #fff;
+      z-index: 1;
+      white-space: nowrap;
+    }
+    .salary-table th:last-child {
+      background: #fafafa;
+      z-index: 2;
+    }
+    .salary-table tbody tr:hover td:last-child {
+      background: #fafafa;
+    }
+    .salary-table tbody tr:hover {
+      background: #fafafa;
+    }
+    .emp-info {
+      text-align: left !important;
+    }
+    .emp-name {
+      font-weight: 500;
+      color: #333;
+    }
+    .emp-dept {
+      font-size: 12px;
+      color: #999;
+      margin-top: 2px;
+    }
+    .money {
+      font-family: Arial;
+    }
+    .money.total {
+      color: #f5222d;
+      font-weight: bold;
+    }
+    .money.real {
+      color: #52c41a;
+      font-weight: bold;
+    }
+    .status-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      font-size: 12px;
+      border-radius: 3px;
+    }
+    .status-paid { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .status-pending { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+    .status-failed { background: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+    .action-link {
+      color: #1890ff;
+      cursor: pointer;
+      margin-right: 10px;
+          display: inline-block;
+      line-height: 20px;
+}
+    .action-link:hover { text-decoration: underline; }
+    .pagination {
+      padding: 15px 20px;
+      text-align: right;
+      border-top: 1px solid #f0f0f0;
+    }
+    .pagination-info {
+      float: left;
+      font-size: 13px;
+      color: #999;
+      line-height: 32px;
+    }
+    .pagination-pages {
+      display: inline-block;
+    }
+    .pagination-pages span {
+      display: inline-block;
+      min-width: 32px;
+      height: 32px;
+      line-height: 30px;
+      text-align: center;
+      border: 1px solid #d9d9d9;
+      margin-left: -1px;
+      cursor: pointer;
+      padding: 0 10px;
+      font-size: 13px;
+      color: #666;
+    }
+    .pagination-pages span:first-child { border-radius: 4px 0 0 4px; }
+    .pagination-pages span:last-child { border-radius: 0 4px 4px 0; }
+    .pagination-pages span.active {
+      background: #1890ff;
+      color: #fff;
+      border-color: #1890ff;
+    }
+    .my-salary-card {
+      background: linear-gradient(135deg, #1890ff, #096dd9);
+      border-radius: 10px;
+      padding: 25px;
+      color: #fff;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .my-salary-card::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 200px;
+      height: 200px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+    .salary-month {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+    .salary-amount {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 1;
+    }
+    .salary-amount small {
+      font-size: 16px;
+      font-weight: normal;
+      opacity: 0.9;
+    }
+    .salary-label {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    .salary-detail-row {
+      display: flex;
+      margin-top: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .salary-detail-item {
+      flex: 1;
+      text-align: center;
+      padding: 0 10px;
+    }
+    .salary-detail-num {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .salary-detail-label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">XX科技<span>人力资源管理系统</span></div>
+    <div class="header-right">
+      欢迎您，HR管理员 &nbsp;|&nbsp; 消息 &nbsp;|&nbsp; 退出
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="menu-item">首页</div>
+      <div class="menu-item">员工管理</div>
+      <div class="menu-item">考勤管理</div>
+      <div class="menu-item active">薪资管理</div>
+      <div class="menu-item">招聘管理</div>
+      <div class="menu-item">培训管理</div>
+      <div class="menu-item">绩效评估</div>
+      <div class="menu-item">系统设置</div>
+    </div>
+
+    <div class="main-content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">💰</div>
+          <div class="stat-info">
+            <div class="num">186.5<span class="unit">万元</span></div>
+            <div class="label">本月薪资总额</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">👥</div>
+          <div class="stat-info">
+            <div class="num">256<span class="unit">人</span></div>
+            <div class="label">发薪人数</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-orange">📊</div>
+          <div class="stat-info">
+            <div class="num">7,285<span class="unit">元</span></div>
+            <div class="label">平均薪资</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-purple">✅</div>
+          <div class="stat-info">
+            <div class="num">252<span class="unit">人</span></div>
+            <div class="label">已发放</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="my-salary-card">
+        <div class="salary-month">2020年5月 工资条</div>
+        <div class="salary-amount"><small>¥ </small>12,580.50</div>
+        <div class="salary-label">实发工资</div>
+        <div class="salary-detail-row">
+          <div class="salary-detail-item">
+            <div class="salary-detail-num">15,000</div>
+            <div class="salary-detail-label">应发工资</div>
+          </div>
+          <div class="salary-detail-item">
+            <div class="salary-detail-num">2,419.50</div>
+            <div class="salary-detail-label">扣款合计</div>
+          </div>
+          <div class="salary-detail-item">
+            <div class="salary-detail-num">1,200</div>
+            <div class="salary-detail-label">个人所得税</div>
+          </div>
+          <div class="salary-detail-item">
+            <div class="salary-detail-num">2020-05-15</div>
+            <div class="salary-detail-label">发放日期</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-panel">
+        <div class="filter-row">
+          <div class="filter-item">
+            <span class="filter-label">薪资月份：</span>
+            <select class="filter-select">
+              <option>2020年5月</option>
+              <option>2020年4月</option>
+              <option>2020年3月</option>
+              <option>2020年2月</option>
+              <option>2020年1月</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">部门：</span>
+            <select class="filter-select">
+              <option>全部部门</option>
+              <option>技术中心</option>
+              <option>市场中心</option>
+              <option>运营中心</option>
+              <option>行政人事部</option>
+              <option>财务部</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <span class="filter-label">关键词：</span>
+            <input type="text" class="filter-input" placeholder="姓名/工号">
+          </div>
+          <div class="filter-actions">
+            <button class="btn">重置</button>
+            <button class="btn btn-primary">查询</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-panel">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <button class="btn btn-primary">薪资核算</button>
+            <button class="btn">批量发放</button>
+            <button class="btn">导出工资条</button>
+            <button class="btn">薪资报表</button>
+          </div>
+          <div class="toolbar-right">
+            <select class="filter-select">
+              <option>全部状态</option>
+              <option>已发放</option>
+              <option>待发放</option>
+              <option>发放失败</option>
+            </select>
+          </div>
+        </div>
+
+        
+          <div style="overflow-x:auto;">
+<table class="salary-table">
+          <thead>
+            <tr>
+              <th width="60">工号</th>
+              <th>员工</th>
+              <th width="100">部门</th>
+              <th width="90">职位</th>
+              <th width="100">基本工资</th>
+              <th width="90">绩效工资</th>
+              <th width="80">补贴</th>
+              <th width="90">应发工资</th>
+              <th width="90">社保公积金</th>
+              <th width="80">个税</th>
+              <th width="100">实发工资</th>
+              <th width="80">状态</th>
+              <th width="100">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>E2018001</td>
+              <td class="emp-info">
+                <div class="emp-name">张明</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>技术总监</td>
+              <td class="money">25,000</td>
+              <td class="money">8,000</td>
+              <td class="money">2,000</td>
+              <td class="money total">35,000</td>
+              <td class="money">-4,200</td>
+              <td class="money">-3,200</td>
+              <td class="money real">27,600</td>
+              <td><span class="status-tag status-paid">已发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">导出</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2018015</td>
+              <td class="emp-info">
+                <div class="emp-name">李华</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>主管</td>
+              <td class="money">18,000</td>
+              <td class="money">5,000</td>
+              <td class="money">1,500</td>
+              <td class="money total">24,500</td>
+              <td class="money">-3,200</td>
+              <td class="money">-1,850</td>
+              <td class="money real">19,450</td>
+              <td><span class="status-tag status-paid">已发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">导出</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2019032</td>
+              <td class="emp-info">
+                <div class="emp-name">王芳</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>高级工程师</td>
+              <td class="money">15,000</td>
+              <td class="money">3,000</td>
+              <td class="money">1,200</td>
+              <td class="money total">19,200</td>
+              <td class="money">-2,800</td>
+              <td class="money">-1,200</td>
+              <td class="money real">15,200</td>
+              <td><span class="status-tag status-paid">已发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">导出</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2019058</td>
+              <td class="emp-info">
+                <div class="emp-name">赵磊</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>工程师</td>
+              <td class="money">12,000</td>
+              <td class="money">2,000</td>
+              <td class="money">1,000</td>
+              <td class="money total">15,000</td>
+              <td class="money">-2,419</td>
+              <td class="money">-1,200</td>
+              <td class="money real">11,381</td>
+              <td><span class="status-tag status-pending">待发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">发放</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2019086</td>
+              <td class="emp-info">
+                <div class="emp-name">陈静</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>初级工程师</td>
+              <td class="money">8,000</td>
+              <td class="money">1,000</td>
+              <td class="money">800</td>
+              <td class="money total">9,800</td>
+              <td class="money">-1,800</td>
+              <td class="money">-200</td>
+              <td class="money real">7,800</td>
+              <td><span class="status-tag status-paid">已发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">导出</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2019095</td>
+              <td class="emp-info">
+                <div class="emp-name">刘伟</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>工程师</td>
+              <td class="money">11,000</td>
+              <td class="money">1,500</td>
+              <td class="money">1,000</td>
+              <td class="money total">13,500</td>
+              <td class="money">-2,200</td>
+              <td class="money">-850</td>
+              <td class="money real">10,450</td>
+              <td><span class="status-tag status-failed">发放失败</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">重发</span>
+              </td>
+            </tr>
+            <tr>
+              <td>E2018042</td>
+              <td class="emp-info">
+                <div class="emp-name">周婷</div>
+                <div class="emp-dept">前端开发部</div>
+              </td>
+              <td>技术中心</td>
+              <td>高级工程师</td>
+              <td class="money">16,000</td>
+              <td class="money">3,500</td>
+              <td class="money">1,200</td>
+              <td class="money total">20,700</td>
+              <td class="money">-2,900</td>
+              <td class="money">-1,500</td>
+              <td class="money real">16,300</td>
+              <td><span class="status-tag status-paid">已发放</span></td>
+              <td>
+                <span class="action-link">详情</span>
+                <span class="action-link">导出</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+          </div>
+
+        <div class="pagination">
+          <div class="pagination-info">
+            共 256 条记录，当前第 1/26 页
+          </div>
+          <div class="pagination-pages">
+            <span>首页</span>
+            <span>上一页</span>
+            <span class="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>...</span>
+            <span>下一页</span>
+            <span>末页</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
